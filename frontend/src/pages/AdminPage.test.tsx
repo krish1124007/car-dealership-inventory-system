@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '../auth/AuthContext'
+import { ToastProvider } from '../components/Toast'
 import { AdminPage } from './AdminPage'
 import * as vehiclesApi from '../api/vehicles.api'
 import { setToken } from '../api/client'
@@ -31,12 +32,14 @@ function renderAdmin() {
   localStorage.setItem('authUser', JSON.stringify(admin))
   return render(
     <AuthProvider>
-      <MemoryRouter initialEntries={['/admin']}>
-        <Routes>
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/login" element={<div>LOGIN PAGE</div>} />
-        </Routes>
-      </MemoryRouter>
+      <ToastProvider>
+        <MemoryRouter initialEntries={['/admin']}>
+          <Routes>
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/login" element={<div>LOGIN PAGE</div>} />
+          </Routes>
+        </MemoryRouter>
+      </ToastProvider>
     </AuthProvider>,
   )
 }
@@ -82,6 +85,31 @@ describe('AdminPage', () => {
       quantity: 2,
     })
     expect(await screen.findByText(/tesla/i)).toBeInTheDocument()
+  })
+
+  it('shows a success toast after adding a vehicle', async () => {
+    vi.mocked(vehiclesApi.createVehicle).mockResolvedValue({
+      id: 'v9',
+      make: 'Tesla',
+      model: 'Model 3',
+      category: 'EV',
+      price: 50000,
+      quantity: 2,
+    })
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    await userEvent.type(screen.getByLabelText(/make/i), 'Tesla')
+    await userEvent.type(screen.getByLabelText(/model/i), 'Model 3')
+    await userEvent.type(screen.getByLabelText(/category/i), 'EV')
+    await userEvent.type(screen.getByLabelText(/price/i), '50000')
+    await userEvent.type(screen.getByLabelText(/^quantity$/i), '2')
+    await userEvent.click(
+      screen.getByRole('button', { name: /add vehicle/i }),
+    )
+
+    const toast = await screen.findByRole('status')
+    expect(toast).toHaveTextContent(/vehicle added/i)
   })
 
   it('deletes a vehicle from its row', async () => {

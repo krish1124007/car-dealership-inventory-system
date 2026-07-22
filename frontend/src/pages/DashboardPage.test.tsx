@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '../auth/AuthContext'
+import { ToastProvider } from '../components/Toast'
 import { DashboardPage } from './DashboardPage'
 import * as vehiclesApi from '../api/vehicles.api'
 import { setToken } from '../api/client'
@@ -40,12 +41,14 @@ function renderDashboard() {
   localStorage.setItem('authUser', JSON.stringify(customer))
   return render(
     <AuthProvider>
-      <MemoryRouter initialEntries={['/']}>
-        <Routes>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/login" element={<div>LOGIN PAGE</div>} />
-        </Routes>
-      </MemoryRouter>
+      <ToastProvider>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/login" element={<div>LOGIN PAGE</div>} />
+          </Routes>
+        </MemoryRouter>
+      </ToastProvider>
     </AuthProvider>,
   )
 }
@@ -93,6 +96,43 @@ describe('DashboardPage', () => {
 
     expect(vehiclesApi.purchaseVehicle).toHaveBeenCalledWith('v1')
     expect(await screen.findByText(/2 in stock/i)).toBeInTheDocument()
+  })
+
+  it('shows a success toast after purchasing', async () => {
+    vi.mocked(vehiclesApi.purchaseVehicle).mockResolvedValue({
+      vehicle: { ...corolla, quantity: 2 },
+      purchase: {
+        id: 'p1',
+        quantity: 1,
+        purchasePrice: 20000,
+        purchasedAt: '2026-07-22T10:00:00.000Z',
+      },
+    })
+    renderDashboard()
+
+    await screen.findByText(/corolla/i)
+    await userEvent.click(
+      screen.getAllByRole('button', { name: /purchase/i })[0]!,
+    )
+
+    expect(
+      await screen.findByText(/purchased toyota corolla/i),
+    ).toBeInTheDocument()
+  })
+
+  it('shows an error toast when the purchase fails', async () => {
+    vi.mocked(vehiclesApi.purchaseVehicle).mockRejectedValue(
+      new Error('Vehicle is out of stock'),
+    )
+    renderDashboard()
+
+    await screen.findByText(/corolla/i)
+    await userEvent.click(
+      screen.getAllByRole('button', { name: /purchase/i })[0]!,
+    )
+
+    const toast = await screen.findByRole('alert')
+    expect(toast).toHaveTextContent(/out of stock/i)
   })
 
   it('searches with only the filled filters', async () => {
