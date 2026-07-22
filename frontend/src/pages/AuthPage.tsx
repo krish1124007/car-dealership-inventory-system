@@ -185,7 +185,7 @@ export function AuthPage() {
   const isRegister = location.pathname === '/register'
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 py-10 overflow-hidden">
+    <div className="relative min-h-screen flex flex-col items-center justify-center gap-4 px-4 py-10 overflow-hidden">
       <div
         aria-hidden
         className="absolute inset-0 bg-cover bg-center blur-xs scale-105"
@@ -232,6 +232,13 @@ export function AuthPage() {
           )}
         </div>
       </div>
+
+      <Link
+        to="/admin/register"
+        className="relative text-xs text-white/80 hover:text-white underline underline-offset-2 drop-shadow"
+      >
+        Admin access
+      </Link>
     </div>
   )
 }
