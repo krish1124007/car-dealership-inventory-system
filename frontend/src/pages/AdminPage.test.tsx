@@ -1,0 +1,139 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from '../auth/AuthContext'
+import { AdminPage } from './AdminPage'
+import * as vehiclesApi from '../api/vehicles.api'
+import { setToken } from '../api/client'
+import type { User, Vehicle } from '../api/schemas'
+
+vi.mock('../api/vehicles.api')
+
+const admin: User = {
+  id: 'a1',
+  name: 'Site Admin',
+  email: 'admin@example.com',
+  role: 'ADMIN',
+}
+
+const corolla: Vehicle = {
+  id: 'v1',
+  make: 'Toyota',
+  model: 'Corolla',
+  category: 'Sedan',
+  price: 20000,
+  quantity: 3,
+}
+
+function renderAdmin() {
+  setToken('jwt')
+  localStorage.setItem('authUser', JSON.stringify(admin))
+  return render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={['/admin']}>
+        <Routes>
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/login" element={<div>LOGIN PAGE</div>} />
+        </Routes>
+      </MemoryRouter>
+    </AuthProvider>,
+  )
+}
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  vi.mocked(vehiclesApi.listVehicles).mockResolvedValue([corolla])
+})
+
+describe('AdminPage', () => {
+  it('lists the existing inventory', async () => {
+    renderAdmin()
+
+    expect(await screen.findByText(/corolla/i)).toBeInTheDocument()
+  })
+
+  it('adds a new vehicle through the form', async () => {
+    vi.mocked(vehiclesApi.createVehicle).mockResolvedValue({
+      id: 'v9',
+      make: 'Tesla',
+      model: 'Model 3',
+      category: 'EV',
+      price: 50000,
+      quantity: 2,
+    })
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    await userEvent.type(screen.getByLabelText(/make/i), 'Tesla')
+    await userEvent.type(screen.getByLabelText(/model/i), 'Model 3')
+    await userEvent.type(screen.getByLabelText(/category/i), 'EV')
+    await userEvent.type(screen.getByLabelText(/price/i), '50000')
+    await userEvent.type(screen.getByLabelText(/quantity/i), '2')
+    await userEvent.click(
+      screen.getByRole('button', { name: /add vehicle/i }),
+    )
+
+    expect(vehiclesApi.createVehicle).toHaveBeenCalledWith({
+      make: 'Tesla',
+      model: 'Model 3',
+      category: 'EV',
+      price: 50000,
+      quantity: 2,
+    })
+    expect(await screen.findByText(/tesla/i)).toBeInTheDocument()
+  })
+
+  it('deletes a vehicle from its row', async () => {
+    vi.mocked(vehiclesApi.deleteVehicle).mockResolvedValue(null)
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    await userEvent.click(screen.getByRole('button', { name: /delete/i }))
+
+    expect(vehiclesApi.deleteVehicle).toHaveBeenCalledWith('v1')
+    await waitFor(() =>
+      expect(screen.queryByText(/corolla/i)).not.toBeInTheDocument(),
+    )
+  })
+
+  it('restocks a vehicle from its row', async () => {
+    vi.mocked(vehiclesApi.restockVehicle).mockResolvedValue({
+      ...corolla,
+      quantity: 8,
+    })
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    await userEvent.type(screen.getByLabelText(/restock quantity/i), '5')
+    await userEvent.click(screen.getByRole('button', { name: /restock/i }))
+
+    expect(vehiclesApi.restockVehicle).toHaveBeenCalledWith('v1', 5)
+    expect(await screen.findByText('8')).toBeInTheDocument()
+  })
+
+  it('edits a vehicle via the form and saves the changes', async () => {
+    vi.mocked(vehiclesApi.updateVehicle).mockResolvedValue({
+      ...corolla,
+      price: 25000,
+    })
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    await userEvent.click(screen.getByRole('button', { name: /edit/i }))
+    const priceInput = screen.getByLabelText(/price/i)
+    expect(screen.getByLabelText(/make/i)).toHaveValue('Toyota')
+
+    await userEvent.clear(priceInput)
+    await userEvent.type(priceInput, '25000')
+    await userEvent.click(
+      screen.getByRole('button', { name: /save changes/i }),
+    )
+
+    expect(vehiclesApi.updateVehicle).toHaveBeenCalledWith(
+      'v1',
+      expect.objectContaining({ price: 25000 }),
+    )
+    expect(await screen.findByText('$25,000')).toBeInTheDocument()
+  })
+})
