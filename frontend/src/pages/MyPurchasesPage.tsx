@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ShoppingBag, CarFront, Loader2 } from 'lucide-react'
 import { AppLayout } from '../components/AppLayout'
+import { useToast } from '../components/Toast'
 import { formatPrice } from '../components/VehicleCard'
 import { getMyPurchases } from '../api/users.api'
 import type { PurchaseHistoryEntry } from '../api/schemas'
@@ -9,16 +10,17 @@ export function MyPurchasesPage() {
   const [purchases, setPurchases] = useState<PurchaseHistoryEntry[] | null>(
     null,
   )
-  const [error, setError] = useState<string | null>(null)
+  const toast = useToast()
 
   useEffect(() => {
     getMyPurchases()
       .then(setPurchases)
       .catch((err) =>
-        setError(
+        toast.error(
           err instanceof Error ? err.message : 'Failed to load purchases',
         ),
       )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -26,15 +28,6 @@ export function MyPurchasesPage() {
       title="My purchases"
       subtitle="Every vehicle you have bought, newest first."
     >
-      {error && (
-        <p
-          role="alert"
-          className="rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3"
-        >
-          {error}
-        </p>
-      )}
-
       {purchases === null ? (
         <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
           <Loader2 size={28} className="animate-spin" />

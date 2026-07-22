@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Loader2, Pencil, Trash2, PackagePlus } from 'lucide-react'
 import { AppLayout } from '../components/AppLayout'
+import { useToast } from '../components/Toast'
 import { formatPrice } from '../components/VehicleCard'
 import {
   listVehicles,
@@ -24,16 +25,17 @@ export function AdminPage() {
   const [restockAmounts, setRestockAmounts] = useState<Record<string, string>>(
     {},
   )
-  const [error, setError] = useState<string | null>(null)
+  const toast = useToast()
 
   useEffect(() => {
     listVehicles()
       .then(setVehicles)
       .catch((err) =>
-        setError(
+        toast.error(
           err instanceof Error ? err.message : 'Failed to load vehicles',
         ),
       )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function setField(key: keyof typeof emptyForm, value: string) {
@@ -58,7 +60,6 @@ export function AdminPage() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    setError(null)
     const payload = {
       make: form.make.trim(),
       model: form.model.trim(),
@@ -72,28 +73,29 @@ export function AdminPage() {
         setVehicles((prev) =>
           prev ? prev.map((v) => (v.id === updated.id ? updated : v)) : prev,
         )
+        toast.success('Vehicle updated')
       } else {
         const created = await createVehicle(payload)
         setVehicles((prev) => (prev ? [...prev, created] : [created]))
+        toast.success('Vehicle added')
       }
       cancelEdit()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Saving failed')
+      toast.error(err instanceof Error ? err.message : 'Saving failed')
     }
   }
 
   async function handleDelete(id: string) {
-    setError(null)
     try {
       await deleteVehicle(id)
       setVehicles((prev) => (prev ? prev.filter((v) => v.id !== id) : prev))
+      toast.success('Vehicle deleted')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed')
+      toast.error(err instanceof Error ? err.message : 'Delete failed')
     }
   }
 
   async function handleRestock(id: string) {
-    setError(null)
     const amount = Number(restockAmounts[id])
     try {
       const updated = await restockVehicle(id, amount)
@@ -101,8 +103,9 @@ export function AdminPage() {
         prev ? prev.map((v) => (v.id === updated.id ? updated : v)) : prev,
       )
       setRestockAmounts((prev) => ({ ...prev, [id]: '' }))
+      toast.success('Stock updated')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Restock failed')
+      toast.error(err instanceof Error ? err.message : 'Restock failed')
     }
   }
 
@@ -111,15 +114,6 @@ export function AdminPage() {
       title="Inventory management"
       subtitle="Add, edit, restock or remove vehicles from the showroom."
     >
-      {error && (
-        <p
-          role="alert"
-          className="rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3"
-        >
-          {error}
-        </p>
-      )}
-
       <form
         onSubmit={handleSubmit}
         className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4"
