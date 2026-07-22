@@ -79,6 +79,31 @@ describe(`GET ${ENDPOINT}`, () => {
         expect(res.body.data).toHaveLength(2);
     });
 
+    it("searches make and model together with q", async () => {
+        await seedInventory();
+        const { header } = await authHeader(Role.CUSTOMER);
+
+        const byModel = await request(app)
+            .get(ENDPOINT)
+            .set(header)
+            .query({ q: "corolla" });
+        const byMake = await request(app)
+            .get(ENDPOINT)
+            .set(header)
+            .query({ q: "Toyota" });
+        const partial = await request(app)
+            .get(ENDPOINT)
+            .set(header)
+            .query({ q: "fort" });
+
+        expect(byModel.status).toBe(200);
+        expect(byModel.body.data).toHaveLength(1);
+        expect(byModel.body.data[0].model).toBe("Corolla");
+        expect(byMake.body.data).toHaveLength(2);
+        expect(partial.body.data).toHaveLength(1);
+        expect(partial.body.data[0].model).toBe("Fortuner");
+    });
+
     it("filters by price range (minPrice and maxPrice)", async () => {
         await seedInventory();
         const { header } = await authHeader(Role.CUSTOMER);

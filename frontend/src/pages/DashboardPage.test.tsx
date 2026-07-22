@@ -67,12 +67,15 @@ describe('DashboardPage', () => {
     ).toBeInTheDocument()
   })
 
-  it('filters by a category picked in the sidebar', async () => {
+  it('filters by category from the filter bar', async () => {
     vi.mocked(vehiclesApi.searchVehicles).mockResolvedValue([corolla])
     renderDashboard()
 
     await screen.findByText(/corolla/i)
-    await userEvent.click(screen.getByRole('radio', { name: /sedan/i }))
+    await userEvent.selectOptions(
+      screen.getByLabelText(/category/i),
+      'Sedan',
+    )
     await userEvent.click(screen.getByRole('button', { name: /^search$/i }))
 
     expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
@@ -156,15 +159,15 @@ describe('DashboardPage', () => {
     expect(toast).toHaveTextContent(/out of stock/i)
   })
 
-  it('searches with only the filled filters', async () => {
+  it('searches by car name from the top search bar', async () => {
     vi.mocked(vehiclesApi.searchVehicles).mockResolvedValue([corolla])
     renderDashboard()
 
     await screen.findByText(/city/i)
-    await userEvent.type(screen.getByLabelText(/make/i), 'Toyota')
+    await userEvent.type(screen.getByRole('searchbox'), 'Toyota')
     await userEvent.click(screen.getByRole('button', { name: /^search$/i }))
 
-    expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith({ make: 'Toyota' })
+    expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith({ q: 'Toyota' })
     await waitFor(() =>
       expect(screen.queryByText(/city/i)).not.toBeInTheDocument(),
     )
@@ -176,7 +179,7 @@ describe('DashboardPage', () => {
     renderDashboard()
 
     await screen.findByText(/corolla/i)
-    await userEvent.type(screen.getByLabelText(/make/i), 'Ferrari')
+    await userEvent.type(screen.getByRole('searchbox'), 'Ferrari')
     await userEvent.click(screen.getByRole('button', { name: /^search$/i }))
 
     expect(await screen.findByText(/no vehicles found/i)).toBeInTheDocument()
@@ -187,7 +190,7 @@ describe('DashboardPage', () => {
     renderDashboard()
 
     await screen.findByText(/city/i)
-    await userEvent.type(screen.getByLabelText(/make/i), 'Toyota')
+    await userEvent.type(screen.getByRole('searchbox'), 'Toyota')
     await userEvent.click(screen.getByRole('button', { name: /^search$/i }))
     await waitFor(() =>
       expect(screen.queryByText(/city/i)).not.toBeInTheDocument(),
