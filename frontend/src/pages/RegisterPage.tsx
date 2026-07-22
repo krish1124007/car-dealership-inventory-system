@@ -8,6 +8,7 @@ import {
   ErrorBanner,
   inputClasses,
   buttonClasses,
+  linkClasses,
 } from './AuthLayout'
 
 export function RegisterPage() {
@@ -34,65 +35,56 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthLayout
-      title="Join the showroom"
-      subtitle="Create an account to browse and purchase vehicles"
-    >
+    <AuthLayout title="Sign up">
       {error && <ErrorBanner message={error} />}
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <FieldLabel htmlFor="name">Name</FieldLabel>
+          <FieldLabel htmlFor="name">Your name</FieldLabel>
           <input
             id="name"
             type="text"
             required
             autoComplete="name"
-            placeholder="Your full name"
             className={inputClasses}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </div>
         <div>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="email">Your email</FieldLabel>
           <input
             id="email"
             type="email"
             required
             autoComplete="email"
-            placeholder="you@example.com"
             className={inputClasses}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
+          <FieldLabel htmlFor="password">Your password</FieldLabel>
           <input
             id="password"
             type="password"
             required
             minLength={6}
             autoComplete="new-password"
-            placeholder="At least 6 characters"
             className={inputClasses}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+        <p className="text-center text-sm text-gray-500">
+          Already have an account?{' '}
+          <Link to="/login" className={linkClasses}>
+            Sign in
+          </Link>
+        </p>
         <button type="submit" disabled={submitting} className={buttonClasses}>
           {submitting ? 'Creating account…' : 'Create account'}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-gray-500">
-        Already have an account?{' '}
-        <Link
-          to="/login"
-          className="text-blue-600 hover:text-emerald-600 font-medium"
-        >
-          Sign in
-        </Link>
-      </p>
     </AuthLayout>
   )
 }

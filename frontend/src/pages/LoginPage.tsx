@@ -8,6 +8,7 @@ import {
   ErrorBanner,
   inputClasses,
   buttonClasses,
+  linkClasses,
 } from './AuthLayout'
 
 export function LoginPage() {
@@ -33,48 +34,43 @@ export function LoginPage() {
   }
 
   return (
-    <AuthLayout title="Welcome back" subtitle="Sign in to browse the showroom">
+    <AuthLayout title="Log in">
       {error && <ErrorBanner message={error} />}
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="email">Your email</FieldLabel>
           <input
             id="email"
             type="email"
             required
             autoComplete="email"
-            placeholder="you@example.com"
             className={inputClasses}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
+          <FieldLabel htmlFor="password">Your password</FieldLabel>
           <input
             id="password"
             type="password"
             required
             autoComplete="current-password"
-            placeholder="••••••••"
             className={inputClasses}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+        <p className="text-center text-sm text-gray-500">
+          Don&apos;t have an account?{' '}
+          <Link to="/register" className={linkClasses}>
+            Register
+          </Link>
+        </p>
         <button type="submit" disabled={submitting} className={buttonClasses}>
           {submitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-gray-500">
-        New here?{' '}
-        <Link
-          to="/register"
-          className="text-blue-600 hover:text-emerald-600 font-medium"
-        >
-          Create an account
-        </Link>
-      </p>
     </AuthLayout>
   )
 }
