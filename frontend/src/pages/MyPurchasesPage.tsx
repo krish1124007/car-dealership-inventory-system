@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { ShoppingBag, CarFront, Loader2 } from 'lucide-react'
+import { ShoppingBag, CarFront } from 'lucide-react'
 import { AppLayout } from '../components/AppLayout'
+import { Loading } from '../components/Loading'
 import { useToast } from '../components/Toast'
 import { formatPrice } from '../components/VehicleCard'
 import { getMyPurchases } from '../api/users.api'
@@ -29,10 +30,7 @@ export function MyPurchasesPage() {
       subtitle="Every vehicle you have bought, newest first."
     >
       {purchases === null ? (
-        <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
-          <Loader2 size={28} className="animate-spin" />
-          <p className="text-sm">Loading…</p>
-        </div>
+        <Loading />
       ) : purchases.length === 0 ? (
         <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
           <ShoppingBag size={32} />

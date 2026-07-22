@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { SearchX, Loader2 } from 'lucide-react'
+import { SearchX } from 'lucide-react'
 import { AppLayout } from '../components/AppLayout'
+import { Loading } from '../components/Loading'
 import { SearchBar } from '../components/SearchBar'
 import { VehicleCard } from '../components/VehicleCard'
 import { useToast } from '../components/Toast'
@@ -65,10 +66,7 @@ export function DashboardPage() {
       <SearchBar onSearch={handleSearch} onReset={loadAll} />
 
       {vehicles === null ? (
-        <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
-          <Loader2 size={28} className="animate-spin" />
-          <p className="text-sm">Loading vehicles…</p>
-        </div>
+        <Loading label="Loading vehicles…" />
       ) : vehicles.length === 0 ? (
         <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
           <SearchX size={32} />

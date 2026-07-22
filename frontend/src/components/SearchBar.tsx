@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Search, RotateCcw } from 'lucide-react'
 import type { SearchFilters } from '../api/vehicles.api'
 
 const fieldClasses =
@@ -110,15 +111,17 @@ export function SearchBar({
       <div className="flex gap-2">
         <button
           type="submit"
-          className="flex-1 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold py-2 transition"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold py-2 transition"
         >
+          <Search size={15} />
           Search
         </button>
         <button
           type="button"
           onClick={handleReset}
-          className="flex-1 rounded-full border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 text-sm font-medium py-2 transition"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 text-sm font-medium py-2 transition"
         >
+          <RotateCcw size={14} />
           Reset
         </button>
       </div>

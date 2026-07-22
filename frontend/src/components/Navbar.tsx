@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Car, LayoutGrid, ShoppingBag, Warehouse, LogOut } from 'lucide-react'
+import { LayoutGrid, ShoppingBag, Warehouse, LogOut } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 
 const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
@@ -32,9 +32,11 @@ export function Navbar() {
         to="/"
         className="flex items-center gap-3 h-16 px-3.5 lg:px-5 border-b border-gray-100"
       >
-        <span className="shrink-0 w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center">
-          <Car size={20} />
-        </span>
+        <img
+          src="/logo/logo_cars.png"
+          alt=""
+          className="shrink-0 w-9 h-9 rounded-xl object-cover"
+        />
         <span className="hidden lg:block font-bold text-gray-900 tracking-tight">
           Car Dealership
         </span>

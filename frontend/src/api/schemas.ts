@@ -16,6 +16,7 @@ export const vehicleSchema = z.object({
   category: z.string(),
   price: z.number(),
   quantity: z.number(),
+  imageUrl: z.string().optional(),
 })
 
 export const loginResponseSchema = z.object({

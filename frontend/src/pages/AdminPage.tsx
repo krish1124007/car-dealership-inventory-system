@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Loader2, Pencil, Trash2, PackagePlus } from 'lucide-react'
+import { CarFront, Pencil, Trash2, PackagePlus } from 'lucide-react'
 import { AppLayout } from '../components/AppLayout'
+import { Loading } from '../components/Loading'
 import { useToast } from '../components/Toast'
 import { formatPrice } from '../components/VehicleCard'
 import {
@@ -16,7 +17,14 @@ import type { Vehicle } from '../api/schemas'
 const fieldClasses =
   'w-full rounded-xl bg-white border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition'
 
-const emptyForm = { make: '', model: '', category: '', price: '', quantity: '' }
+const emptyForm = {
+  make: '',
+  model: '',
+  category: '',
+  price: '',
+  quantity: '',
+  imageUrl: '',
+}
 
 export function AdminPage() {
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
@@ -50,6 +58,7 @@ export function AdminPage() {
       category: vehicle.category,
       price: String(vehicle.price),
       quantity: String(vehicle.quantity),
+      imageUrl: vehicle.imageUrl ?? '',
     })
   }
 
@@ -66,6 +75,7 @@ export function AdminPage() {
       category: form.category.trim(),
       price: Number(form.price),
       quantity: Number(form.quantity || 0),
+      ...(form.imageUrl.trim() && { imageUrl: form.imageUrl.trim() }),
     }
     try {
       if (editingId) {
@@ -116,22 +126,31 @@ export function AdminPage() {
     >
       <form
         onSubmit={handleSubmit}
-        className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4"
+        className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
       >
-        <h2 className="font-semibold text-gray-900">
-          {editingId ? 'Edit vehicle' : 'Add a vehicle'}
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+          <h2 className="font-semibold text-gray-900">
+            {editingId ? 'Edit vehicle' : 'Add a vehicle'}
+          </h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {editingId
+              ? 'Update the listing details and save your changes.'
+              : 'Fill in the listing details to publish it in the showroom.'}
+          </p>
+        </div>
+
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-4">
           <div>
             <label
               htmlFor="admin-make"
-              className="block text-xs font-medium text-gray-500 mb-1"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
             >
               Make
             </label>
             <input
               id="admin-make"
               required
+              placeholder="e.g. Toyota"
               className={fieldClasses}
               value={form.make}
               onChange={(e) => setField('make', e.target.value)}
@@ -140,13 +159,14 @@ export function AdminPage() {
           <div>
             <label
               htmlFor="admin-model"
-              className="block text-xs font-medium text-gray-500 mb-1"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
             >
               Model
             </label>
             <input
               id="admin-model"
               required
+              placeholder="e.g. Fortuner"
               className={fieldClasses}
               value={form.model}
               onChange={(e) => setField('model', e.target.value)}
@@ -155,13 +175,14 @@ export function AdminPage() {
           <div>
             <label
               htmlFor="admin-category"
-              className="block text-xs font-medium text-gray-500 mb-1"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
             >
               Category
             </label>
             <input
               id="admin-category"
               required
+              placeholder="e.g. SUV"
               className={fieldClasses}
               value={form.category}
               onChange={(e) => setField('category', e.target.value)}
@@ -170,7 +191,7 @@ export function AdminPage() {
           <div>
             <label
               htmlFor="admin-price"
-              className="block text-xs font-medium text-gray-500 mb-1"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
             >
               Price
             </label>
@@ -179,6 +200,7 @@ export function AdminPage() {
               type="number"
               required
               min="1"
+              placeholder="45000"
               className={fieldClasses}
               value={form.price}
               onChange={(e) => setField('price', e.target.value)}
@@ -187,7 +209,7 @@ export function AdminPage() {
           <div>
             <label
               htmlFor="admin-quantity"
-              className="block text-xs font-medium text-gray-500 mb-1"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
             >
               Quantity
             </label>
@@ -195,36 +217,52 @@ export function AdminPage() {
               id="admin-quantity"
               type="number"
               min="0"
+              placeholder="5"
               className={fieldClasses}
               value={form.quantity}
               onChange={(e) => setField('quantity', e.target.value)}
             />
           </div>
+          <div>
+            <label
+              htmlFor="admin-image-url"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Image URL{' '}
+              <span className="text-gray-400 font-normal">(optional)</span>
+            </label>
+            <input
+              id="admin-image-url"
+              type="url"
+              placeholder="https://example.com/car.jpg"
+              className={fieldClasses}
+              value={form.imageUrl}
+              onChange={(e) => setField('imageUrl', e.target.value)}
+            />
+          </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            className="rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-6 py-2.5 transition"
-          >
-            {editingId ? 'Save changes' : 'Add vehicle'}
-          </button>
+
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex justify-end gap-2">
           {editingId && (
             <button
               type="button"
               onClick={cancelEdit}
-              className="rounded-xl border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 text-sm font-medium px-6 py-2.5 transition"
+              className="rounded-xl border border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600 text-sm font-medium px-6 py-2.5 transition"
             >
               Cancel
             </button>
           )}
+          <button
+            type="submit"
+            className="rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-6 py-2.5 shadow-sm transition"
+          >
+            {editingId ? 'Save changes' : 'Add vehicle'}
+          </button>
         </div>
       </form>
 
       {vehicles === null ? (
-        <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
-          <Loader2 size={28} className="animate-spin" />
-          <p className="text-sm">Loading…</p>
-        </div>
+        <Loading />
       ) : (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
@@ -244,8 +282,23 @@ export function AdminPage() {
                   key={vehicle.id}
                   className="border-b border-gray-50 last:border-0 hover:bg-gray-50/40 transition"
                 >
-                  <td className="px-5 py-3 font-medium text-gray-900">
-                    {vehicle.make} {vehicle.model}
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-3">
+                      {vehicle.imageUrl ? (
+                        <img
+                          src={vehicle.imageUrl}
+                          alt=""
+                          className="w-12 h-9 rounded-lg object-cover border border-gray-100"
+                        />
+                      ) : (
+                        <span className="w-12 h-9 rounded-lg bg-gray-100 text-gray-300 flex items-center justify-center">
+                          <CarFront size={18} />
+                        </span>
+                      )}
+                      <span className="font-medium text-gray-900">
+                        {vehicle.make} {vehicle.model}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-5 py-3 text-gray-500">
                     {vehicle.category}

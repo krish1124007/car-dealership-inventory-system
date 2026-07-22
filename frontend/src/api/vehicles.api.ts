@@ -9,6 +9,7 @@ export interface VehiclePayload {
   category: string
   price: number
   quantity: number
+  imageUrl?: string
 }
 
 export interface SearchFilters {

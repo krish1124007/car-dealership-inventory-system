@@ -12,6 +12,7 @@ const createVehicleSchema = z.object({
     category: z.string().min(1),
     price: z.number().positive(),
     quantity: z.number().int().min(0).default(0),
+    imageUrl: z.url().optional(),
 });
 
 const updateVehicleSchema = z.object({
@@ -20,6 +21,7 @@ const updateVehicleSchema = z.object({
     category: z.string().min(1).optional(),
     price: z.number().positive().optional(),
     quantity: z.number().int().min(0).optional(),
+    imageUrl: z.url().optional(),
 });
 
 const searchSchema = z.object({
@@ -76,7 +78,11 @@ const createVehicle = asyncHandler(async (req: Request, res: Response) => {
         return;
     }
 
-    const vehicle = await Vehicle.create(parsed.data);
+    const { imageUrl, ...rest } = parsed.data;
+    const vehicle = await Vehicle.create({
+        ...rest,
+        ...(imageUrl !== undefined && { imageUrl }),
+    });
     returnResponse(res, 201, "Vehicle added", vehicle.toJSON());
 });
 

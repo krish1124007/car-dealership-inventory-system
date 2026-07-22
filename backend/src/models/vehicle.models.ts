@@ -6,6 +6,7 @@ interface IVehicle {
     category: string;
     price: number;
     quantity: number;
+    imageUrl?: string;
 }
 
 const vehicleSchema = new Schema<IVehicle>(
@@ -23,6 +24,7 @@ const vehicleSchema = new Schema<IVehicle>(
             default: 0,
             min: [0, "quantity cannot be negative"],
         },
+        imageUrl: { type: String, trim: true },
     },
     {
         timestamps: true,
