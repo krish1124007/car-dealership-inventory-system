@@ -13,6 +13,8 @@ export interface VehiclePayload {
 }
 
 export interface SearchFilters {
+  /** Free-text name search — matches make or model. */
+  q?: string
   make?: string
   model?: string
   category?: string

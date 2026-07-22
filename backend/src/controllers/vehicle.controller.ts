@@ -25,6 +25,7 @@ const updateVehicleSchema = z.object({
 });
 
 const searchSchema = z.object({
+    q: z.string().optional(),
     make: z.string().optional(),
     model: z.string().optional(),
     category: z.string().optional(),
@@ -41,6 +42,11 @@ function ciExact(value: string): RegExp {
     return new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
 }
 
+/** Case-insensitive contains match, for free-text name search. */
+function ciContains(value: string): RegExp {
+    return new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+}
+
 /** GET /api/vehicles */
 const listVehicles = asyncHandler(async (_req: Request, res: Response) => {
     const vehicles = await Vehicle.find();
@@ -54,9 +60,12 @@ const searchVehicles = asyncHandler(async (req: Request, res: Response) => {
         returnResponse(res, 400, "Invalid search filters", null);
         return;
     }
-    const { make, model, category, minPrice, maxPrice } = parsed.data;
+    const { q, make, model, category, minPrice, maxPrice } = parsed.data;
 
     const filter: Record<string, unknown> = {};
+    // Free-text name search: matches make or model, partial and
+    // case-insensitive.
+    if (q) filter["$or"] = [{ make: ciContains(q) }, { model: ciContains(q) }];
     if (make) filter["make"] = ciExact(make);
     if (model) filter["model"] = ciExact(model);
     if (category) filter["category"] = ciExact(category);
