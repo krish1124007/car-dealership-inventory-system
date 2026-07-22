@@ -40,6 +40,11 @@ export function searchVehicles(filters: SearchFilters): Promise<Vehicle[]> {
   return request(`/vehicles/search?${params.toString()}`, vehicleListSchema)
 }
 
+/** GET /api/vehicles/:id */
+export function getVehicle(id: string): Promise<Vehicle> {
+  return request(`/vehicles/${id}`, vehicleSchema)
+}
+
 /** POST /api/vehicles (admin) */
 export function createVehicle(payload: VehiclePayload): Promise<Vehicle> {
   return request('/vehicles', vehicleSchema, { method: 'POST', body: payload })

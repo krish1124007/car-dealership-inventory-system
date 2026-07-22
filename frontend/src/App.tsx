@@ -6,6 +6,7 @@ import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { AdminRegisterPage } from './pages/AdminRegisterPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { VehicleDetailPage } from './pages/VehicleDetailPage'
 import { MyPurchasesPage } from './pages/MyPurchasesPage'
 import { AdminPage } from './pages/AdminPage'
 
@@ -23,6 +24,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vehicles/:id"
+            element={
+              <ProtectedRoute>
+                <VehicleDetailPage />
               </ProtectedRoute>
             }
           />

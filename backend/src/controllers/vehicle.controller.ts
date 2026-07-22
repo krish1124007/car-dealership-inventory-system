@@ -79,6 +79,17 @@ const searchVehicles = asyncHandler(async (req: Request, res: Response) => {
     returnResponse(res, 200, "Search results", vehicles);
 });
 
+/** GET /api/vehicles/:id — full details for one listing. */
+const getVehicle = asyncHandler(async (req: Request, res: Response) => {
+    const vehicle = await Vehicle.findById(req.params.id as string);
+    if (!vehicle) {
+        returnResponse(res, 404, "Vehicle not found", null);
+        return;
+    }
+
+    returnResponse(res, 200, "Vehicle fetched", vehicle.toJSON());
+});
+
 /** POST /api/vehicles (admin) */
 const createVehicle = asyncHandler(async (req: Request, res: Response) => {
     const parsed = createVehicleSchema.safeParse(req.body);
@@ -186,6 +197,7 @@ const restockVehicle = asyncHandler(async (req: Request, res: Response) => {
 export {
     listVehicles,
     searchVehicles,
+    getVehicle,
     createVehicle,
     updateVehicle,
     deleteVehicle,

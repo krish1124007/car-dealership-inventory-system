@@ -1,20 +1,15 @@
 import { useState } from 'react'
-import { CarFront, ShoppingCart } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { CarFront, Eye } from 'lucide-react'
 import type { Vehicle } from '../api/schemas'
 
 export function formatPrice(price: number): string {
   return `$${price.toLocaleString('en-US')}`
 }
 
-/** Listing card in the professional dealer style: photo on top with the
- * stock badge overlaid, details and the purchase CTA below. */
-export function VehicleCard({
-  vehicle,
-  onPurchase,
-}: {
-  vehicle: Vehicle
-  onPurchase: (vehicle: Vehicle) => void
-}) {
+/** Listing card: photo with stock/category badges and a View car link
+ * that opens the vehicle detail page. */
+export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
   const outOfStock = vehicle.quantity === 0
   // Broken image urls fall back to the placeholder instead of a broken icon.
   const [imgFailed, setImgFailed] = useState(false)
@@ -61,14 +56,13 @@ export function VehicleCard({
           </div>
         </div>
 
-        <button
-          onClick={() => onPurchase(vehicle)}
-          disabled={outOfStock}
-          className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 transition"
+        <Link
+          to={`/vehicles/${vehicle.id}`}
+          className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold py-2.5 transition"
         >
-          <ShoppingCart size={16} />
-          Purchase
-        </button>
+          <Eye size={16} />
+          View car
+        </Link>
       </div>
     </div>
   )

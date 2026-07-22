@@ -5,11 +5,7 @@ import { AppLayout } from '../components/AppLayout'
 import { Loading } from '../components/Loading'
 import { VehicleCard } from '../components/VehicleCard'
 import { useToast } from '../components/Toast'
-import {
-  listVehicles,
-  searchVehicles,
-  purchaseVehicle,
-} from '../api/vehicles.api'
+import { listVehicles, searchVehicles } from '../api/vehicles.api'
 import type { SearchFilters } from '../api/vehicles.api'
 import type { Vehicle } from '../api/schemas'
 
@@ -67,20 +63,6 @@ export function DashboardPage() {
     setMinPrice('')
     setMaxPrice('')
     void loadAll()
-  }
-
-  async function handlePurchase(vehicle: Vehicle) {
-    try {
-      const result = await purchaseVehicle(vehicle.id)
-      setVehicles((prev) =>
-        prev
-          ? prev.map((v) => (v.id === result.vehicle.id ? result.vehicle : v))
-          : prev,
-      )
-      toast.success(`Purchased ${vehicle.make} ${vehicle.model}`)
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Purchase failed')
-    }
   }
 
   return (
@@ -199,11 +181,7 @@ export function DashboardPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {vehicles.map((vehicle) => (
-            <VehicleCard
-              key={vehicle.id}
-              vehicle={vehicle}
-              onPurchase={handlePurchase}
-            />
+            <VehicleCard key={vehicle.id} vehicle={vehicle} />
           ))}
         </div>
       )}

@@ -55,11 +55,11 @@ describe('VehicleDetailPage', () => {
   it('loads and shows the full vehicle details', async () => {
     renderDetail()
 
-    expect(await screen.findByText(/fortuner/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /toyota fortuner/i })).toBeInTheDocument()
     expect(vehiclesApi.getVehicle).toHaveBeenCalledWith('v1')
     expect(screen.getByText(/suv/i)).toBeInTheDocument()
     expect(screen.getByText('$45,000')).toBeInTheDocument()
-    expect(screen.getByText(/3 in stock/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/3 in stock/i).length).toBeGreaterThan(0)
     expect(
       screen.getByRole('img', { name: /toyota fortuner/i }),
     ).toHaveAttribute('src', fortuner.imageUrl!)
@@ -77,11 +77,13 @@ describe('VehicleDetailPage', () => {
     })
     renderDetail()
 
-    await screen.findByText(/fortuner/i)
+    await screen.findByRole('heading', { name: /toyota fortuner/i })
     await userEvent.click(screen.getByRole('button', { name: /purchase/i }))
 
     expect(vehiclesApi.purchaseVehicle).toHaveBeenCalledWith('v1')
-    expect(await screen.findByText(/2 in stock/i)).toBeInTheDocument()
+    expect((await screen.findAllByText(/2 in stock/i)).length).toBeGreaterThan(
+      0,
+    )
     expect(
       await screen.findByText(/purchased toyota fortuner/i),
     ).toBeInTheDocument()
@@ -94,9 +96,9 @@ describe('VehicleDetailPage', () => {
     })
     renderDetail()
 
-    await screen.findByText(/fortuner/i)
+    await screen.findByRole('heading', { name: /toyota fortuner/i })
     expect(screen.getByRole('button', { name: /purchase/i })).toBeDisabled()
-    expect(screen.getByText(/out of stock/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/out of stock/i).length).toBeGreaterThan(0)
   })
 
   it('shows an error state when the vehicle does not exist', async () => {
@@ -111,7 +113,7 @@ describe('VehicleDetailPage', () => {
   it('links back to the home page', async () => {
     renderDetail()
 
-    await screen.findByText(/fortuner/i)
+    await screen.findByRole('heading', { name: /toyota fortuner/i })
     expect(screen.getByRole('link', { name: /back/i })).toHaveAttribute(
       'href',
       '/',
