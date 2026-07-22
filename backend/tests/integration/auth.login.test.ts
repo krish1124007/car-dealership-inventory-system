@@ -21,6 +21,21 @@ describe(`POST ${ENDPOINT}`, () => {
         expect(res.body.data.accessToken).toEqual(expect.any(String));
     });
 
+    it("returns the user's public profile alongside the token", async () => {
+        const { user } = await createUser();
+
+        const res = await request(app)
+            .post(ENDPOINT)
+            .send({ email: user.email, password: DEFAULT_PASSWORD });
+
+        expect(res.body.data.user).toMatchObject({
+            id: user.id,
+            email: user.email,
+            role: "CUSTOMER",
+        });
+        expect(res.body.data.user.passwordHash).toBeUndefined();
+    });
+
     it("issues a JWT carrying the user id and role", async () => {
         const { user } = await createUser(Role.ADMIN);
 
