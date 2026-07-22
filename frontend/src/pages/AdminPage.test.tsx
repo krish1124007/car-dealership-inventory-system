@@ -69,7 +69,7 @@ describe('AdminPage', () => {
     await userEvent.type(screen.getByLabelText(/model/i), 'Model 3')
     await userEvent.type(screen.getByLabelText(/category/i), 'EV')
     await userEvent.type(screen.getByLabelText(/price/i), '50000')
-    await userEvent.type(screen.getByLabelText(/quantity/i), '2')
+    await userEvent.type(screen.getByLabelText(/^quantity$/i), '2')
     await userEvent.click(
       screen.getByRole('button', { name: /add vehicle/i }),
     )
