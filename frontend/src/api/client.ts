@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const API_BASE: string =
+export const API_BASE: string =
   (import.meta.env.VITE_API_URL as string | undefined) ??
   'http://localhost:3000/api'
 

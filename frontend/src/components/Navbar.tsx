@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutGrid, ShoppingBag, Warehouse, LogOut } from 'lucide-react'
+import { Home, ShoppingBag, Warehouse, LogOut } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 
 const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
@@ -44,8 +44,8 @@ export function Navbar() {
 
       <nav className="flex-1 px-2.5 lg:px-3 py-4 space-y-1">
         <NavLink to="/" end className={navLinkClasses}>
-          <LayoutGrid size={18} className="shrink-0" />
-          <span className="hidden lg:inline">Showroom</span>
+          <Home size={18} className="shrink-0" />
+          <span className="hidden lg:inline">Home</span>
         </NavLink>
         <NavLink to="/purchases" className={navLinkClasses}>
           <ShoppingBag size={18} className="shrink-0" />

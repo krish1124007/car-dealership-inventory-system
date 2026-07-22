@@ -12,23 +12,18 @@ import {
   deleteVehicle,
   restockVehicle,
 } from '../api/vehicles.api'
+import { uploadVehicleImage } from '../api/uploads.api'
 import type { Vehicle } from '../api/schemas'
 
 const fieldClasses =
   'w-full rounded-xl bg-white border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition'
 
-const emptyForm = {
-  make: '',
-  model: '',
-  category: '',
-  price: '',
-  quantity: '',
-  imageUrl: '',
-}
+const emptyForm = { make: '', model: '', category: '', price: '', quantity: '' }
 
 export function AdminPage() {
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
   const [form, setForm] = useState(emptyForm)
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [restockAmounts, setRestockAmounts] = useState<Record<string, string>>(
     {},
@@ -58,26 +53,31 @@ export function AdminPage() {
       category: vehicle.category,
       price: String(vehicle.price),
       quantity: String(vehicle.quantity),
-      imageUrl: vehicle.imageUrl ?? '',
     })
+    setImageFile(null)
   }
 
   function cancelEdit() {
     setEditingId(null)
     setForm(emptyForm)
+    setImageFile(null)
   }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    const payload = {
-      make: form.make.trim(),
-      model: form.model.trim(),
-      category: form.category.trim(),
-      price: Number(form.price),
-      quantity: Number(form.quantity || 0),
-      ...(form.imageUrl.trim() && { imageUrl: form.imageUrl.trim() }),
-    }
     try {
+      let imageUrl: string | undefined
+      if (imageFile) {
+        imageUrl = (await uploadVehicleImage(imageFile)).url
+      }
+      const payload = {
+        make: form.make.trim(),
+        model: form.model.trim(),
+        category: form.category.trim(),
+        price: Number(form.price),
+        quantity: Number(form.quantity || 0),
+        ...(imageUrl && { imageUrl }),
+      }
       if (editingId) {
         const updated = await updateVehicle(editingId, payload)
         setVehicles((prev) =>
@@ -225,19 +225,18 @@ export function AdminPage() {
           </div>
           <div>
             <label
-              htmlFor="admin-image-url"
+              htmlFor="admin-image"
               className="block text-sm font-medium text-gray-700 mb-1.5"
             >
-              Image URL{' '}
+              Vehicle image{' '}
               <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <input
-              id="admin-image-url"
-              type="url"
-              placeholder="https://example.com/car.jpg"
-              className={fieldClasses}
-              value={form.imageUrl}
-              onChange={(e) => setField('imageUrl', e.target.value)}
+              id="admin-image"
+              type="file"
+              accept="image/*"
+              className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
             />
           </div>
         </div>

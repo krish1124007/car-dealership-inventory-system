@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { SearchX } from 'lucide-react'
 import { AppLayout } from '../components/AppLayout'
+import { FilterSidebar } from '../components/FilterSidebar'
 import { Loading } from '../components/Loading'
-import { SearchBar } from '../components/SearchBar'
 import { VehicleCard } from '../components/VehicleCard'
 import { useToast } from '../components/Toast'
 import {
@@ -15,11 +15,14 @@ import type { Vehicle } from '../api/schemas'
 
 export function DashboardPage() {
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
+  const [categories, setCategories] = useState<string[]>([])
   const toast = useToast()
 
   async function loadAll() {
     try {
-      setVehicles(await listVehicles())
+      const list = await listVehicles()
+      setVehicles(list)
+      setCategories([...new Set(list.map((v) => v.category))])
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : 'Failed to load vehicles',
@@ -60,29 +63,46 @@ export function DashboardPage() {
 
   return (
     <AppLayout
-      title="Showroom"
+      title="Home"
       subtitle="Browse the inventory and drive one home today."
     >
-      <SearchBar onSearch={handleSearch} onReset={loadAll} />
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        <FilterSidebar
+          categories={categories}
+          onSearch={handleSearch}
+          onReset={loadAll}
+        />
 
-      {vehicles === null ? (
-        <Loading label="Loading vehicles…" />
-      ) : vehicles.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
-          <SearchX size={32} />
-          <p className="text-sm">No vehicles found. Try different filters.</p>
+        <div className="flex-1 w-full space-y-4">
+          {vehicles !== null && (
+            <p className="text-sm font-semibold text-gray-900">
+              {vehicles.length} vehicle{vehicles.length === 1 ? '' : 's'}{' '}
+              available
+            </p>
+          )}
+
+          {vehicles === null ? (
+            <Loading label="Loading vehicles…" />
+          ) : vehicles.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
+              <SearchX size={32} />
+              <p className="text-sm">
+                No vehicles found. Try different filters.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {vehicles.map((vehicle) => (
+                <VehicleCard
+                  key={vehicle.id}
+                  vehicle={vehicle}
+                  onPurchase={handlePurchase}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {vehicles.map((vehicle) => (
-            <VehicleCard
-              key={vehicle.id}
-              vehicle={vehicle}
-              onPurchase={handlePurchase}
-            />
-          ))}
-        </div>
-      )}
+      </div>
     </AppLayout>
   )
 }

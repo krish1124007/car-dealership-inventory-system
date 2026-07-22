@@ -44,3 +44,7 @@ Thumbs.db
 .DS_Store
 
 /src/generated/prisma
+
+# Uploaded vehicle images (runtime data)
+public/uploads/*
+!public/uploads/.gitkeep
