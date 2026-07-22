@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Navbar } from '../components/Navbar'
+import { SearchX, Loader2 } from 'lucide-react'
+import { AppLayout } from '../components/AppLayout'
 import { SearchBar } from '../components/SearchBar'
 import { VehicleCard } from '../components/VehicleCard'
 import {
@@ -55,45 +56,42 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Showroom</h1>
-          <p className="text-gray-500 mt-1">
-            Browse the inventory and drive one home today.
-          </p>
+    <AppLayout
+      title="Showroom"
+      subtitle="Browse the inventory and drive one home today."
+    >
+      <SearchBar onSearch={handleSearch} onReset={loadAll} />
+
+      {error && (
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3"
+        >
+          {error}
+        </p>
+      )}
+
+      {vehicles === null ? (
+        <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
+          <Loader2 size={28} className="animate-spin" />
+          <p className="text-sm">Loading vehicles…</p>
         </div>
-
-        <SearchBar onSearch={handleSearch} onReset={loadAll} />
-
-        {error && (
-          <p
-            role="alert"
-            className="rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3"
-          >
-            {error}
-          </p>
-        )}
-
-        {vehicles === null ? (
-          <p className="text-gray-400 text-center py-16">Loading vehicles…</p>
-        ) : vehicles.length === 0 ? (
-          <p className="text-gray-400 text-center py-16">
-            No vehicles found. Try different filters.
-          </p>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {vehicles.map((vehicle) => (
-              <VehicleCard
-                key={vehicle.id}
-                vehicle={vehicle}
-                onPurchase={handlePurchase}
-              />
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+      ) : vehicles.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
+          <SearchX size={32} />
+          <p className="text-sm">No vehicles found. Try different filters.</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {vehicles.map((vehicle) => (
+            <VehicleCard
+              key={vehicle.id}
+              vehicle={vehicle}
+              onPurchase={handlePurchase}
+            />
+          ))}
+        </div>
+      )}
+    </AppLayout>
   )
 }

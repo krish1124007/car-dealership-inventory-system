@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Car } from 'lucide-react'
 
 /**
  * Shared shell for the auth screens: softly blurred full-bleed background
@@ -20,8 +21,8 @@ export function AuthLayout({
       />
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 sm:p-10">
         <div className="text-center mb-8">
-          <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 text-2xl">
-            🚗
+          <span className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 text-white">
+            <Car size={26} />
           </span>
           <h1 className="mt-4 text-2xl font-semibold text-gray-800 tracking-tight">
             {title}

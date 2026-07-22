@@ -34,7 +34,7 @@ describe('Navbar', () => {
     renderNavbar(customer)
 
     expect(screen.getByText(/car dealership/i)).toBeInTheDocument()
-    expect(screen.getByText(/krish/i)).toBeInTheDocument()
+    expect(screen.getByText('Krish')).toBeInTheDocument()
   })
 
   it('links to the purchases page', () => {
