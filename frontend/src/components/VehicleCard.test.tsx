@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { VehicleCard } from './VehicleCard'
 import type { Vehicle } from '../api/schemas'
 
@@ -13,9 +13,17 @@ const vehicle: Vehicle = {
   quantity: 3,
 }
 
+function renderCard(v: Vehicle = vehicle) {
+  return render(
+    <MemoryRouter>
+      <VehicleCard vehicle={v} />
+    </MemoryRouter>,
+  )
+}
+
 describe('VehicleCard', () => {
   it('shows the vehicle details', () => {
-    render(<VehicleCard vehicle={vehicle} onPurchase={vi.fn()} />)
+    renderCard()
 
     expect(screen.getByText(/toyota/i)).toBeInTheDocument()
     expect(screen.getByText(/corolla/i)).toBeInTheDocument()
@@ -24,45 +32,29 @@ describe('VehicleCard', () => {
     expect(screen.getByText(/3 in stock/i)).toBeInTheDocument()
   })
 
-  it('enables the purchase button when stock is available', () => {
-    render(<VehicleCard vehicle={vehicle} onPurchase={vi.fn()} />)
+  it('links to the vehicle detail page', () => {
+    renderCard()
 
-    expect(screen.getByRole('button', { name: /purchase/i })).toBeEnabled()
+    const link = screen.getByRole('link', { name: /view car/i })
+    expect(link).toHaveAttribute('href', '/vehicles/v1')
   })
 
-  it('disables the purchase button when the quantity is zero', () => {
-    render(
-      <VehicleCard vehicle={{ ...vehicle, quantity: 0 }} onPurchase={vi.fn()} />,
-    )
+  it('shows the out-of-stock badge when the quantity is zero', () => {
+    renderCard({ ...vehicle, quantity: 0 })
 
-    expect(screen.getByRole('button', { name: /purchase/i })).toBeDisabled()
     expect(screen.getByText(/out of stock/i)).toBeInTheDocument()
   })
 
   it('shows the vehicle photo when an image url is set', () => {
-    render(
-      <VehicleCard
-        vehicle={{ ...vehicle, imageUrl: 'https://example.com/corolla.jpg' }}
-        onPurchase={vi.fn()}
-      />,
-    )
+    renderCard({ ...vehicle, imageUrl: 'https://example.com/corolla.jpg' })
 
     const img = screen.getByRole('img', { name: /toyota corolla/i })
     expect(img).toHaveAttribute('src', 'https://example.com/corolla.jpg')
   })
 
   it('falls back to a placeholder when there is no image', () => {
-    render(<VehicleCard vehicle={vehicle} onPurchase={vi.fn()} />)
+    renderCard()
 
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
-  })
-
-  it('calls onPurchase with the vehicle when clicked', async () => {
-    const onPurchase = vi.fn()
-    render(<VehicleCard vehicle={vehicle} onPurchase={onPurchase} />)
-
-    await userEvent.click(screen.getByRole('button', { name: /purchase/i }))
-
-    expect(onPurchase).toHaveBeenCalledWith(vehicle)
   })
 })

@@ -152,6 +152,46 @@ describe("Vehicle CRUD", () => {
         });
     });
 
+    describe("GET /api/vehicles/:id", () => {
+        it("rejects unauthenticated requests with 401", async () => {
+            const vehicle = await createVehicle();
+
+            const res = await request(app).get(`/api/vehicles/${vehicle.id}`);
+
+            expect(res.status).toBe(401);
+        });
+
+        it("returns the vehicle details for any authenticated user", async () => {
+            const vehicle = await createVehicle({
+                make: "Toyota",
+                model: "Fortuner",
+                price: 45000,
+            });
+            const { header } = await authHeader(Role.CUSTOMER);
+
+            const res = await request(app)
+                .get(`/api/vehicles/${vehicle.id}`)
+                .set(header);
+
+            expect(res.status).toBe(200);
+            expect(res.body.data).toMatchObject({
+                id: vehicle.id,
+                make: "Toyota",
+                model: "Fortuner",
+            });
+        });
+
+        it("returns 404 for a vehicle that does not exist", async () => {
+            const { header } = await authHeader(Role.CUSTOMER);
+
+            const res = await request(app)
+                .get(`/api/vehicles/${UNKNOWN_ID}`)
+                .set(header);
+
+            expect(res.status).toBe(404);
+        });
+    });
+
     describe("PUT /api/vehicles/:id", () => {
         it("rejects unauthenticated requests with 401", async () => {
             const vehicle = await createVehicle();

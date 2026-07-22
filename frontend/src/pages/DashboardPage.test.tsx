@@ -91,72 +91,14 @@ describe('DashboardPage', () => {
     expect(screen.getByText('$20,000')).toBeInTheDocument()
   })
 
-  it('disables the purchase button for out-of-stock vehicles only', async () => {
+  it('links every card to its vehicle detail page', async () => {
     renderDashboard()
 
     await screen.findByText(/corolla/i)
-    const buttons = screen.getAllByRole('button', { name: /purchase/i })
-    expect(buttons).toHaveLength(2)
-    expect(buttons[0]).toBeEnabled()
-    expect(buttons[1]).toBeDisabled()
-  })
-
-  it('purchases a vehicle and updates its stock in place', async () => {
-    vi.mocked(vehiclesApi.purchaseVehicle).mockResolvedValue({
-      vehicle: { ...corolla, quantity: 2 },
-      purchase: {
-        id: 'p1',
-        quantity: 1,
-        purchasePrice: 20000,
-        purchasedAt: '2026-07-22T10:00:00.000Z',
-      },
-    })
-    renderDashboard()
-
-    await screen.findByText(/corolla/i)
-    await userEvent.click(
-      screen.getAllByRole('button', { name: /purchase/i })[0]!,
-    )
-
-    expect(vehiclesApi.purchaseVehicle).toHaveBeenCalledWith('v1')
-    expect(await screen.findByText(/2 in stock/i)).toBeInTheDocument()
-  })
-
-  it('shows a success toast after purchasing', async () => {
-    vi.mocked(vehiclesApi.purchaseVehicle).mockResolvedValue({
-      vehicle: { ...corolla, quantity: 2 },
-      purchase: {
-        id: 'p1',
-        quantity: 1,
-        purchasePrice: 20000,
-        purchasedAt: '2026-07-22T10:00:00.000Z',
-      },
-    })
-    renderDashboard()
-
-    await screen.findByText(/corolla/i)
-    await userEvent.click(
-      screen.getAllByRole('button', { name: /purchase/i })[0]!,
-    )
-
-    expect(
-      await screen.findByText(/purchased toyota corolla/i),
-    ).toBeInTheDocument()
-  })
-
-  it('shows an error toast when the purchase fails', async () => {
-    vi.mocked(vehiclesApi.purchaseVehicle).mockRejectedValue(
-      new Error('Vehicle is out of stock'),
-    )
-    renderDashboard()
-
-    await screen.findByText(/corolla/i)
-    await userEvent.click(
-      screen.getAllByRole('button', { name: /purchase/i })[0]!,
-    )
-
-    const toast = await screen.findByRole('alert')
-    expect(toast).toHaveTextContent(/out of stock/i)
+    const links = screen.getAllByRole('link', { name: /view car/i })
+    expect(links).toHaveLength(2)
+    expect(links[0]).toHaveAttribute('href', '/vehicles/v1')
+    expect(links[1]).toHaveAttribute('href', '/vehicles/v2')
   })
 
   it('searches by car name from the top search bar', async () => {
