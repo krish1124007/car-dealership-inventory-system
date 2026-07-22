@@ -87,6 +87,37 @@ describe('AdminPage', () => {
     expect(await screen.findByText(/tesla/i)).toBeInTheDocument()
   })
 
+  it('sends the image url with the new vehicle when provided', async () => {
+    vi.mocked(vehiclesApi.createVehicle).mockResolvedValue({
+      id: 'v9',
+      make: 'Tesla',
+      model: 'Model 3',
+      category: 'EV',
+      price: 50000,
+      quantity: 2,
+      imageUrl: 'https://example.com/model3.jpg',
+    })
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    await userEvent.type(screen.getByLabelText(/make/i), 'Tesla')
+    await userEvent.type(screen.getByLabelText(/model/i), 'Model 3')
+    await userEvent.type(screen.getByLabelText(/category/i), 'EV')
+    await userEvent.type(screen.getByLabelText(/price/i), '50000')
+    await userEvent.type(screen.getByLabelText(/^quantity$/i), '2')
+    await userEvent.type(
+      screen.getByLabelText(/image url/i),
+      'https://example.com/model3.jpg',
+    )
+    await userEvent.click(
+      screen.getByRole('button', { name: /add vehicle/i }),
+    )
+
+    expect(vehiclesApi.createVehicle).toHaveBeenCalledWith(
+      expect.objectContaining({ imageUrl: 'https://example.com/model3.jpg' }),
+    )
+  })
+
   it('shows a success toast after adding a vehicle', async () => {
     vi.mocked(vehiclesApi.createVehicle).mockResolvedValue({
       id: 'v9',

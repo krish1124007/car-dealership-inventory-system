@@ -39,6 +39,24 @@ describe('VehicleCard', () => {
     expect(screen.getByText(/out of stock/i)).toBeInTheDocument()
   })
 
+  it('shows the vehicle photo when an image url is set', () => {
+    render(
+      <VehicleCard
+        vehicle={{ ...vehicle, imageUrl: 'https://example.com/corolla.jpg' }}
+        onPurchase={vi.fn()}
+      />,
+    )
+
+    const img = screen.getByRole('img', { name: /toyota corolla/i })
+    expect(img).toHaveAttribute('src', 'https://example.com/corolla.jpg')
+  })
+
+  it('falls back to a placeholder when there is no image', () => {
+    render(<VehicleCard vehicle={vehicle} onPurchase={vi.fn()} />)
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
   it('calls onPurchase with the vehicle when clicked', async () => {
     const onPurchase = vi.fn()
     render(<VehicleCard vehicle={vehicle} onPurchase={onPurchase} />)

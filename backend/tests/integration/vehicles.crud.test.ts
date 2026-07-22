@@ -97,6 +97,28 @@ describe("Vehicle CRUD", () => {
             expect(stored).not.toBeNull();
         });
 
+        it("stores an optional image url with the vehicle", async () => {
+            const { header } = await authHeader(Role.ADMIN);
+
+            const res = await request(app)
+                .post("/api/vehicles")
+                .set(header)
+                .send({
+                    ...buildVehiclePayload(),
+                    imageUrl: "https://example.com/cars/corolla.jpg",
+                });
+
+            expect(res.status).toBe(201);
+            expect(res.body.data.imageUrl).toBe(
+                "https://example.com/cars/corolla.jpg"
+            );
+
+            const stored = await Vehicle.findById(res.body.data.id);
+            expect(stored!.imageUrl).toBe(
+                "https://example.com/cars/corolla.jpg"
+            );
+        });
+
         it.each(["make", "model", "category", "price"])(
             "rejects a body missing %s with 400",
             async (field) => {
