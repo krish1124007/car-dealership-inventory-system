@@ -59,6 +59,27 @@ beforeEach(() => {
 })
 
 describe('DashboardPage', () => {
+  it('shows how many vehicles are available', async () => {
+    renderDashboard()
+
+    expect(
+      await screen.findByText(/2 vehicles available/i),
+    ).toBeInTheDocument()
+  })
+
+  it('filters by a category picked in the sidebar', async () => {
+    vi.mocked(vehiclesApi.searchVehicles).mockResolvedValue([corolla])
+    renderDashboard()
+
+    await screen.findByText(/corolla/i)
+    await userEvent.click(screen.getByRole('radio', { name: /sedan/i }))
+    await userEvent.click(screen.getByRole('button', { name: /^search$/i }))
+
+    expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
+      expect.objectContaining({ category: 'Sedan' }),
+    )
+  })
+
   it('lists every vehicle returned by the api', async () => {
     renderDashboard()
 

@@ -6,10 +6,12 @@ import { AuthProvider } from '../auth/AuthContext'
 import { ToastProvider } from '../components/Toast'
 import { AdminPage } from './AdminPage'
 import * as vehiclesApi from '../api/vehicles.api'
+import * as uploadsApi from '../api/uploads.api'
 import { setToken } from '../api/client'
 import type { User, Vehicle } from '../api/schemas'
 
 vi.mock('../api/vehicles.api')
+vi.mock('../api/uploads.api')
 
 const admin: User = {
   id: 'a1',
@@ -87,7 +89,10 @@ describe('AdminPage', () => {
     expect(await screen.findByText(/tesla/i)).toBeInTheDocument()
   })
 
-  it('sends the image url with the new vehicle when provided', async () => {
+  it('uploads the selected photo and sends its url with the new vehicle', async () => {
+    vi.mocked(uploadsApi.uploadVehicleImage).mockResolvedValue({
+      url: 'http://localhost:3000/uploads/model3.jpg',
+    })
     vi.mocked(vehiclesApi.createVehicle).mockResolvedValue({
       id: 'v9',
       make: 'Tesla',
@@ -95,26 +100,27 @@ describe('AdminPage', () => {
       category: 'EV',
       price: 50000,
       quantity: 2,
-      imageUrl: 'https://example.com/model3.jpg',
+      imageUrl: 'http://localhost:3000/uploads/model3.jpg',
     })
     renderAdmin()
     await screen.findByText(/corolla/i)
 
+    const file = new File(['img-bytes'], 'model3.jpg', { type: 'image/jpeg' })
     await userEvent.type(screen.getByLabelText(/make/i), 'Tesla')
     await userEvent.type(screen.getByLabelText(/model/i), 'Model 3')
     await userEvent.type(screen.getByLabelText(/category/i), 'EV')
     await userEvent.type(screen.getByLabelText(/price/i), '50000')
     await userEvent.type(screen.getByLabelText(/^quantity$/i), '2')
-    await userEvent.type(
-      screen.getByLabelText(/image url/i),
-      'https://example.com/model3.jpg',
-    )
+    await userEvent.upload(screen.getByLabelText(/vehicle image/i), file)
     await userEvent.click(
       screen.getByRole('button', { name: /add vehicle/i }),
     )
 
+    expect(uploadsApi.uploadVehicleImage).toHaveBeenCalledWith(file)
     expect(vehiclesApi.createVehicle).toHaveBeenCalledWith(
-      expect.objectContaining({ imageUrl: 'https://example.com/model3.jpg' }),
+      expect.objectContaining({
+        imageUrl: 'http://localhost:3000/uploads/model3.jpg',
+      }),
     )
   })
 
