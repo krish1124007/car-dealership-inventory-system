@@ -55,8 +55,14 @@ const loginHandler = asyncHandler(async (req: Request, res: Response) => {
     }
 
     try {
-        const accessToken = await login(parsed.data.email, parsed.data.password);
-        returnResponse(res, 200, "Login successful", { accessToken });
+        const { accessToken, user } = await login(
+            parsed.data.email,
+            parsed.data.password
+        );
+        returnResponse(res, 200, "Login successful", {
+            accessToken,
+            user: user.toJSON(),
+        });
     } catch {
         // Same response for unknown email and wrong password, so the API
         // can't be used to probe which emails are registered.
