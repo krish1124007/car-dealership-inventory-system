@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 
 /**
- * Shared shell for the auth screens: full-bleed background photo with a
- * solid white rounded card floating on the right side (centered on mobile).
+ * Shared shell for the auth screens: softly blurred full-bleed background
+ * photo with a solid white rounded card centered on top.
  */
 export function AuthLayout({
   title,
@@ -12,11 +12,13 @@ export function AuthLayout({
   children: ReactNode
 }) {
   return (
-    <div
-      className="min-h-screen bg-cover bg-center flex items-center justify-center md:justify-end px-4 py-10 md:pr-16 lg:pr-28"
-      style={{ backgroundImage: "url('/bgms/login-bgm.png')" }}
-    >
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 sm:p-10">
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-10 overflow-hidden">
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-cover bg-center blur-xs scale-105"
+        style={{ backgroundImage: "url('/bgms/login-bgm.png')" }}
+      />
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 sm:p-10">
         <div className="text-center mb-8">
           <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 text-2xl">
             🚗
