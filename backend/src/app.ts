@@ -1,6 +1,10 @@
 import express from "express";
+import type { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { authRouter } from "./routers/auth.routes.js";
+import { vehicleRouter } from "./routers/vehicle.routes.js";
+import { returnResponse } from "./utils/apiResponse.js";
 
 const app = express();
 
@@ -14,8 +18,13 @@ app.use(express.urlencoded({extended:true,limit:"16kb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
 
+app.use("/api/auth", authRouter)
+app.use("/api/vehicles", vehicleRouter)
 
-
-
+// Central error handler: anything forwarded by asyncHandler lands here.
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    console.error(err);
+    returnResponse(res, 500, "Internal Server Error", null);
+})
 
 export {app}
