@@ -8,15 +8,17 @@ import { RegisterPage } from './pages/RegisterPage'
 function DashboardPlaceholder() {
   const { user, logout } = useAuth()
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center gap-4">
-      <span className="text-4xl">🚗</span>
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center justify-center gap-4 bg-[radial-gradient(ellipse_at_top_left,_rgba(59,130,246,0.08),_transparent_50%),radial-gradient(ellipse_at_bottom_right,_rgba(16,185,129,0.08),_transparent_50%)]">
+      <span className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-emerald-500 text-3xl shadow-lg shadow-blue-200">
+        🚗
+      </span>
       <h1 className="text-2xl font-semibold">
         Welcome, {user?.name ?? 'driver'}
       </h1>
-      <p className="text-slate-400">The showroom dashboard is coming soon.</p>
+      <p className="text-gray-500">The showroom dashboard is coming soon.</p>
       <button
         onClick={logout}
-        className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:bg-slate-800 transition"
+        className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 hover:border-blue-300 hover:text-blue-600 shadow-sm transition"
       >
         Log out
       </button>

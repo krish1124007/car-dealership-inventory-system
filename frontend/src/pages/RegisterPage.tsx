@@ -84,11 +84,11 @@ export function RegisterPage() {
           {submitting ? 'Creating account…' : 'Create account'}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-slate-400">
+      <p className="mt-6 text-center text-sm text-gray-500">
         Already have an account?{' '}
         <Link
           to="/login"
-          className="text-blue-400 hover:text-blue-300 font-medium"
+          className="text-blue-600 hover:text-emerald-600 font-medium"
         >
           Sign in
         </Link>
