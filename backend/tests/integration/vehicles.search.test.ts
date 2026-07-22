@@ -3,7 +3,7 @@ import { app } from "../../src/app.js";
 import { useDb } from "../helpers/db.js";
 import { authHeader } from "../helpers/auth.js";
 import { createVehicle } from "../helpers/factories.js";
-import { Role } from "../../src/generated/prisma/client.js";
+import { Role } from "../../src/models/user.models.js";
 
 const ENDPOINT = "/api/vehicles/search";
 

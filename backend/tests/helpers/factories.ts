@@ -1,5 +1,4 @@
-import { prisma } from "../../src/db/index.js";
-import type { Vehicle } from "../../src/generated/prisma/client.js";
+import { Vehicle } from "../../src/models/vehicle.models.js";
 
 type VehicleAttrs = {
     make?: string;
@@ -22,11 +21,11 @@ function buildVehiclePayload(overrides: VehicleAttrs = {}) {
 }
 
 /** Inserts a vehicle directly into the database, bypassing the API. */
-async function createVehicle(overrides: VehicleAttrs = {}): Promise<Vehicle> {
-    return prisma.vehicle.create({ data: buildVehiclePayload(overrides) });
+async function createVehicle(overrides: VehicleAttrs = {}) {
+    return Vehicle.create(buildVehiclePayload(overrides));
 }
 
-/** A well-formed UUID that no row will ever have. */
-const UNKNOWN_UUID = "00000000-0000-4000-8000-000000000000";
+/** A well-formed ObjectId that no document will ever have. */
+const UNKNOWN_ID = "0123456789abcdef01234567";
 
-export { buildVehiclePayload, createVehicle, UNKNOWN_UUID };
+export { buildVehiclePayload, createVehicle, UNKNOWN_ID };

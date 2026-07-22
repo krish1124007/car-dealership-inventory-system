@@ -1,8 +1,10 @@
-import { prisma } from "../db/index.js";
+import { User } from "../models/user.models.js";
+import { Vehicle } from "../models/vehicle.models.js";
+import { Purchase } from "../models/purchase.models.js";
 
-// Registry of Prisma model delegates, keyed by model name.
+// Registry of mongoose models, keyed by model name.
 export const models = {
-  user: prisma.user,
-  vehicle: prisma.vehicle,
-  purchase: prisma.purchase,
+    user: User,
+    vehicle: Vehicle,
+    purchase: Purchase,
 };

@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { app } from "../../src/app.js";
 import { useDb } from "../helpers/db.js";
 import { createUser, DEFAULT_PASSWORD } from "../helpers/auth.js";
-import { Role } from "../../src/generated/prisma/client.js";
+import { Role } from "../../src/models/user.models.js";
 
 const ENDPOINT = "/api/auth/login";
 

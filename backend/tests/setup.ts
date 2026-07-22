@@ -1,7 +1,11 @@
 // Loaded by Jest (setupFiles) before any test module is imported.
-// Provides safe defaults for env vars the app reads, without overriding
-// values already supplied by .env or the shell.
 import "dotenv/config";
 
 process.env.JWT_SECRET ??= "test-jwt-secret";
 process.env.CORS_ORIGIN ??= "http://localhost:5173";
+
+// Always run the suite against a dedicated test database so the per-test
+// wipes can never touch development data.
+process.env.MONGODB_URI =
+    process.env.MONGODB_URI_TEST ??
+    "mongodb://127.0.0.1:27017/car_dealership_test";

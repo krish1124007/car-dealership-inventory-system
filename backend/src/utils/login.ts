@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { prisma } from "../db/index.js";
+import { User } from "../models/user.models.js";
 
 /**
  * Verifies a user's credentials and returns a signed JWT access token.
@@ -8,7 +8,7 @@ import { prisma } from "../db/index.js";
  * payload so protected routes can authorize admin-only actions.
  */
 async function login(email: string, password: string): Promise<string> {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await User.findOne({ email });
     if (!user) {
         throw new Error("User not found");
     }

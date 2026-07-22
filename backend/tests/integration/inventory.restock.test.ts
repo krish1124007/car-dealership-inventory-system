@@ -1,9 +1,9 @@
 import request from "supertest";
 import { app } from "../../src/app.js";
-import { prisma, useDb } from "../helpers/db.js";
+import { useDb, Vehicle } from "../helpers/db.js";
 import { authHeader } from "../helpers/auth.js";
-import { createVehicle, UNKNOWN_UUID } from "../helpers/factories.js";
-import { Role } from "../../src/generated/prisma/client.js";
+import { createVehicle, UNKNOWN_ID } from "../helpers/factories.js";
+import { Role } from "../../src/models/user.models.js";
 
 const endpoint = (id: string) => `/api/vehicles/${id}/restock`;
 
@@ -30,9 +30,7 @@ describe("POST /api/vehicles/:id/restock", () => {
             .send({ quantity: 5 });
 
         expect(res.status).toBe(403);
-        const stored = await prisma.vehicle.findUnique({
-            where: { id: vehicle.id },
-        });
+        const stored = await Vehicle.findById(vehicle.id);
         expect(stored!.quantity).toBe(3);
     });
 
@@ -46,9 +44,7 @@ describe("POST /api/vehicles/:id/restock", () => {
             .send({ quantity: 5 });
 
         expect(res.status).toBe(200);
-        const stored = await prisma.vehicle.findUnique({
-            where: { id: vehicle.id },
-        });
+        const stored = await Vehicle.findById(vehicle.id);
         expect(stored!.quantity).toBe(8);
     });
 
@@ -83,9 +79,7 @@ describe("POST /api/vehicles/:id/restock", () => {
             .send(body);
 
         expect(res.status).toBe(400);
-        const stored = await prisma.vehicle.findUnique({
-            where: { id: vehicle.id },
-        });
+        const stored = await Vehicle.findById(vehicle.id);
         expect(stored!.quantity).toBe(3);
     });
 
@@ -93,7 +87,7 @@ describe("POST /api/vehicles/:id/restock", () => {
         const { header } = await authHeader(Role.ADMIN);
 
         const res = await request(app)
-            .post(endpoint(UNKNOWN_UUID))
+            .post(endpoint(UNKNOWN_ID))
             .set(header)
             .send({ quantity: 5 });
 

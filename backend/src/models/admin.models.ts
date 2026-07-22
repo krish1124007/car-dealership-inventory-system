@@ -1,3 +1,3 @@
-// There is no separate Admin table — an admin is a User whose role is ADMIN
-// (see prisma/schema.prisma). This alias exists for readability at call sites.
-export type { User as Admin } from "../generated/prisma/client.js";
+// There is no separate Admin collection — an admin is a User whose role is
+// ADMIN (see user.models.ts). This alias exists for readability at call sites.
+export { User as Admin } from "./user.models.js";

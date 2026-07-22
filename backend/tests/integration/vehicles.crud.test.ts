@@ -1,13 +1,13 @@
 import request from "supertest";
 import { app } from "../../src/app.js";
-import { prisma, useDb } from "../helpers/db.js";
+import { useDb, Vehicle } from "../helpers/db.js";
 import { authHeader } from "../helpers/auth.js";
 import {
     buildVehiclePayload,
     createVehicle,
-    UNKNOWN_UUID,
+    UNKNOWN_ID,
 } from "../helpers/factories.js";
-import { Role } from "../../src/generated/prisma/client.js";
+import { Role } from "../../src/models/user.models.js";
 
 describe("Vehicle CRUD", () => {
     useDb();
@@ -72,7 +72,7 @@ describe("Vehicle CRUD", () => {
                 .send(buildVehiclePayload());
 
             expect(res.status).toBe(403);
-            await expect(prisma.vehicle.count()).resolves.toBe(0);
+            await expect(Vehicle.countDocuments()).resolves.toBe(0);
         });
 
         it("lets an admin add a vehicle and persists it", async () => {
@@ -93,9 +93,7 @@ describe("Vehicle CRUD", () => {
             });
             expect(Number(res.body.data.price)).toBe(payload.price);
 
-            const stored = await prisma.vehicle.findUnique({
-                where: { id: res.body.data.id },
-            });
+            const stored = await Vehicle.findById(res.body.data.id);
             expect(stored).not.toBeNull();
         });
 
@@ -128,7 +126,7 @@ describe("Vehicle CRUD", () => {
                 .send(buildVehiclePayload(overrides));
 
             expect(res.status).toBe(400);
-            await expect(prisma.vehicle.count()).resolves.toBe(0);
+            await expect(Vehicle.countDocuments()).resolves.toBe(0);
         });
     });
 
@@ -153,9 +151,7 @@ describe("Vehicle CRUD", () => {
                 .send({ price: 1 });
 
             expect(res.status).toBe(403);
-            const stored = await prisma.vehicle.findUnique({
-                where: { id: vehicle.id },
-            });
+            const stored = await Vehicle.findById(vehicle.id);
             expect(Number(stored!.price)).toBe(20000);
         });
 
@@ -169,9 +165,7 @@ describe("Vehicle CRUD", () => {
                 .send({ price: 22000, quantity: 8 });
 
             expect(res.status).toBe(200);
-            const stored = await prisma.vehicle.findUnique({
-                where: { id: vehicle.id },
-            });
+            const stored = await Vehicle.findById(vehicle.id);
             expect(Number(stored!.price)).toBe(22000);
             expect(stored!.quantity).toBe(8);
         });
@@ -180,7 +174,7 @@ describe("Vehicle CRUD", () => {
             const { header } = await authHeader(Role.ADMIN);
 
             const res = await request(app)
-                .put(`/api/vehicles/${UNKNOWN_UUID}`)
+                .put(`/api/vehicles/${UNKNOWN_ID}`)
                 .set(header)
                 .send({ price: 22000 });
 
@@ -218,7 +212,7 @@ describe("Vehicle CRUD", () => {
                 .set(header);
 
             expect(res.status).toBe(403);
-            await expect(prisma.vehicle.count()).resolves.toBe(1);
+            await expect(Vehicle.countDocuments()).resolves.toBe(1);
         });
 
         it("lets an admin delete a vehicle", async () => {
@@ -230,16 +224,14 @@ describe("Vehicle CRUD", () => {
                 .set(header);
 
             expect(res.status).toBe(200);
-            await expect(
-                prisma.vehicle.findUnique({ where: { id: vehicle.id } })
-            ).resolves.toBeNull();
+            await expect(Vehicle.findById(vehicle.id)).resolves.toBeNull();
         });
 
         it("returns 404 for a vehicle that does not exist", async () => {
             const { header } = await authHeader(Role.ADMIN);
 
             const res = await request(app)
-                .delete(`/api/vehicles/${UNKNOWN_UUID}`)
+                .delete(`/api/vehicles/${UNKNOWN_ID}`)
                 .set(header);
 
             expect(res.status).toBe(404);

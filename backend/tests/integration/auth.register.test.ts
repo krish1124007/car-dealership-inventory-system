@@ -1,7 +1,7 @@
 import request from "supertest";
 import bcrypt from "bcrypt";
 import { app } from "../../src/app.js";
-import { prisma, useDb } from "../helpers/db.js";
+import { useDb, User } from "../helpers/db.js";
 
 const ENDPOINT = "/api/auth/register";
 
@@ -36,9 +36,7 @@ describe(`POST ${ENDPOINT}`, () => {
     it("stores the password as a bcrypt hash, not plaintext", async () => {
         await request(app).post(ENDPOINT).send(validBody);
 
-        const user = await prisma.user.findUnique({
-            where: { email: validBody.email },
-        });
+        const user = await User.findOne({ email: validBody.email });
         expect(user).not.toBeNull();
         expect(user!.passwordHash).not.toBe(validBody.password);
         await expect(
@@ -52,9 +50,7 @@ describe(`POST ${ENDPOINT}`, () => {
             .post(ENDPOINT)
             .send({ ...validBody, role: "ADMIN" });
 
-        const user = await prisma.user.findUnique({
-            where: { email: validBody.email },
-        });
+        const user = await User.findOne({ email: validBody.email });
         expect(user!.role).toBe("CUSTOMER");
     });
 
@@ -63,7 +59,7 @@ describe(`POST ${ENDPOINT}`, () => {
         const res = await request(app).post(ENDPOINT).send(validBody);
 
         expect(res.status).toBe(409);
-        await expect(prisma.user.count()).resolves.toBe(1);
+        await expect(User.countDocuments()).resolves.toBe(1);
     });
 
     it.each([
@@ -74,7 +70,7 @@ describe(`POST ${ENDPOINT}`, () => {
         const res = await request(app).post(ENDPOINT).send(body);
 
         expect(res.status).toBe(400);
-        await expect(prisma.user.count()).resolves.toBe(0);
+        await expect(User.countDocuments()).resolves.toBe(0);
     });
 
     it("rejects an invalid email format with 400", async () => {

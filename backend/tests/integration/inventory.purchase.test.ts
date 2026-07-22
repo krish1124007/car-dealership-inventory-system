@@ -1,9 +1,9 @@
 import request from "supertest";
 import { app } from "../../src/app.js";
-import { prisma, useDb } from "../helpers/db.js";
+import { useDb, Vehicle, Purchase } from "../helpers/db.js";
 import { authHeader } from "../helpers/auth.js";
-import { createVehicle, UNKNOWN_UUID } from "../helpers/factories.js";
-import { Role } from "../../src/generated/prisma/client.js";
+import { createVehicle, UNKNOWN_ID } from "../helpers/factories.js";
+import { Role } from "../../src/models/user.models.js";
 
 const endpoint = (id: string) => `/api/vehicles/${id}/purchase`;
 
@@ -25,9 +25,7 @@ describe("POST /api/vehicles/:id/purchase", () => {
         const res = await request(app).post(endpoint(vehicle.id)).set(header);
 
         expect(res.status).toBe(200);
-        const stored = await prisma.vehicle.findUnique({
-            where: { id: vehicle.id },
-        });
+        const stored = await Vehicle.findById(vehicle.id);
         expect(stored!.quantity).toBe(4);
     });
 
@@ -37,13 +35,11 @@ describe("POST /api/vehicles/:id/purchase", () => {
 
         await request(app).post(endpoint(vehicle.id)).set(header);
 
-        const purchases = await prisma.purchase.findMany();
+        const purchases = await Purchase.find();
         expect(purchases).toHaveLength(1);
-        expect(purchases[0]).toMatchObject({
-            userId: user.id,
-            vehicleId: vehicle.id,
-            quantity: 1,
-        });
+        expect(String(purchases[0]!.userId)).toBe(user.id);
+        expect(String(purchases[0]!.vehicleId)).toBe(vehicle.id);
+        expect(purchases[0]!.quantity).toBe(1);
         expect(Number(purchases[0]!.purchasePrice)).toBe(45000);
     });
 
@@ -52,13 +48,11 @@ describe("POST /api/vehicles/:id/purchase", () => {
         const { header } = await authHeader(Role.CUSTOMER);
 
         await request(app).post(endpoint(vehicle.id)).set(header);
-        await prisma.vehicle.update({
-            where: { id: vehicle.id },
-            data: { price: 99999 },
-        });
+        await Vehicle.findByIdAndUpdate(vehicle.id, { price: 99999 });
 
-        const purchase = await prisma.purchase.findFirstOrThrow();
-        expect(Number(purchase.purchasePrice)).toBe(45000);
+        const purchase = await Purchase.findOne();
+        expect(purchase).not.toBeNull();
+        expect(Number(purchase!.purchasePrice)).toBe(45000);
     });
 
     it("rejects a purchase when the vehicle is out of stock with 400", async () => {
@@ -68,11 +62,9 @@ describe("POST /api/vehicles/:id/purchase", () => {
         const res = await request(app).post(endpoint(vehicle.id)).set(header);
 
         expect(res.status).toBe(400);
-        const stored = await prisma.vehicle.findUnique({
-            where: { id: vehicle.id },
-        });
+        const stored = await Vehicle.findById(vehicle.id);
         expect(stored!.quantity).toBe(0); // never goes negative
-        await expect(prisma.purchase.count()).resolves.toBe(0);
+        await expect(Purchase.countDocuments()).resolves.toBe(0);
     });
 
     it("sells down to zero and then refuses further purchases", async () => {
@@ -87,17 +79,15 @@ describe("POST /api/vehicles/:id/purchase", () => {
         expect(second.status).toBe(200);
         expect(third.status).toBe(400);
 
-        const stored = await prisma.vehicle.findUnique({
-            where: { id: vehicle.id },
-        });
+        const stored = await Vehicle.findById(vehicle.id);
         expect(stored!.quantity).toBe(0);
-        await expect(prisma.purchase.count()).resolves.toBe(2);
+        await expect(Purchase.countDocuments()).resolves.toBe(2);
     });
 
     it("returns 404 for a vehicle that does not exist", async () => {
         const { header } = await authHeader(Role.CUSTOMER);
 
-        const res = await request(app).post(endpoint(UNKNOWN_UUID)).set(header);
+        const res = await request(app).post(endpoint(UNKNOWN_ID)).set(header);
 
         expect(res.status).toBe(404);
     });
