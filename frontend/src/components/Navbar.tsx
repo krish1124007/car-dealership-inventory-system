@@ -45,7 +45,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-gray-200">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
+      <div className="max-w-6xl mx-auto px-4 py-3 sm:py-0 sm:h-16 flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-3">
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
           <img
             src="/logo/logo_cars.png"
@@ -57,7 +57,10 @@ export function Navbar() {
           </span>
         </Link>
 
-        <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-auto">
+        <form
+          onSubmit={handleSearch}
+          className="order-3 sm:order-none basis-full sm:basis-auto sm:flex-1 max-w-xl sm:mx-auto"
+        >
           <div className="relative">
             <Search
               size={16}
@@ -77,7 +80,7 @@ export function Navbar() {
           </div>
         </form>
 
-        <nav className="flex items-center gap-2 shrink-0">
+        <nav className="ml-auto sm:ml-0 flex items-center gap-2 shrink-0">
           <NavLink
             to="/cars"
             className={({ isActive }) =>

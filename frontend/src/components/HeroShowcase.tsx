@@ -58,7 +58,7 @@ export function HeroShowcase() {
   return (
     <section
       aria-label="Hero"
-      className="relative w-full overflow-hidden bg-white border-b border-gray-200 h-[calc(100vh-4rem)] min-h-[560px]"
+      className="relative w-full overflow-hidden bg-white border-b border-gray-200 h-[60vh] min-h-[380px] sm:h-[calc(100vh-4rem)] sm:min-h-[560px]"
     >
       <div className="relative h-full flex">
         {/* Landing photo, crossfading between modes. */}
@@ -83,13 +83,13 @@ export function HeroShowcase() {
       </div>
 
       {/* Drive-mode tabs. */}
-      <div className="absolute bottom-8 left-4 sm:left-10 z-10">
-        <div className="inline-flex items-center gap-1 rounded-full bg-gray-100/90 backdrop-blur border border-gray-200 p-1.5 shadow-sm">
+      <div className="absolute bottom-5 sm:bottom-8 left-1/2 -translate-x-1/2 sm:left-10 sm:translate-x-0 z-10">
+        <div className="inline-flex items-center gap-1 rounded-full bg-gray-100/90 backdrop-blur border border-gray-200 p-1 sm:p-1.5 shadow-sm">
           {modes.map((m, index) => (
             <button
               key={m.name}
               onClick={() => setActive(index)}
-              className={`rounded-full px-6 sm:px-8 py-2.5 text-sm font-semibold transition-all duration-300 ${
+              className={`rounded-full px-4 sm:px-8 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold transition-all duration-300 ${
                 index === active
                   ? 'bg-gray-900 text-white shadow-md'
                   : 'text-gray-500 hover:text-gray-900'
