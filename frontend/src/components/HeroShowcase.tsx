@@ -1,30 +1,14 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { ArrowRight, Sparkles } from 'lucide-react'
 
 interface DriveMode {
   name: string
   photo: string
-  tagline: string
 }
 
 const modes: DriveMode[] = [
-  {
-    name: 'Fast',
-    photo: '/landing-photo/p1.png',
-    tagline:
-      'Zero to thrill in seconds — performance machines tuned for pure speed.',
-  },
-  {
-    name: 'Furious',
-    photo: '/landing-photo/p2.png',
-    tagline: 'Aggressive lines and roaring engines — cars with an attitude.',
-  },
-  {
-    name: 'Flawless',
-    photo: '/landing-photo/p3.png',
-    tagline: 'Immaculate luxury and comfort, detailed down to perfection.',
-  },
+  { name: 'Fast', photo: '/landing-photo/p1.png' },
+  { name: 'Furious', photo: '/landing-photo/p2.png' },
+  { name: 'Flawless', photo: '/landing-photo/p3.png' },
 ]
 
 const logoRail1 = [
@@ -87,27 +71,6 @@ export function HeroShowcase() {
       </span>
 
       <div className="relative h-full flex">
-        {/* Copy block. */}
-        <div className="absolute top-8 sm:top-12 left-4 sm:left-10 z-10 max-w-sm">
-          <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
-            <Sparkles size={12} />
-            Premium showroom
-          </p>
-          <h2 className="font-display mt-3 text-3xl sm:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
-            Drive it your way
-          </h2>
-          <p className="mt-3 text-sm text-gray-500 leading-relaxed">
-            {mode.tagline}
-          </p>
-          <Link
-            to="/cars"
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-gray-900 text-white hover:bg-blue-600 text-sm font-semibold px-7 py-3 shadow-lg transition-colors duration-300"
-          >
-            Browse cars
-            <ArrowRight size={15} />
-          </Link>
-        </div>
-
         {/* Landing photo, crossfading between modes. */}
         <div className="flex-1 relative h-full">
           {modes.map((m, index) => (

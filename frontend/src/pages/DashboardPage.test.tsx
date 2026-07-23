@@ -70,16 +70,6 @@ describe('DashboardPage (home)', () => {
     expect(img).toHaveAttribute('src', '/landing-photo/p2.png')
   })
 
-  it('hero call-to-action leads to the cars page', async () => {
-    renderHome()
-
-    await userEvent.click(
-      screen.getAllByRole('link', { name: /browse cars/i })[0]!,
-    )
-
-    expect(await screen.findByText('CARS PAGE')).toBeInTheDocument()
-  })
-
   it('shows the priciest cars in the luxury collection', async () => {
     renderHome()
 
