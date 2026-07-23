@@ -102,6 +102,13 @@ describe('AdminRegisterPage', () => {
     expect(screen.queryByText('ADMIN PANEL')).not.toBeInTheDocument()
   })
 
+  it('shows the demo admin credentials for quick testing', () => {
+    renderPage()
+
+    expect(screen.getByText(/admin@cardealership\.com/i)).toBeInTheDocument()
+    expect(screen.getByText(/Admin@123/)).toBeInTheDocument()
+  })
+
   it('links back to the sign in page', () => {
     renderPage()
 
