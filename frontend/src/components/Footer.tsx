@@ -11,7 +11,9 @@ export function Footer() {
             alt=""
             className="w-8 h-8 rounded-lg object-cover"
           />
-          <span className="font-bold text-gray-900">Car Dealership</span>
+          <span className="font-display font-bold text-gray-900">
+            Car Dealership
+          </span>
         </div>
 
         <nav className="flex items-center gap-5 text-sm text-gray-500">

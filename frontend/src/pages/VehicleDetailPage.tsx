@@ -110,7 +110,7 @@ export function VehicleDetailPage() {
               <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
                 {vehicle.make}
               </p>
-              <h2 className="text-2xl font-bold text-gray-900 mt-1">
+              <h2 className="font-display text-3xl font-bold text-gray-900 mt-1 tracking-tight">
                 {vehicle.make} {vehicle.model}
               </h2>
               <p className="text-3xl font-bold text-gray-900 mt-4">

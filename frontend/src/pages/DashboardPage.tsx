@@ -30,7 +30,7 @@ function CollectionSection({
     <section aria-label={label} className="space-y-4">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h2 className="inline-flex items-center gap-2 text-xl font-bold text-gray-900 tracking-tight">
+          <h2 className="font-display inline-flex items-center gap-2.5 text-2xl font-bold text-gray-900 tracking-tight">
             {icon}
             {title}
           </h2>
@@ -107,17 +107,25 @@ export function DashboardPage() {
               vehicles={affordable}
             />
 
-            <section className="rounded-3xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-center px-6 py-12 shadow-md">
-              <h2 className="text-2xl sm:text-3xl font-bold">
+            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white text-center px-6 py-14 shadow-lg shadow-blue-200/70">
+              <div
+                aria-hidden
+                className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-white/10 blur-2xl"
+              />
+              <div
+                aria-hidden
+                className="absolute -bottom-28 -left-20 w-72 h-72 rounded-full bg-indigo-400/20 blur-2xl"
+              />
+              <h2 className="font-display relative text-3xl sm:text-4xl font-bold tracking-tight">
                 Explore our full collection
               </h2>
-              <p className="mt-3 text-blue-100 max-w-xl mx-auto text-sm sm:text-base">
+              <p className="relative mt-4 text-blue-100 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
                 These are just the highlights — visit our car collections to
                 browse every make, model and price range in the showroom.
               </p>
               <Link
                 to="/cars"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white text-blue-700 hover:bg-blue-50 text-sm font-semibold px-8 py-3 shadow transition"
+                className="relative mt-7 inline-flex items-center gap-2 rounded-full bg-white text-blue-700 hover:bg-blue-50 text-sm font-semibold px-8 py-3 shadow-lg transition"
               >
                 Visit our collections
                 <ArrowRight size={15} />

@@ -21,7 +21,7 @@ export function AppLayout({
           <header className="flex flex-wrap items-end justify-between gap-3">
             <div>
               {title && (
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                <h1 className="font-display text-2xl font-bold text-gray-900 tracking-tight">
                   {title}
                 </h1>
               )}

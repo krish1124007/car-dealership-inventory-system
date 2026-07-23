@@ -52,7 +52,7 @@ export function Navbar() {
             alt=""
             className="w-9 h-9 rounded-xl object-cover"
           />
-          <span className="hidden sm:block font-bold text-gray-900 tracking-tight">
+          <span className="font-display hidden sm:block font-bold text-gray-900 tracking-tight">
             Car Dealership
           </span>
         </Link>
