@@ -181,10 +181,17 @@ describe('DashboardPage (home)', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows a simple footer', () => {
+  it('ends with the site footer', () => {
     renderHome()
 
     const footer = screen.getByRole('contentinfo')
-    expect(within(footer).getByText(/car dealership/i)).toBeInTheDocument()
+    // Brand appears as the wordmark and again in the copyright line.
+    expect(within(footer).getAllByText(/car dealership/i).length).toBeGreaterThan(
+      0,
+    )
+    expect(within(footer).getByText(/^explore$/i)).toBeInTheDocument()
+    expect(
+      within(footer).getByRole('link', { name: /all cars/i }),
+    ).toBeInTheDocument()
   })
 })
