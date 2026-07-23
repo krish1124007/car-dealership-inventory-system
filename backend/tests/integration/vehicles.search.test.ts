@@ -12,9 +12,9 @@ describe(`GET ${ENDPOINT}`, () => {
 
     async function seedInventory() {
         await createVehicle({ make: "Toyota", model: "Corolla", category: "Sedan", price: 20000 });
-        await createVehicle({ make: "Toyota", model: "Fortuner", category: "SUV", price: 45000 });
+        await createVehicle({ make: "Toyota", model: "Fortuner", category: "SUV", fuelType: "DIESEL", price: 45000 });
         await createVehicle({ make: "Honda", model: "City", category: "Sedan", price: 18000 });
-        await createVehicle({ make: "Tesla", model: "Model Y", category: "SUV", price: 60000 });
+        await createVehicle({ make: "Tesla", model: "Model Y", category: "SUV", fuelType: "ELECTRIC", preLaunch: true, price: 60000 });
     }
 
     it("allows searching without a token", async () => {
@@ -80,6 +80,51 @@ describe(`GET ${ENDPOINT}`, () => {
 
         expect(res.status).toBe(200);
         expect(res.body.data).toHaveLength(2);
+    });
+
+    it("filters by fuel type, case-insensitively", async () => {
+        await seedInventory();
+        const { header } = await authHeader(Role.CUSTOMER);
+
+        const res = await request(app)
+            .get(ENDPOINT)
+            .set(header)
+            .query({ fuelType: "electric" });
+
+        expect(res.status).toBe(200);
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.data[0].model).toBe("Model Y");
+    });
+
+    it("rejects an unknown fuel type with 400", async () => {
+        await seedInventory();
+        const { header } = await authHeader(Role.CUSTOMER);
+
+        const res = await request(app)
+            .get(ENDPOINT)
+            .set(header)
+            .query({ fuelType: "steam" });
+
+        expect(res.status).toBe(400);
+    });
+
+    it("filters by pre-launch status", async () => {
+        await seedInventory();
+        const { header } = await authHeader(Role.CUSTOMER);
+
+        const preLaunch = await request(app)
+            .get(ENDPOINT)
+            .set(header)
+            .query({ preLaunch: "true" });
+        const launched = await request(app)
+            .get(ENDPOINT)
+            .set(header)
+            .query({ preLaunch: "false" });
+
+        expect(preLaunch.status).toBe(200);
+        expect(preLaunch.body.data).toHaveLength(1);
+        expect(preLaunch.body.data[0].model).toBe("Model Y");
+        expect(launched.body.data).toHaveLength(3);
     });
 
     it("searches make and model together with q", async () => {

@@ -83,9 +83,45 @@ describe('AdminPage', () => {
       make: 'Tesla',
       model: 'Model 3',
       category: 'EV',
+      fuelType: 'PETROL',
+      preLaunch: false,
       price: 50000,
       quantity: 2,
     })
+    expect(await screen.findByText(/tesla/i)).toBeInTheDocument()
+  })
+
+  it('sends the chosen fuel type and pre-launch flag', async () => {
+    vi.mocked(vehiclesApi.createVehicle).mockResolvedValue({
+      id: 'v9',
+      make: 'Tesla',
+      model: 'Model 3',
+      category: 'EV',
+      fuelType: 'ELECTRIC',
+      preLaunch: true,
+      price: 50000,
+      quantity: 2,
+    })
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    await userEvent.type(screen.getByLabelText(/make/i), 'Tesla')
+    await userEvent.type(screen.getByLabelText(/model/i), 'Model 3')
+    await userEvent.type(screen.getByLabelText(/category/i), 'EV')
+    await userEvent.selectOptions(
+      screen.getByLabelText(/fuel type/i),
+      'ELECTRIC',
+    )
+    await userEvent.click(screen.getByLabelText(/pre-launch listing/i))
+    await userEvent.type(screen.getByLabelText(/price/i), '50000')
+    await userEvent.type(screen.getByLabelText(/^quantity$/i), '2')
+    await userEvent.click(
+      screen.getByRole('button', { name: /add vehicle/i }),
+    )
+
+    expect(vehiclesApi.createVehicle).toHaveBeenCalledWith(
+      expect.objectContaining({ fuelType: 'ELECTRIC', preLaunch: true }),
+    )
     expect(await screen.findByText(/tesla/i)).toBeInTheDocument()
   })
 
@@ -111,7 +147,7 @@ describe('AdminPage', () => {
     await userEvent.type(screen.getByLabelText(/category/i), 'EV')
     await userEvent.type(screen.getByLabelText(/price/i), '50000')
     await userEvent.type(screen.getByLabelText(/^quantity$/i), '2')
-    await userEvent.upload(screen.getByLabelText(/vehicle image/i), file)
+    await userEvent.upload(screen.getByLabelText(/vehicle photos/i), file)
     await userEvent.click(
       screen.getByRole('button', { name: /add vehicle/i }),
     )
@@ -120,6 +156,60 @@ describe('AdminPage', () => {
     expect(vehiclesApi.createVehicle).toHaveBeenCalledWith(
       expect.objectContaining({
         imageUrl: 'http://localhost:3000/uploads/model3.jpg',
+      }),
+    )
+  })
+
+  it('uploads several photos: first is the main image, the rest the gallery', async () => {
+    vi.mocked(uploadsApi.uploadVehicleImage)
+      .mockResolvedValueOnce({
+        url: 'http://localhost:3000/uploads/front.jpg',
+      })
+      .mockResolvedValueOnce({
+        url: 'http://localhost:3000/uploads/interior.jpg',
+      })
+      .mockResolvedValueOnce({
+        url: 'http://localhost:3000/uploads/seats.jpg',
+      })
+    vi.mocked(vehiclesApi.createVehicle).mockResolvedValue({
+      id: 'v9',
+      make: 'Tesla',
+      model: 'Model 3',
+      category: 'EV',
+      price: 50000,
+      quantity: 2,
+      imageUrl: 'http://localhost:3000/uploads/front.jpg',
+      images: [
+        'http://localhost:3000/uploads/interior.jpg',
+        'http://localhost:3000/uploads/seats.jpg',
+      ],
+    })
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    const files = [
+      new File(['a'], 'front.jpg', { type: 'image/jpeg' }),
+      new File(['b'], 'interior.jpg', { type: 'image/jpeg' }),
+      new File(['c'], 'seats.jpg', { type: 'image/jpeg' }),
+    ]
+    await userEvent.type(screen.getByLabelText(/make/i), 'Tesla')
+    await userEvent.type(screen.getByLabelText(/model/i), 'Model 3')
+    await userEvent.type(screen.getByLabelText(/category/i), 'EV')
+    await userEvent.type(screen.getByLabelText(/price/i), '50000')
+    await userEvent.type(screen.getByLabelText(/^quantity$/i), '2')
+    await userEvent.upload(screen.getByLabelText(/vehicle photos/i), files)
+    await userEvent.click(
+      screen.getByRole('button', { name: /add vehicle/i }),
+    )
+
+    expect(uploadsApi.uploadVehicleImage).toHaveBeenCalledTimes(3)
+    expect(vehiclesApi.createVehicle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        imageUrl: 'http://localhost:3000/uploads/front.jpg',
+        images: [
+          'http://localhost:3000/uploads/interior.jpg',
+          'http://localhost:3000/uploads/seats.jpg',
+        ],
       }),
     )
   })

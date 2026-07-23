@@ -117,29 +117,44 @@ export function DashboardPage() {
       <HeroShowcase />
 
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-12">
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white text-center px-6 py-14 shadow-lg shadow-blue-200/70">
-              <div
-                aria-hidden
-                className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-white/10 blur-2xl"
-              />
-              <div
-                aria-hidden
-                className="absolute -bottom-28 -left-20 w-72 h-72 rounded-full bg-indigo-400/20 blur-2xl"
-              />
-              <h2 className="font-display relative text-3xl sm:text-4xl font-bold tracking-tight">
+        {/* Closing invite, in the same language as the hero: ghost
+            lettering behind a car cutout on a light card. */}
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-white to-gray-100 border border-gray-200 shadow-sm">
+          <p
+            aria-hidden
+            className="font-hero absolute inset-x-0 top-4 text-center text-[20vw] sm:text-[11rem] leading-[0.8] uppercase text-gray-900/5 select-none pointer-events-none"
+          >
+            Showroom
+          </p>
+
+          <div className="relative grid lg:grid-cols-2 items-center gap-8 px-6 sm:px-12 py-12 sm:py-14">
+            <div className="text-center lg:text-left">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
+                The full showroom
+              </p>
+              <h2 className="font-display mt-3 text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
                 Explore our full collection
               </h2>
-              <p className="relative mt-4 text-blue-100 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-gray-500 leading-relaxed max-w-md mx-auto lg:mx-0">
                 These are just the highlights — visit our car collections to
                 browse every make, model and price range in the showroom.
               </p>
               <Link
                 to="/cars"
-                className="relative mt-7 inline-flex items-center gap-2 rounded-full bg-white text-blue-700 hover:bg-blue-50 text-sm font-semibold px-8 py-3 shadow-lg transition"
+                className="mt-7 inline-flex items-center gap-2 rounded-full bg-gray-900 text-white hover:bg-blue-600 text-sm font-semibold px-8 py-3 shadow-lg transition-colors duration-300"
               >
                 Visit our collections
                 <ArrowRight size={15} />
               </Link>
+            </div>
+
+            <img
+              src="/landing-photo/p3-show.png"
+              alt=""
+              aria-hidden
+              className="w-full max-w-md lg:max-w-xl mx-auto object-contain drop-shadow-2xl"
+            />
+          </div>
         </section>
       </div>
 

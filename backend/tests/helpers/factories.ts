@@ -1,9 +1,12 @@
 import { Vehicle } from "../../src/models/vehicle.models.js";
+import type { FuelType } from "../../src/models/vehicle.models.js";
 
 type VehicleAttrs = {
     make?: string;
     model?: string;
     category?: string;
+    fuelType?: FuelType;
+    preLaunch?: boolean;
     price?: number;
     quantity?: number;
 };

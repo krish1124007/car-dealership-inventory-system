@@ -13,17 +13,31 @@ import {
   restockVehicle,
 } from '../api/vehicles.api'
 import { uploadVehicleImage } from '../api/uploads.api'
-import type { Vehicle } from '../api/schemas'
+import type { Vehicle, FuelType } from '../api/schemas'
 
 const fieldClasses =
   'w-full rounded-xl bg-white border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition'
 
-const emptyForm = { make: '', model: '', category: '', price: '', quantity: '' }
+const fuelLabels: Record<FuelType, string> = {
+  PETROL: 'Petrol',
+  DIESEL: 'Diesel',
+  ELECTRIC: 'Electric',
+}
+
+const emptyForm = {
+  make: '',
+  model: '',
+  category: '',
+  fuelType: 'PETROL',
+  price: '',
+  quantity: '',
+}
 
 export function AdminPage() {
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
   const [form, setForm] = useState(emptyForm)
-  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [preLaunch, setPreLaunch] = useState(false)
+  const [imageFiles, setImageFiles] = useState<File[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
   const [restockAmounts, setRestockAmounts] = useState<Record<string, string>>(
     {},
@@ -51,32 +65,38 @@ export function AdminPage() {
       make: vehicle.make,
       model: vehicle.model,
       category: vehicle.category,
+      fuelType: vehicle.fuelType ?? 'PETROL',
       price: String(vehicle.price),
       quantity: String(vehicle.quantity),
     })
-    setImageFile(null)
+    setPreLaunch(vehicle.preLaunch ?? false)
+    setImageFiles([])
   }
 
   function cancelEdit() {
     setEditingId(null)
     setForm(emptyForm)
-    setImageFile(null)
+    setPreLaunch(false)
+    setImageFiles([])
   }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     try {
-      let imageUrl: string | undefined
-      if (imageFile) {
-        imageUrl = (await uploadVehicleImage(imageFile)).url
+      // The first photo becomes the main image; the rest fill the gallery.
+      const urls: string[] = []
+      for (const file of imageFiles) {
+        urls.push((await uploadVehicleImage(file)).url)
       }
       const payload = {
         make: form.make.trim(),
         model: form.model.trim(),
         category: form.category.trim(),
+        fuelType: form.fuelType as FuelType,
+        preLaunch,
         price: Number(form.price),
         quantity: Number(form.quantity || 0),
-        ...(imageUrl && { imageUrl }),
+        ...(urls.length > 0 && { imageUrl: urls[0], images: urls.slice(1) }),
       }
       if (editingId) {
         const updated = await updateVehicle(editingId, payload)
@@ -190,6 +210,24 @@ export function AdminPage() {
           </div>
           <div>
             <label
+              htmlFor="admin-fuel-type"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Fuel type
+            </label>
+            <select
+              id="admin-fuel-type"
+              className={fieldClasses}
+              value={form.fuelType}
+              onChange={(e) => setField('fuelType', e.target.value)}
+            >
+              <option value="PETROL">Petrol</option>
+              <option value="DIESEL">Diesel</option>
+              <option value="ELECTRIC">Electric</option>
+            </select>
+          </div>
+          <div>
+            <label
               htmlFor="admin-price"
               className="block text-sm font-medium text-gray-700 mb-1.5"
             >
@@ -228,17 +266,42 @@ export function AdminPage() {
               htmlFor="admin-image"
               className="block text-sm font-medium text-gray-700 mb-1.5"
             >
-              Vehicle image{' '}
-              <span className="text-gray-400 font-normal">(optional)</span>
+              Vehicle photos{' '}
+              <span className="text-gray-400 font-normal">
+                (optional — first is the main photo, the rest become the
+                gallery)
+              </span>
             </label>
             <input
               id="admin-image"
               type="file"
               accept="image/*"
+              multiple
               className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer"
-              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => setImageFiles([...(e.target.files ?? [])])}
             />
+            {imageFiles.length > 1 && (
+              <p className="text-xs text-gray-400 mt-1">
+                {imageFiles.length} photos selected
+              </p>
+            )}
           </div>
+          <label
+            htmlFor="admin-pre-launch"
+            className="flex items-center gap-2.5 text-sm font-medium text-gray-700 cursor-pointer sm:col-span-2 lg:col-span-3"
+          >
+            <input
+              id="admin-pre-launch"
+              type="checkbox"
+              checked={preLaunch}
+              onChange={(e) => setPreLaunch(e.target.checked)}
+              className="accent-blue-600 w-4 h-4"
+            />
+            Pre-launch listing
+            <span className="text-gray-400 font-normal">
+              (shown under the Pre-launch cars collection)
+            </span>
+          </label>
         </div>
 
         <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex justify-end gap-2">
@@ -269,6 +332,7 @@ export function AdminPage() {
               <tr className="text-left text-gray-500 border-b border-gray-100 bg-gray-50/60">
                 <th className="px-5 py-3 font-medium">Vehicle</th>
                 <th className="px-5 py-3 font-medium">Category</th>
+                <th className="px-5 py-3 font-medium">Fuel</th>
                 <th className="px-5 py-3 font-medium">Price</th>
                 <th className="px-5 py-3 font-medium">Stock</th>
                 <th className="px-5 py-3 font-medium">Restock</th>
@@ -301,6 +365,16 @@ export function AdminPage() {
                   </td>
                   <td className="px-5 py-3 text-gray-500">
                     {vehicle.category}
+                  </td>
+                  <td className="px-5 py-3 text-gray-500">
+                    <span className="inline-flex items-center gap-1.5">
+                      {fuelLabels[vehicle.fuelType ?? 'PETROL']}
+                      {vehicle.preLaunch && (
+                        <span className="rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold px-2 py-0.5">
+                          Pre-launch
+                        </span>
+                      )}
+                    </span>
                   </td>
                   <td className="px-5 py-3 font-semibold text-gray-900">
                     {formatPrice(vehicle.price)}

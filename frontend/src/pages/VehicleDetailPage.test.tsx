@@ -122,6 +122,36 @@ describe('VehicleDetailPage', () => {
     expect(vehiclesApi.purchaseVehicle).not.toHaveBeenCalled()
   })
 
+  it('shows gallery thumbnails and swaps the main photo on click', async () => {
+    vi.mocked(vehiclesApi.getVehicle).mockResolvedValue({
+      ...fortuner,
+      images: [
+        'https://example.com/fortuner-interior.jpg',
+        'https://example.com/fortuner-seats.jpg',
+      ],
+    })
+    renderDetail()
+
+    await screen.findByRole('heading', { name: /toyota fortuner/i })
+    expect(screen.getByRole('button', { name: /photo 1/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /photo 3/i })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /photo 2/i }))
+
+    expect(
+      screen.getByRole('img', { name: /toyota fortuner/i }),
+    ).toHaveAttribute('src', 'https://example.com/fortuner-interior.jpg')
+  })
+
+  it('shows no thumbnail strip when there is only one photo', async () => {
+    renderDetail()
+
+    await screen.findByRole('heading', { name: /toyota fortuner/i })
+    expect(
+      screen.queryByRole('button', { name: /photo 1/i }),
+    ).not.toBeInTheDocument()
+  })
+
   it('links back to the home page', async () => {
     renderDetail()
 

@@ -21,6 +21,7 @@ const sampleVehicles = [
         price: 18500000,
         quantity: 2,
         imageUrl: img("photo-1503376780353-7e6692767b70"),
+        images: [img("photo-1583121274602-3e2820c69888"), img("photo-1503736334956-4c8f8e92946d"), img("photo-1511919884226-fd3cad34687c")],
     },
     {
         make: "BMW",
@@ -29,6 +30,7 @@ const sampleVehicles = [
         price: 14800000,
         quantity: 3,
         imageUrl: img("photo-1617531653332-bd46c24f2068"),
+        images: [img("photo-1489824904134-891ab64532f1"), img("photo-1449965408869-eaa3f722e40d"), img("photo-1542282088-fe8426682b8f")],
     },
     {
         make: "Audi",
@@ -37,6 +39,7 @@ const sampleVehicles = [
         price: 6500000,
         quantity: 5,
         imageUrl: img("photo-1502877338535-766e1452684a"),
+        images: [img("photo-1503736334956-4c8f8e92946d"), img("photo-1600661653561-629509216228"), img("photo-1493238792000-8113da705763")],
     },
     {
         make: "Mercedes-Benz",
@@ -45,6 +48,7 @@ const sampleVehicles = [
         price: 6000000,
         quantity: 4,
         imageUrl: img("photo-1549317661-bd32c8ce0db2"),
+        images: [img("photo-1449965408869-eaa3f722e40d"), img("photo-1489824904134-891ab64532f1"), img("photo-1600661653561-629509216228")],
     },
     {
         make: "Jeep",
@@ -53,6 +57,7 @@ const sampleVehicles = [
         price: 6700000,
         quantity: 6,
         imageUrl: img("photo-1568605117036-5fe5e7bab0b7"),
+        images: [img("photo-1493238792000-8113da705763"), img("photo-1503736334956-4c8f8e92946d"), img("photo-1525609004556-c46c7d6cf023")],
     },
     {
         make: "Ford",
@@ -61,6 +66,7 @@ const sampleVehicles = [
         price: 7500000,
         quantity: 0,
         imageUrl: img("photo-1494976388531-d1058494cdd8"),
+        images: [img("photo-1542282088-fe8426682b8f"), img("photo-1583121274602-3e2820c69888"), img("photo-1449965408869-eaa3f722e40d")],
     },
     {
         make: "Tesla",
@@ -69,6 +75,7 @@ const sampleVehicles = [
         price: 4000000,
         quantity: 8,
         imageUrl: img("photo-1533473359331-0135ef1b58bf"),
+        images: [img("photo-1489824904134-891ab64532f1"), img("photo-1600661653561-629509216228"), img("photo-1511919884226-fd3cad34687c")],
     },
     {
         make: "Toyota",
@@ -77,6 +84,7 @@ const sampleVehicles = [
         price: 4200000,
         quantity: 5,
         imageUrl: img("photo-1541899481282-d53bffe3c35d"),
+        images: [img("photo-1503736334956-4c8f8e92946d"), img("photo-1493238792000-8113da705763"), img("photo-1449965408869-eaa3f722e40d")],
     },
     {
         make: "Honda",
@@ -85,6 +93,7 @@ const sampleVehicles = [
         price: 1200000,
         quantity: 7,
         imageUrl: img("photo-1605559424843-9e4c228bf1c2"),
+        images: [img("photo-1489824904134-891ab64532f1"), img("photo-1600661653561-629509216228"), img("photo-1493238792000-8113da705763")],
     },
     {
         make: "Volkswagen",
@@ -93,6 +102,7 @@ const sampleVehicles = [
         price: 3500000,
         quantity: 3,
         imageUrl: img("photo-1552519507-da3b142c6e3d"),
+        images: [img("photo-1503736334956-4c8f8e92946d"), img("photo-1542282088-fe8426682b8f"), img("photo-1525609004556-c46c7d6cf023")],
     },
 ];
 

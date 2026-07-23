@@ -25,6 +25,11 @@ const navLinks = [
     to: '/cars?fuel=petrol',
     match: (search: string) => search.includes('fuel=petrol'),
   },
+  {
+    label: 'Pre-launch cars',
+    to: '/cars?type=pre-launch',
+    match: (search: string) => search.includes('type=pre-launch'),
+  },
 ]
 
 /** Public top navigation: blends into the page at the top and turns

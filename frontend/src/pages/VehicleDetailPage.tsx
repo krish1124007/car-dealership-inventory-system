@@ -25,6 +25,7 @@ export function VehicleDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [purchasing, setPurchasing] = useState(false)
   const [imgFailed, setImgFailed] = useState(false)
+  const [photoIndex, setPhotoIndex] = useState(0)
   const toast = useToast()
 
   useEffect(() => {
@@ -58,6 +59,14 @@ export function VehicleDetailPage() {
 
   const outOfStock = vehicle?.quantity === 0
 
+  // Main photo first, then the gallery (interior, seats, details…).
+  const photos = vehicle
+    ? [vehicle.imageUrl, ...(vehicle.images ?? [])].filter(
+        (src): src is string => Boolean(src),
+      )
+    : []
+  const currentPhoto = photos[photoIndex] ?? photos[0]
+
   return (
     <AppLayout
       title="Vehicle details"
@@ -81,28 +90,59 @@ export function VehicleDetailPage() {
         <Loading label="Loading vehicle…" />
       ) : (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden lg:grid lg:grid-cols-2">
-          <div className="relative h-64 lg:h-full min-h-64 bg-gray-100">
-            {vehicle.imageUrl && !imgFailed ? (
-              <img
-                src={vehicle.imageUrl}
-                alt={`${vehicle.make} ${vehicle.model}`}
-                onError={() => setImgFailed(true)}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-300">
-                <CarFront size={96} strokeWidth={1} />
+          <div className="flex flex-col">
+            <div className="relative flex-1 h-64 lg:h-full min-h-64 bg-gray-100">
+              {currentPhoto && !imgFailed ? (
+                <img
+                  src={currentPhoto}
+                  alt={`${vehicle.make} ${vehicle.model}`}
+                  onError={() => setImgFailed(true)}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                  <CarFront size={96} strokeWidth={1} />
+                </div>
+              )}
+              <span
+                className={`absolute top-4 right-4 text-xs font-semibold rounded-full px-3 py-1 shadow-sm backdrop-blur ${
+                  outOfStock
+                    ? 'bg-red-500/90 text-white'
+                    : 'bg-white/90 text-emerald-700'
+                }`}
+              >
+                {outOfStock ? 'Out of stock' : `${vehicle.quantity} in stock`}
+              </span>
+            </div>
+
+            {/* Gallery strip: click a thumbnail to bring it up top. */}
+            {photos.length > 1 && (
+              <div className="flex gap-2 p-3 bg-white border-t border-gray-100 overflow-x-auto">
+                {photos.map((src, index) => (
+                  <button
+                    key={`${src}-${index}`}
+                    type="button"
+                    aria-label={`Photo ${index + 1}`}
+                    aria-current={index === photoIndex}
+                    onClick={() => {
+                      setPhotoIndex(index)
+                      setImgFailed(false)
+                    }}
+                    className={`w-20 h-14 shrink-0 rounded-lg overflow-hidden border-2 transition ${
+                      index === photoIndex
+                        ? 'border-blue-500 shadow-sm'
+                        : 'border-transparent opacity-70 hover:opacity-100 hover:border-gray-300'
+                    }`}
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
               </div>
             )}
-            <span
-              className={`absolute top-4 right-4 text-xs font-semibold rounded-full px-3 py-1 shadow-sm backdrop-blur ${
-                outOfStock
-                  ? 'bg-red-500/90 text-white'
-                  : 'bg-white/90 text-emerald-700'
-              }`}
-            >
-              {outOfStock ? 'Out of stock' : `${vehicle.quantity} in stock`}
-            </span>
           </div>
 
           <div className="p-6 sm:p-8 flex flex-col gap-6">

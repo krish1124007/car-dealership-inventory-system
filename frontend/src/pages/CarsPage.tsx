@@ -29,6 +29,8 @@ export function CarsPage() {
   const urlCategory = searchParams.get('category') ?? ''
   // Petrol shortcut from the navbar: everything that isn't electric.
   const petrolOnly = searchParams.get('fuel') === 'petrol'
+  // Pre-launch shortcut from the navbar: only upcoming listings.
+  const preLaunchOnly = searchParams.get('type') === 'pre-launch'
 
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
   const [categories, setCategories] = useState<string[]>([])
@@ -109,9 +111,11 @@ export function CarsPage() {
   const visible =
     vehicles === null
       ? null
-      : petrolOnly
-        ? vehicles.filter((v) => v.category !== 'EV')
-        : vehicles
+      : preLaunchOnly
+        ? vehicles.filter((v) => v.preLaunch === true)
+        : petrolOnly
+          ? vehicles.filter((v) => v.category !== 'EV')
+          : vehicles
 
   return (
     <AppLayout>

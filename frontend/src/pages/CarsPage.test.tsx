@@ -161,6 +161,29 @@ describe('CarsPage', () => {
     expect(screen.getByText(/2 vehicles available/i)).toBeInTheDocument()
   })
 
+  it('the pre-launch filter shows only pre-launch cars', async () => {
+    vi.mocked(vehiclesApi.listVehicles).mockResolvedValue([
+      corolla,
+      wrangler,
+      {
+        id: 'v4',
+        make: 'Tata',
+        model: 'Avinya',
+        category: 'EV',
+        fuelType: 'ELECTRIC',
+        preLaunch: true,
+        price: 3000000,
+        quantity: 0,
+      },
+    ])
+    renderCars('/cars?type=pre-launch')
+
+    expect(await screen.findByText(/avinya/i)).toBeInTheDocument()
+    expect(screen.queryByText(/corolla/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/wrangler/i)).not.toBeInTheDocument()
+    expect(screen.getByText(/1 vehicle available/i)).toBeInTheDocument()
+  })
+
   it('runs the navbar-provided query from the url on load', async () => {
     renderCars('/cars?q=Corolla')
 

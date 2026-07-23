@@ -9,14 +9,21 @@ export const userSchema = z.object({
   role: roleSchema,
 })
 
+export const fuelTypeSchema = z.enum(['PETROL', 'DIESEL', 'ELECTRIC'])
+
 export const vehicleSchema = z.object({
   id: z.string(),
   make: z.string(),
   model: z.string(),
   category: z.string(),
+  // Optional so listings created before these fields existed still parse.
+  fuelType: fuelTypeSchema.optional(),
+  preLaunch: z.boolean().optional(),
   price: z.number(),
   quantity: z.number(),
   imageUrl: z.string().optional(),
+  // Extra gallery photos (interior, seats, details) beyond the main one.
+  images: z.array(z.string()).optional(),
 })
 
 export const loginResponseSchema = z.object({
@@ -42,6 +49,7 @@ export const purchaseHistoryEntrySchema = purchaseSchema.extend({
 })
 
 export type Role = z.infer<typeof roleSchema>
+export type FuelType = z.infer<typeof fuelTypeSchema>
 export type User = z.infer<typeof userSchema>
 export type Vehicle = z.infer<typeof vehicleSchema>
 export type LoginResponse = z.infer<typeof loginResponseSchema>

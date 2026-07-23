@@ -114,6 +114,31 @@ describe("Vehicle CRUD", () => {
             );
         });
 
+        it("stores extra gallery images with the vehicle", async () => {
+            const { header } = await authHeader(Role.ADMIN);
+
+            const res = await request(app)
+                .post("/api/vehicles")
+                .set(header)
+                .send({
+                    ...buildVehiclePayload(),
+                    imageUrl: "https://example.com/cars/corolla.jpg",
+                    images: [
+                        "https://example.com/cars/corolla-interior.jpg",
+                        "https://example.com/cars/corolla-seats.jpg",
+                    ],
+                });
+
+            expect(res.status).toBe(201);
+            expect(res.body.data.images).toEqual([
+                "https://example.com/cars/corolla-interior.jpg",
+                "https://example.com/cars/corolla-seats.jpg",
+            ]);
+
+            const stored = await Vehicle.findById(res.body.data.id);
+            expect(stored!.images).toHaveLength(2);
+        });
+
         it.each(["make", "model", "category", "price"])(
             "rejects a body missing %s with 400",
             async (field) => {

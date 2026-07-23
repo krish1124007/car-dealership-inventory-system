@@ -1,15 +1,18 @@
 import { z } from 'zod'
 import { request } from './client'
 import { vehicleSchema, purchaseResultSchema } from './schemas'
-import type { Vehicle, PurchaseResult } from './schemas'
+import type { Vehicle, PurchaseResult, FuelType } from './schemas'
 
 export interface VehiclePayload {
   make: string
   model: string
   category: string
+  fuelType?: FuelType
+  preLaunch?: boolean
   price: number
   quantity: number
   imageUrl?: string
+  images?: string[]
 }
 
 export interface SearchFilters {
@@ -18,6 +21,8 @@ export interface SearchFilters {
   make?: string
   model?: string
   category?: string
+  fuelType?: FuelType
+  preLaunch?: boolean
   minPrice?: number
   maxPrice?: number
 }

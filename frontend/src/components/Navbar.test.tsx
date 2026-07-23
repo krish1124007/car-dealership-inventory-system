@@ -69,6 +69,14 @@ describe('Navbar', () => {
     )
   })
 
+  it('links to the pre-launch collection', () => {
+    renderNavbar()
+
+    expect(
+      screen.getByRole('link', { name: /pre-launch cars/i }),
+    ).toHaveAttribute('href', '/cars?type=pre-launch')
+  })
+
   it('is transparent at the top and turns solid after scrolling', () => {
     renderNavbar()
 

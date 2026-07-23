@@ -1,12 +1,18 @@
 import { Schema, model } from "mongoose";
 
+const FUEL_TYPES = ["PETROL", "DIESEL", "ELECTRIC"] as const;
+type FuelType = (typeof FUEL_TYPES)[number];
+
 interface IVehicle {
     make: string;
     model: string;
     category: string;
+    fuelType: FuelType;
+    preLaunch: boolean;
     price: number;
     quantity: number;
     imageUrl?: string;
+    images: string[];
 }
 
 const vehicleSchema = new Schema<IVehicle>(
@@ -14,6 +20,8 @@ const vehicleSchema = new Schema<IVehicle>(
         make: { type: String, required: true, trim: true },
         model: { type: String, required: true, trim: true },
         category: { type: String, required: true, trim: true },
+        fuelType: { type: String, enum: FUEL_TYPES, default: "PETROL" },
+        preLaunch: { type: Boolean, default: false },
         price: {
             type: Number,
             required: true,
@@ -25,6 +33,9 @@ const vehicleSchema = new Schema<IVehicle>(
             min: [0, "quantity cannot be negative"],
         },
         imageUrl: { type: String, trim: true },
+        // Extra gallery photos (interior, seats, details) beyond the
+        // main imageUrl.
+        images: { type: [String], default: [] },
     },
     {
         timestamps: true,
@@ -43,9 +54,11 @@ const vehicleSchema = new Schema<IVehicle>(
 vehicleSchema.index({ make: 1 });
 vehicleSchema.index({ model: 1 });
 vehicleSchema.index({ category: 1 });
+vehicleSchema.index({ fuelType: 1 });
+vehicleSchema.index({ preLaunch: 1 });
 vehicleSchema.index({ price: 1 });
 
 const Vehicle = model<IVehicle>("Vehicle", vehicleSchema);
 
-export { Vehicle };
-export type { IVehicle };
+export { Vehicle, FUEL_TYPES };
+export type { IVehicle, FuelType };

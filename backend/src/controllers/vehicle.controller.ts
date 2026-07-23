@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
-import { Vehicle } from "../models/vehicle.models.js";
+import { Vehicle, FUEL_TYPES } from "../models/vehicle.models.js";
 import { Purchase } from "../models/purchase.models.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { returnResponse } from "../utils/apiResponse.js";
@@ -10,18 +10,24 @@ const createVehicleSchema = z.object({
     make: z.string().min(1),
     model: z.string().min(1),
     category: z.string().min(1),
+    fuelType: z.enum(FUEL_TYPES).default("PETROL"),
+    preLaunch: z.boolean().default(false),
     price: z.number().positive(),
     quantity: z.number().int().min(0).default(0),
     imageUrl: z.url().optional(),
+    images: z.array(z.url()).optional(),
 });
 
 const updateVehicleSchema = z.object({
     make: z.string().min(1).optional(),
     model: z.string().min(1).optional(),
     category: z.string().min(1).optional(),
+    fuelType: z.enum(FUEL_TYPES).optional(),
+    preLaunch: z.boolean().optional(),
     price: z.number().positive().optional(),
     quantity: z.number().int().min(0).optional(),
     imageUrl: z.url().optional(),
+    images: z.array(z.url()).optional(),
 });
 
 const searchSchema = z.object({
@@ -29,6 +35,15 @@ const searchSchema = z.object({
     make: z.string().optional(),
     model: z.string().optional(),
     category: z.string().optional(),
+    fuelType: z
+        .string()
+        .transform((v) => v.toUpperCase())
+        .pipe(z.enum(FUEL_TYPES))
+        .optional(),
+    preLaunch: z
+        .enum(["true", "false"])
+        .transform((v) => v === "true")
+        .optional(),
     minPrice: z.coerce.number().optional(),
     maxPrice: z.coerce.number().optional(),
 });
@@ -60,7 +75,8 @@ const searchVehicles = asyncHandler(async (req: Request, res: Response) => {
         returnResponse(res, 400, "Invalid search filters", null);
         return;
     }
-    const { q, make, model, category, minPrice, maxPrice } = parsed.data;
+    const { q, make, model, category, fuelType, preLaunch, minPrice, maxPrice } =
+        parsed.data;
 
     const filter: Record<string, unknown> = {};
     // Free-text name search: matches make or model, partial and
@@ -69,6 +85,8 @@ const searchVehicles = asyncHandler(async (req: Request, res: Response) => {
     if (make) filter["make"] = ciExact(make);
     if (model) filter["model"] = ciExact(model);
     if (category) filter["category"] = ciExact(category);
+    if (fuelType) filter["fuelType"] = fuelType;
+    if (preLaunch !== undefined) filter["preLaunch"] = preLaunch;
 
     const priceRange: Record<string, number> = {};
     if (minPrice !== undefined) priceRange["$gte"] = minPrice;
@@ -98,10 +116,11 @@ const createVehicle = asyncHandler(async (req: Request, res: Response) => {
         return;
     }
 
-    const { imageUrl, ...rest } = parsed.data;
+    const { imageUrl, images, ...rest } = parsed.data;
     const vehicle = await Vehicle.create({
         ...rest,
         ...(imageUrl !== undefined && { imageUrl }),
+        ...(images !== undefined && { images }),
     });
     returnResponse(res, 201, "Vehicle added", vehicle.toJSON());
 });
