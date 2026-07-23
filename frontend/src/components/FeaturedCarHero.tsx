@@ -40,38 +40,53 @@ export function FeaturedCarHero() {
       aria-label="Featured cars"
       className="relative w-full overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100 border-b border-gray-200 h-[70vh] min-h-[460px] sm:h-[calc(100vh-4rem)] sm:min-h-[560px]"
     >
+      {/* Name layer: the old name lifts up and away while the new one
+          rises in from below. */}
+      {cars.map((car, index) => {
+        const position =
+          index === active ? 'active' : index === prevIndex ? 'prev' : 'next'
+        return (
+          <div
+            key={`${car.model}-name`}
+            className={`absolute inset-x-0 top-[10%] sm:top-[8%] text-center select-none pointer-events-none transition-all duration-700 ease-in-out ${
+              position === 'active'
+                ? 'translate-y-0 opacity-100'
+                : position === 'prev'
+                  ? '-translate-y-16 opacity-0'
+                  : 'translate-y-16 opacity-0'
+            }`}
+          >
+            <p className="text-lg sm:text-3xl font-bold uppercase tracking-[0.4em] text-gray-800">
+              {car.brand}
+            </p>
+            <p className="font-display text-[21vw] sm:text-[16vw] leading-[0.9] font-extrabold uppercase text-gray-900/10 -mt-1">
+              {car.model}
+            </p>
+          </div>
+        )
+      })}
+
+      {/* Car layer: only the photo drives across — out to the left,
+          in from the right. */}
       {cars.map((car, index) => {
         const position =
           index === active ? 'active' : index === prevIndex ? 'prev' : 'next'
         return (
           <div
             key={car.model}
-            className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+            className={`absolute inset-0 flex items-center justify-center pt-[14vh] sm:pt-[16vh] pb-24 transition-transform duration-700 ease-in-out ${
               position === 'active'
-                ? 'translate-x-0 opacity-100'
+                ? 'translate-x-0'
                 : position === 'prev'
-                  ? '-translate-x-full opacity-0'
-                  : 'translate-x-full opacity-0'
+                  ? '-translate-x-[120%]'
+                  : 'translate-x-[120%]'
             }`}
           >
-            {/* Car name rendered huge behind the photo. */}
-            <div className="absolute inset-x-0 top-[10%] sm:top-[8%] text-center select-none pointer-events-none">
-              <p className="text-lg sm:text-3xl font-bold uppercase tracking-[0.4em] text-gray-800">
-                {car.brand}
-              </p>
-              <p className="font-display text-[21vw] sm:text-[16vw] leading-[0.9] font-extrabold uppercase text-gray-900/10 -mt-1">
-                {car.model}
-              </p>
-            </div>
-
-            {/* The car itself. */}
-            <div className="absolute inset-0 flex items-center justify-center pt-[14vh] sm:pt-[16vh] pb-24">
-              <img
-                src={car.photo}
-                alt={`${car.brand} ${car.model}`}
-                className="w-[min(88%,52rem)] max-h-[52%] object-contain drop-shadow-2xl"
-              />
-            </div>
+            <img
+              src={car.photo}
+              alt={`${car.brand} ${car.model}`}
+              className="w-[min(88%,52rem)] max-h-[52%] object-contain drop-shadow-2xl"
+            />
           </div>
         )
       })}
