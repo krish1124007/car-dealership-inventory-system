@@ -85,7 +85,7 @@ export function FeaturedCarHero() {
             <img
               src={car.photo}
               alt={`${car.brand} ${car.model}`}
-              className="w-[min(88%,52rem)] max-h-[52%] object-contain drop-shadow-2xl"
+              className="w-[min(96%,66rem)] max-h-[64%] object-contain drop-shadow-2xl"
             />
           </div>
         )
