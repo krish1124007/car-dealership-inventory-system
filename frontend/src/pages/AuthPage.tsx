@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Car } from 'lucide-react'
+import { Car, Zap } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
+import { DEMO_ADMIN, demoLoginEnabled } from '../auth/demoCredentials'
 
 const inputClasses =
   'w-full rounded-lg bg-gray-100 border border-transparent px-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition'
@@ -32,18 +33,29 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
+  async function signIn(withEmail: string, withPassword: string) {
     setError(null)
     setSubmitting(true)
     try {
-      await login(email, password)
+      await login(withEmail, withPassword)
       navigate('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+    await signIn(email, password)
+  }
+
+  /** One click straight into the admin panel — no typing for reviewers. */
+  async function handleDemoAdmin() {
+    setEmail(DEMO_ADMIN.email)
+    setPassword(DEMO_ADMIN.password)
+    await signIn(DEMO_ADMIN.email, DEMO_ADMIN.password)
   }
 
   return (
@@ -88,6 +100,30 @@ function LoginForm() {
       <button type="submit" disabled={submitting} className={solidPill}>
         {submitting ? 'Signing in…' : 'Sign in'}
       </button>
+
+      {demoLoginEnabled && (
+        <div className="pt-1 space-y-2">
+          <div className="flex items-center gap-3">
+            <span className="h-px flex-1 bg-gray-200" />
+            <span className="text-[10px] uppercase tracking-widest text-gray-400">
+              or
+            </span>
+            <span className="h-px flex-1 bg-gray-200" />
+          </div>
+          <button
+            type="button"
+            onClick={handleDemoAdmin}
+            disabled={submitting}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-emerald-300 bg-emerald-50/70 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold px-6 py-2.5 transition"
+          >
+            <Zap size={15} />
+            Log in as demo admin
+          </button>
+          <p className="text-[11px] text-gray-400">
+            Opens the admin panel instantly — no credentials to type.
+          </p>
+        </div>
+      )}
     </form>
   )
 }

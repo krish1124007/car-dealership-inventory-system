@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ShieldCheck } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
+import { DEMO_ADMIN } from '../auth/demoCredentials'
 import { registerAdmin } from '../api/admin.api'
 
 const inputClasses =
@@ -144,13 +145,24 @@ export function AdminRegisterPage() {
             Test admin — auto-created on server start
           </p>
           <p className="mt-2 text-sm text-gray-700">
-            Email: <span className="font-mono font-semibold">admin@cardealership.com</span>
+            Email:{' '}
+            <span className="font-mono font-semibold">{DEMO_ADMIN.email}</span>
           </p>
           <p className="text-sm text-gray-700">
-            Password: <span className="font-mono font-semibold">Admin@123</span>
+            Password:{' '}
+            <span className="font-mono font-semibold">
+              {DEMO_ADMIN.password}
+            </span>
           </p>
           <p className="mt-2 text-xs text-gray-500">
-            Use these on the sign-in page to explore the admin panel.
+            Or skip the typing — the sign-in page has a{' '}
+            <Link
+              to="/login"
+              className="text-emerald-700 font-medium underline underline-offset-2"
+            >
+              Log in as demo admin
+            </Link>{' '}
+            button.
           </p>
         </div>
 

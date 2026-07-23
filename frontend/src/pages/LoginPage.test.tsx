@@ -79,6 +79,45 @@ describe('LoginPage', () => {
     expect(screen.queryByText('DASHBOARD')).not.toBeInTheDocument()
   })
 
+  it('logs straight in as the demo admin with one click, no typing', async () => {
+    const admin: User = {
+      id: 'a1',
+      name: 'Test Admin',
+      email: 'admin@cardealership.com',
+      role: 'ADMIN',
+    }
+    vi.mocked(authApi.loginUser).mockResolvedValue({
+      accessToken: 'jwt',
+      user: admin,
+    })
+    renderLogin()
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /log in as demo admin/i }),
+    )
+
+    expect(authApi.loginUser).toHaveBeenCalledWith({
+      email: 'admin@cardealership.com',
+      password: 'Admin@123',
+    })
+    expect(await screen.findByText('DASHBOARD')).toBeInTheDocument()
+  })
+
+  it('fills the visible fields so the demo credentials are not a mystery', async () => {
+    vi.mocked(authApi.loginUser).mockRejectedValue(
+      new ApiError(401, 'Invalid email or password'),
+    )
+    renderLogin()
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /log in as demo admin/i }),
+    )
+
+    expect(screen.getByLabelText(/email/i)).toHaveValue(
+      'admin@cardealership.com',
+    )
+  })
+
   it('links to the register page', () => {
     renderLogin()
 
