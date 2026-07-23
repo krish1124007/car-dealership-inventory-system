@@ -70,6 +70,25 @@ describe('DashboardPage (home)', () => {
     expect(img).toHaveAttribute('src', '/landing-photo/p2.png')
   })
 
+  it('spotlights one car with its feature callouts after the hero', () => {
+    renderHome()
+
+    const spotlight = screen.getByRole('region', { name: /car spotlight/i })
+    expect(
+      within(spotlight).getByRole('img', { name: /hyundai creta/i }),
+    ).toHaveAttribute('src', '/cars/creata.png')
+    expect(
+      within(spotlight).getByText(/led projector headlamps/i),
+    ).toBeInTheDocument()
+    expect(
+      within(spotlight).getByText(/cascading chrome grille/i),
+    ).toBeInTheDocument()
+    expect(within(spotlight).getByText(/roof rails/i)).toBeInTheDocument()
+    expect(
+      within(spotlight).getByText(/diamond-cut alloys/i),
+    ).toBeInTheDocument()
+  })
+
   it('shows the priciest cars in the luxury collection', async () => {
     renderHome()
 
