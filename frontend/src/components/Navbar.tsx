@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import type { FormEvent } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Search,
-  X,
+  CarFront,
   ChevronDown,
   ShoppingBag,
   Warehouse,
@@ -12,15 +10,29 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 
-/** Public top navigation: brand, name search, Cars link and the
- * login/account area. */
+const navLinks = [
+  { label: 'Cars', to: '/cars', match: (search: string) => search === '' },
+  {
+    label: 'Electric cars',
+    to: '/cars?category=EV',
+    match: (search: string) => search.includes('category=EV'),
+  },
+  {
+    label: 'Petrol cars',
+    to: '/cars?fuel=petrol',
+    match: (search: string) => search.includes('fuel=petrol'),
+  },
+]
+
+/** Public top navigation: blends into the page at the top and turns
+ * solid white once the user scrolls. */
 export function Navbar() {
   const { user, isAdmin, logout } = useAuth()
   const navigate = useNavigate()
-  const [query, setQuery] = useState('')
+  const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)
-  const searchRef = useRef<HTMLInputElement | null>(null)
 
   // Close the account dropdown when clicking anywhere else.
   useEffect(() => {
@@ -33,28 +45,15 @@ export function Navbar() {
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
 
-  // Press "/" anywhere to jump into the search box.
+  // Transparent over the hero at the top, solid once scrolling starts.
   useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      const target = event.target as HTMLElement
-      const typing =
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
-      if (event.key === '/' && !typing) {
-        event.preventDefault()
-        searchRef.current?.focus()
-      }
+    function onScroll() {
+      setScrolled(window.scrollY > 16)
     }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
-  function handleSearch(event: FormEvent) {
-    event.preventDefault()
-    const q = query.trim()
-    navigate(q ? `/cars?q=${encodeURIComponent(q)}` : '/cars')
-  }
 
   function handleLogout() {
     setMenuOpen(false)
@@ -70,83 +69,51 @@ export function Navbar() {
     .toUpperCase()
 
   return (
-    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200/80 shadow-sm shadow-gray-100/80">
-      <div className="max-w-6xl mx-auto px-4 py-3 sm:py-0 sm:h-16 flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-3">
+    <header
+      className={`sticky top-0 z-30 transition-all duration-300 ${
+        scrolled
+          ? 'bg-white/90 backdrop-blur-md border-b border-gray-200/80 shadow-sm shadow-gray-100/80'
+          : 'bg-transparent border-b border-transparent'
+      }`}
+    >
+      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-          <img
-            src="/logo/logo_cars.png"
-            alt=""
-            className="w-9 h-9 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform"
-          />
+          <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-600 text-white flex items-center justify-center shadow-md group-hover:scale-105 group-hover:from-blue-600 group-hover:to-blue-500 transition-all duration-300">
+            <CarFront size={18} />
+          </span>
           <span className="font-hero hidden sm:block text-2xl text-gray-900 tracking-wide leading-none pt-0.5">
             Car Dealership
           </span>
         </Link>
 
-        <form
-          onSubmit={handleSearch}
-          className="order-3 sm:order-none basis-full sm:basis-auto sm:flex-1 max-w-xl sm:mx-auto"
-        >
-          <div className="relative group/search">
-            <Search
-              size={16}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/search:text-blue-500 transition-colors pointer-events-none"
-            />
-            <label htmlFor="navbar-search" className="sr-only">
-              Search
-            </label>
-            <input
-              id="navbar-search"
-              ref={searchRef}
-              type="search"
-              placeholder="Search cars by name…"
-              className="w-full h-11 rounded-full bg-gray-100/80 border border-transparent pl-11 pr-12 text-sm text-gray-900 placeholder-gray-400 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/70 focus:border-transparent focus:bg-white focus:shadow-md focus:shadow-blue-100/60 transition-all [&::-webkit-search-cancel-button]:hidden"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            {query ? (
-              <button
-                type="button"
-                aria-label="Clear search"
-                onClick={() => {
-                  setQuery('')
-                  searchRef.current?.focus()
-                }}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition"
+        <nav className="mx-auto flex items-center gap-1">
+          {navLinks.map((link) => {
+            const active =
+              location.pathname === '/cars' && link.match(location.search)
+            return (
+              <Link
+                key={link.label}
+                to={link.to}
+                className={`px-3 sm:px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+                  active
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-900/5'
+                } ${link.label === 'Cars' ? '' : 'hidden sm:inline-flex'}`}
               >
-                <X size={14} />
-              </button>
-            ) : (
-              <kbd className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 items-center justify-center w-6 h-6 rounded-md border border-gray-200 bg-white text-[11px] font-semibold text-gray-400 pointer-events-none">
-                /
-              </kbd>
-            )}
-          </div>
-        </form>
+                {link.label}
+              </Link>
+            )
+          })}
+        </nav>
 
-        <nav className="ml-auto sm:ml-0 flex items-center gap-2 shrink-0">
-          <NavLink
-            to="/cars"
-            className={({ isActive }) =>
-              `px-4 py-2 rounded-full text-sm font-semibold transition ${
-                isActive
-                  ? 'bg-gray-900 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              }`
-            }
-          >
-            Cars
-          </NavLink>
-
+        <div className="ml-auto shrink-0">
           {user ? (
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen((open) => !open)}
                 aria-label="Account"
                 className={`flex items-center gap-1.5 rounded-full p-1 pr-2 transition ${
-                  menuOpen
-                    ? 'bg-gray-100'
-                    : 'hover:bg-gray-100'
+                  menuOpen ? 'bg-gray-900/5' : 'hover:bg-gray-900/5'
                 }`}
               >
                 <span className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-bold flex items-center justify-center shadow-sm">
@@ -210,7 +177,7 @@ export function Navbar() {
               Login
             </Link>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   )

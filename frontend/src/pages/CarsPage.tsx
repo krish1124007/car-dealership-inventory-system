@@ -26,6 +26,9 @@ function SectionTitle({ children }: { children: string }) {
 export function CarsPage() {
   const [searchParams] = useSearchParams()
   const urlQuery = searchParams.get('q') ?? ''
+  const urlCategory = searchParams.get('category') ?? ''
+  // Petrol shortcut from the navbar: everything that isn't electric.
+  const petrolOnly = searchParams.get('fuel') === 'petrol'
 
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
   const [categories, setCategories] = useState<string[]>([])
@@ -68,6 +71,11 @@ export function CarsPage() {
     setQuery(urlQuery)
   }, [urlQuery])
 
+  // Category links in the navbar land here with ?category=.
+  useEffect(() => {
+    setCategory(urlCategory)
+  }, [urlCategory])
+
   // Auto-apply: any filter change re-runs the search after a short debounce
   // (no Apply button needed).
   useEffect(() => {
@@ -97,6 +105,13 @@ export function CarsPage() {
     setCategory('')
     setPriceLimit(priceCap)
   }
+
+  const visible =
+    vehicles === null
+      ? null
+      : petrolOnly
+        ? vehicles.filter((v) => v.category !== 'EV')
+        : vehicles
 
   return (
     <AppLayout>
@@ -201,16 +216,16 @@ export function CarsPage() {
         </form>
 
         <div className="flex-1 w-full space-y-4">
-          {vehicles !== null && (
+          {visible !== null && (
             <p className="text-sm font-semibold text-gray-900">
-              {vehicles.length} vehicle{vehicles.length === 1 ? '' : 's'}{' '}
+              {visible.length} vehicle{visible.length === 1 ? '' : 's'}{' '}
               available
             </p>
           )}
 
-          {vehicles === null ? (
+          {visible === null ? (
             <Loading label="Loading vehicles…" />
-          ) : vehicles.length === 0 ? (
+          ) : visible.length === 0 ? (
             <div className="flex flex-col items-center gap-3 text-gray-400 py-20">
               <SearchX size={32} />
               <p className="text-sm">
@@ -219,7 +234,7 @@ export function CarsPage() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {vehicles.map((vehicle) => (
+              {visible.map((vehicle) => (
                 <VehicleCard key={vehicle.id} vehicle={vehicle} />
               ))}
             </div>
