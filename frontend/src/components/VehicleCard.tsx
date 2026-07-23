@@ -4,7 +4,7 @@ import { CarFront, Eye } from 'lucide-react'
 import type { Vehicle } from '../api/schemas'
 
 export function formatPrice(price: number): string {
-  return `$${price.toLocaleString('en-US')}`
+  return `₹${price.toLocaleString('en-IN')}`
 }
 
 /** Listing card: photo with stock/category badges and a View car link
