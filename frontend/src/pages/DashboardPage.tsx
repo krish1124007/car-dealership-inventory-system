@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
-import { AppLayout } from '../components/AppLayout'
+import { Link } from 'react-router-dom'
+import { ArrowRight, Crown, Wallet } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { Navbar } from '../components/Navbar'
+import { Footer } from '../components/Footer'
 import { BannerCarousel } from '../components/BannerCarousel'
 import { Loading } from '../components/Loading'
 import { VehicleCard } from '../components/VehicleCard'
@@ -7,7 +11,54 @@ import { useToast } from '../components/Toast'
 import { listVehicles } from '../api/vehicles.api'
 import type { Vehicle } from '../api/schemas'
 
-/** Public landing page: promotional banners above the full inventory. */
+const COLLECTION_SIZE = 3
+
+function CollectionSection({
+  label,
+  title,
+  subtitle,
+  icon,
+  vehicles,
+}: {
+  label: string
+  title: string
+  subtitle: string
+  icon: ReactNode
+  vehicles: Vehicle[]
+}) {
+  return (
+    <section aria-label={label} className="space-y-4">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <h2 className="inline-flex items-center gap-2 text-xl font-bold text-gray-900 tracking-tight">
+            {icon}
+            {title}
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {vehicles.map((vehicle) => (
+          <VehicleCard key={vehicle.id} vehicle={vehicle} />
+        ))}
+      </div>
+
+      <div className="flex justify-center pt-1">
+        <Link
+          to="/cars"
+          className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:text-blue-600 text-sm font-semibold px-8 py-2.5 shadow-sm transition"
+        >
+          View more
+          <ArrowRight size={15} />
+        </Link>
+      </div>
+    </section>
+  )
+}
+
+/** Public landing page: banners, curated collections, a closing invite
+ * and a simple footer. */
 export function DashboardPage() {
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
   const toast = useToast()
@@ -23,36 +74,60 @@ export function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const luxury = vehicles
+    ? [...vehicles].sort((a, b) => b.price - a.price).slice(0, COLLECTION_SIZE)
+    : []
+  const affordable = vehicles
+    ? [...vehicles].sort((a, b) => a.price - b.price).slice(0, COLLECTION_SIZE)
+    : []
+
   return (
-    <AppLayout>
-      <BannerCarousel />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar />
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-12">
+        <BannerCarousel />
 
-      <div className="flex items-end justify-between gap-3 pt-2">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-            Our cars
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Browse the full inventory and drive one home today.
-          </p>
-        </div>
-        {vehicles !== null && (
-          <p className="text-sm font-semibold text-gray-900">
-            {vehicles.length} vehicle{vehicles.length === 1 ? '' : 's'}{' '}
-            available
-          </p>
+        {vehicles === null ? (
+          <Loading label="Loading collections…" />
+        ) : (
+          <>
+            <CollectionSection
+              label="Luxury cars collection"
+              title="Our luxury cars collection"
+              subtitle="Flagship machines for those who settle for nothing less."
+              icon={<Crown size={20} className="text-amber-500" />}
+              vehicles={luxury}
+            />
+
+            <CollectionSection
+              label="Affordable cars collection"
+              title="Most affordable cars collection"
+              subtitle="Great first cars and daily drivers that go easy on the wallet."
+              icon={<Wallet size={20} className="text-emerald-600" />}
+              vehicles={affordable}
+            />
+
+            <section className="rounded-3xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-center px-6 py-12 shadow-md">
+              <h2 className="text-2xl sm:text-3xl font-bold">
+                Explore our full collection
+              </h2>
+              <p className="mt-3 text-blue-100 max-w-xl mx-auto text-sm sm:text-base">
+                These are just the highlights — visit our car collections to
+                browse every make, model and price range in the showroom.
+              </p>
+              <Link
+                to="/cars"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white text-blue-700 hover:bg-blue-50 text-sm font-semibold px-8 py-3 shadow transition"
+              >
+                Visit our collections
+                <ArrowRight size={15} />
+              </Link>
+            </section>
+          </>
         )}
-      </div>
+      </main>
 
-      {vehicles === null ? (
-        <Loading label="Loading vehicles…" />
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {vehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.id} vehicle={vehicle} />
-          ))}
-        </div>
-      )}
-    </AppLayout>
+      <Footer />
+    </div>
   )
 }
