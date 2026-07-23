@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '../auth/AuthContext'
@@ -84,17 +84,35 @@ describe('CarsPage', () => {
     )
   })
 
-  it('filters by price range from the sidebar', async () => {
+  it('filters with a price range slider running from zero to the max price', async () => {
     renderCars()
 
     await screen.findByText(/wrangler/i)
-    await userEvent.type(screen.getByLabelText(/min price/i), '10000')
-    await userEvent.type(screen.getByLabelText(/max price/i), '30000')
+    const slider = screen.getByRole('slider', { name: /price range/i })
+    expect(slider).toHaveAttribute('min', '0')
+    expect(slider).toHaveAttribute('max', '42000')
+
+    fireEvent.change(slider, { target: { value: '30000' } })
+    expect(screen.getByText(/up to ₹30,000/i)).toBeInTheDocument()
+
     await userEvent.click(screen.getByRole('button', { name: /apply/i }))
 
     expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
-      expect.objectContaining({ minPrice: 10000, maxPrice: 30000 }),
+      expect.objectContaining({ maxPrice: 30000 }),
     )
+  })
+
+  it('does not send a price filter when the slider stays at the max', async () => {
+    renderCars()
+
+    await screen.findByText(/wrangler/i)
+    await userEvent.type(
+      screen.getByRole('searchbox', { name: /search by name/i }),
+      'Toyota',
+    )
+    await userEvent.click(screen.getByRole('button', { name: /apply/i }))
+
+    expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith({ q: 'Toyota' })
   })
 
   it('runs the navbar-provided query from the url on load', async () => {
