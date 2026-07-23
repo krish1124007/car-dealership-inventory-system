@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from '../auth/AuthContext'
@@ -48,13 +48,37 @@ describe('Navbar', () => {
     )
   })
 
-  it('search submits to the cars page with the query', async () => {
+  it('has no search bar', () => {
     renderNavbar()
 
-    await userEvent.type(screen.getByRole('searchbox'), 'Corolla{enter}')
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
+  })
 
-    expect(await screen.findByText(/cars page/i)).toBeInTheDocument()
-    expect(screen.getByText(/q=Corolla/)).toBeInTheDocument()
+  it('links to the electric and petrol collections', () => {
+    renderNavbar()
+
+    expect(
+      screen.getByRole('link', { name: /electric cars/i }),
+    ).toHaveAttribute('href', '/cars?category=EV')
+    expect(screen.getByRole('link', { name: /petrol cars/i })).toHaveAttribute(
+      'href',
+      '/cars?fuel=petrol',
+    )
+  })
+
+  it('is transparent at the top and turns solid after scrolling', () => {
+    renderNavbar()
+
+    const header = screen.getByRole('banner')
+    expect(header.className).toContain('bg-transparent')
+
+    Object.defineProperty(window, 'scrollY', { value: 120, writable: true })
+    fireEvent.scroll(window)
+
+    expect(header.className).toContain('bg-white')
+
+    Object.defineProperty(window, 'scrollY', { value: 0, writable: true })
+    fireEvent.scroll(window)
   })
 
   it('shows a Login link when logged out', () => {

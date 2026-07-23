@@ -130,6 +130,37 @@ describe('CarsPage', () => {
     )
   })
 
+  it('applies a category from the url on load', async () => {
+    renderCars('/cars?category=SUV')
+
+    await waitFor(() =>
+      expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
+        expect.objectContaining({ category: 'SUV' }),
+      ),
+    )
+  })
+
+  it('the petrol filter hides electric cars', async () => {
+    vi.mocked(vehiclesApi.listVehicles).mockResolvedValue([
+      corolla,
+      wrangler,
+      {
+        id: 'v3',
+        make: 'Tesla',
+        model: 'Model 3',
+        category: 'EV',
+        price: 4000000,
+        quantity: 2,
+      },
+    ])
+    renderCars('/cars?fuel=petrol')
+
+    expect(await screen.findByText(/corolla/i)).toBeInTheDocument()
+    expect(screen.getByText(/wrangler/i)).toBeInTheDocument()
+    expect(screen.queryByText(/tesla/i)).not.toBeInTheDocument()
+    expect(screen.getByText(/2 vehicles available/i)).toBeInTheDocument()
+  })
+
   it('runs the navbar-provided query from the url on load', async () => {
     renderCars('/cars?q=Corolla')
 
