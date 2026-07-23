@@ -54,22 +54,12 @@ function LogoRail({ logos, reverse }: { logos: string[]; reverse?: boolean }) {
  */
 export function HeroShowcase() {
   const [active, setActive] = useState(0)
-  const mode = modes[active]!
 
   return (
     <section
       aria-label="Hero"
       className="relative w-full overflow-hidden bg-white border-b border-gray-200 h-[calc(100vh-4rem)] min-h-[560px]"
     >
-      {/* Ghost watermark behind everything. */}
-      <span
-        aria-hidden
-        className="absolute left-2 sm:left-8 bottom-24 font-display font-extrabold uppercase leading-none select-none pointer-events-none text-[19vw] text-transparent"
-        style={{ WebkitTextStroke: '2px rgba(17, 24, 39, 0.07)' }}
-      >
-        {mode.name}
-      </span>
-
       <div className="relative h-full flex">
         {/* Landing photo, crossfading between modes. */}
         <div className="flex-1 relative h-full">
