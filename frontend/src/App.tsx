@@ -9,6 +9,7 @@ import { AdminRegisterPage } from './pages/AdminRegisterPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { CarsPage } from './pages/CarsPage'
 import { VehicleDetailPage } from './pages/VehicleDetailPage'
+import { ContactPage } from './pages/ContactPage'
 import { MyPurchasesPage } from './pages/MyPurchasesPage'
 import { AdminPage } from './pages/AdminPage'
 
@@ -27,6 +28,7 @@ function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/cars" element={<CarsPage />} />
             <Route path="/vehicles/:id" element={<VehicleDetailPage />} />
+            <Route path="/contact" element={<ContactPage />} />
 
             {/* Personal and management areas stay protected. */}
             <Route

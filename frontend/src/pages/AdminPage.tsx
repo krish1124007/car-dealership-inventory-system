@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { CarFront, Pencil, Trash2, PackagePlus } from 'lucide-react'
 import { AppLayout } from '../components/AppLayout'
+import { AdminUsersPanel } from '../components/AdminUsersPanel'
+import { AdminMessagesPanel } from '../components/AdminMessagesPanel'
 import { Loading } from '../components/Loading'
 import { useToast } from '../components/Toast'
 import { formatPrice } from '../components/VehicleCard'
@@ -431,6 +433,9 @@ export function AdminPage() {
           </table>
         </div>
       )}
+
+      <AdminUsersPanel />
+      <AdminMessagesPanel />
     </AppLayout>
   )
 }

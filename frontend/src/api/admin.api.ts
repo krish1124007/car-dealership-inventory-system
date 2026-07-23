@@ -1,6 +1,6 @@
 import { request } from './client'
-import { userSchema } from './schemas'
-import type { User } from './schemas'
+import { userSchema, adminUserListSchema } from './schemas'
+import type { User, AdminUserList } from './schemas'
 import type { RegisterPayload } from './auth.api'
 
 /**
@@ -16,4 +16,9 @@ export function registerAdmin(
     body: payload,
     headers: { 'x-admin-secret': adminSecret },
   })
+}
+
+/** GET /api/admin/users (admin) — everyone registered, with sign-in history. */
+export function listUsers(): Promise<AdminUserList> {
+  return request('/admin/users', adminUserListSchema)
 }

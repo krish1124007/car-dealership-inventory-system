@@ -13,6 +13,8 @@ interface IUser {
     email: string;
     passwordHash: string;
     role: Role;
+    /** Stamped on every successful login; absent until the first one. */
+    lastLoginAt?: Date;
 }
 
 const userSchema = new Schema<IUser>(
@@ -31,6 +33,7 @@ const userSchema = new Schema<IUser>(
             enum: Object.values(Role),
             default: Role.CUSTOMER,
         },
+        lastLoginAt: { type: Date },
     },
     {
         timestamps: true,

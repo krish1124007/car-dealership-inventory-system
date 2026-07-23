@@ -26,6 +26,10 @@ async function login(email: string, password: string): Promise<LoginResult> {
         throw new Error("Password is not correct");
     }
 
+    // Only a successful credential check counts as a login.
+    user.lastLoginAt = new Date();
+    await user.save();
+
     const accessToken = jwt.sign(
         { sub: user.id, email: user.email, role: user.role },
         process.env.JWT_SECRET as string,

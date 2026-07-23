@@ -23,6 +23,9 @@ export function Footer() {
           <Link to="/cars" className="hover:text-blue-600 transition">
             Cars
           </Link>
+          <Link to="/contact" className="hover:text-blue-600 transition">
+            Contact
+          </Link>
           <Link to="/login" className="hover:text-blue-600 transition">
             Login
           </Link>
