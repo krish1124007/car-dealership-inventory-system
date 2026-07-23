@@ -4,7 +4,7 @@ import { ArrowRight, Crown, Wallet } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
-import { BannerCarousel } from '../components/BannerCarousel'
+import { HeroShowcase } from '../components/HeroShowcase'
 import { Loading } from '../components/Loading'
 import { VehicleCard } from '../components/VehicleCard'
 import { useToast } from '../components/Toast'
@@ -84,7 +84,7 @@ export function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <BannerCarousel />
+      <HeroShowcase />
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-12 space-y-12">
         {vehicles === null ? (
           <Loading label="Loading collections…" />
