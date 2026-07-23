@@ -76,7 +76,7 @@ function FeatureCard({
           align === 'right' ? 'lg:flex-row-reverse' : ''
         }`}
       >
-        <span className="shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">
+        <span className="shrink-0 w-7 h-7 rounded-full bg-blue-600 text-onaccent text-xs font-bold flex items-center justify-center">
           {feature.number}
         </span>
         <h3 className="font-semibold text-gray-900 text-sm">
@@ -141,7 +141,7 @@ export function CarSpotlight() {
                 style={{ left: feature.x, top: feature.y }}
               >
                 <span className="absolute w-6 h-6 rounded-full bg-blue-500/40 animate-ping" />
-                <span className="relative w-5 h-5 rounded-full bg-blue-600 border-2 border-white shadow text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="relative w-5 h-5 rounded-full bg-blue-600 border-2 border-white shadow text-onaccent text-[10px] font-bold flex items-center justify-center">
                   {feature.number}
                 </span>
               </span>

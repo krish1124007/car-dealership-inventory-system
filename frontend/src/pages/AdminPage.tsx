@@ -108,7 +108,7 @@ function PhotoOrder({ vehicle }: { vehicle: Vehicle }) {
               index === 0 ? 'border-blue-400' : 'border-gray-200'
             }`}
           />
-          <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-gray-900 text-white text-[9px] font-bold flex items-center justify-center leading-none">
+          <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-gray-900 text-onaccent text-[9px] font-bold flex items-center justify-center leading-none">
             {index + 1}
           </span>
         </span>
@@ -251,7 +251,7 @@ export function AdminPage() {
                 aria-current={active ? 'page' : undefined}
                 className={`flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium whitespace-nowrap transition ${
                   active
-                    ? 'bg-blue-600 text-white shadow-sm'
+                    ? 'bg-blue-600 text-onaccent shadow-sm'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
@@ -439,7 +439,7 @@ export function AdminPage() {
           )}
           <button
             type="submit"
-            className="rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-6 py-2.5 shadow-sm transition"
+            className="rounded-xl bg-blue-600 hover:bg-blue-500 text-onaccent text-sm font-semibold px-6 py-2.5 shadow-sm transition"
           >
             {editingId ? 'Save changes' : 'Add vehicle'}
           </button>
@@ -516,7 +516,7 @@ export function AdminPage() {
                         onClick={() => handleRestock(vehicle.id)}
                         aria-label={`Restock ${vehicle.make} ${vehicle.model}`}
                         title="Restock"
-                        className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition"
+                        className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-onaccent transition"
                       >
                         <PackagePlus size={14} />
                       </button>

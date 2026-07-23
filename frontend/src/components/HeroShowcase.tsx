@@ -93,7 +93,7 @@ export function HeroShowcase() {
               onClick={() => setActive(index)}
               className={`rounded-full px-4 sm:px-8 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold transition-all duration-300 ${
                 index === active
-                  ? 'bg-gray-900 text-white shadow-md'
+                  ? 'bg-gray-900 text-onaccent shadow-md'
                   : 'text-gray-500 hover:text-gray-900'
               }`}
             >

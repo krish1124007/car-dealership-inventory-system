@@ -1,9 +1,67 @@
 @import "tailwindcss";
 
+/* Dark mode is driven by a class on <html>, set by the theme toggle. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-hero: "Bebas Neue", "Sora", ui-sans-serif, system-ui, sans-serif;
+
+  /* Text that sits on an accent fill (buttons, badges, the blue auth panel).
+     `white` is remapped to the card surface in dark mode, so anything that
+     must stay genuinely white uses this instead. */
+  --color-onaccent: #ffffff;
+}
+
+/**
+ * Dark theme.
+ *
+ * Every Tailwind colour utility compiles to `var(--color-…)`, so redefining
+ * the neutral ramp here flips the whole site at once: `bg-white` becomes the
+ * raised card surface, `text-gray-900` becomes the brightest text, and so on.
+ * The ramp is inverted and biased slightly green so the neutrals sit with the
+ * brand accent instead of reading as flat grey.
+ */
+.dark {
+  --color-white: #161d1a;
+  --color-gray-50: #0e1411;
+  --color-gray-100: #1f2a25;
+  --color-gray-200: #2b3831;
+  --color-gray-300: #3a4a42;
+  --color-gray-400: #7f8f87;
+  --color-gray-500: #97a69f;
+  --color-gray-600: #aebbb4;
+  --color-gray-700: #c8d3cd;
+  --color-gray-800: #dee7e2;
+  --color-gray-900: #eff5f2;
+
+  /* Lift the accent so it keeps its contrast on a dark ground. */
+  --color-blue-600: #4f8dff;
+  --color-blue-700: #6d9fff;
+  --color-blue-50: #1b2740;
+  --color-blue-100: #22314f;
+
+  /* Status colours need lifting too — the 500–700 steps are tuned for light
+     grounds and go muddy on a dark one. */
+  --color-red-500: #ff8b82;
+  --color-red-600: #ff7b72;
+  --color-emerald-500: #4ed69b;
+  --color-emerald-600: #43c98b;
+  --color-emerald-700: #5ad39b;
+  --color-amber-500: #e8b356;
+  --color-amber-700: #e0b457;
+
+  --color-emerald-50: #14291f;
+  --color-emerald-100: #1a3628;
+  --color-amber-100: #3a2f14;
+  --color-red-50: #33191a;
+  --color-red-200: #4a2422;
+}
+
+/* The page ground itself, so there is no white flash before React paints. */
+.dark body {
+  background-color: var(--color-gray-50);
 }
 
 @keyframes menu-in {

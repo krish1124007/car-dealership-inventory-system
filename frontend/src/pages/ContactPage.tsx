@@ -138,7 +138,7 @@ export function ContactPage() {
             <button
               type="submit"
               disabled={sending}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-6 py-2.5 shadow-sm transition"
+              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-onaccent text-sm font-semibold px-6 py-2.5 shadow-sm transition"
             >
               <Send size={15} />
               {sending ? 'Sending…' : 'Send message'}

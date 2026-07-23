@@ -107,7 +107,7 @@ export function VehicleDetailPage() {
               <span
                 className={`absolute top-4 right-4 text-xs font-semibold rounded-full px-3 py-1 shadow-sm backdrop-blur ${
                   outOfStock
-                    ? 'bg-red-500/90 text-white'
+                    ? 'bg-red-500/90 text-onaccent'
                     : 'bg-white/90 text-emerald-700'
                 }`}
               >
@@ -195,7 +195,7 @@ export function VehicleDetailPage() {
               <button
                 onClick={handlePurchase}
                 disabled={outOfStock || purchasing}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-semibold py-3 shadow-sm transition"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-onaccent text-sm font-semibold py-3 shadow-sm transition"
               >
                 <ShoppingCart size={16} />
                 {purchasing ? 'Purchasing…' : 'Purchase'}

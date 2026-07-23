@@ -12,6 +12,7 @@ import {
   LogIn,
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
+import { ThemeToggle } from './ThemeToggle'
 
 /** Each link decides for itself when it is the current page, because they
  *  are not all collections of `/cars`. */
@@ -103,7 +104,7 @@ export function Navbar() {
     >
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-          <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-600 text-white flex items-center justify-center shadow-md group-hover:scale-105 group-hover:from-blue-600 group-hover:to-blue-500 transition-all duration-300">
+          <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-600 text-onaccent flex items-center justify-center shadow-md group-hover:scale-105 group-hover:from-blue-600 group-hover:to-blue-500 transition-all duration-300">
             <CarFront size={18} />
           </span>
           <span className="font-hero hidden sm:block text-2xl text-gray-900 tracking-wide leading-none pt-0.5">
@@ -120,7 +121,7 @@ export function Navbar() {
                 to={link.to}
                 className={`px-3 sm:px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
                   active
-                    ? 'bg-gray-900 text-white shadow-sm'
+                    ? 'bg-gray-900 text-onaccent shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-900/5'
                 } ${link.label === 'Cars' ? '' : 'hidden sm:inline-flex'}`}
               >
@@ -168,7 +169,8 @@ export function Navbar() {
           </div>
         </form>
 
-        <div className="ml-auto md:ml-0 shrink-0">
+        <div className="ml-auto md:ml-0 shrink-0 flex items-center gap-1">
+          <ThemeToggle />
           {user ? (
             <div className="relative" ref={menuRef}>
               <button
@@ -178,7 +180,7 @@ export function Navbar() {
                   menuOpen ? 'bg-gray-900/5' : 'hover:bg-gray-900/5'
                 }`}
               >
-                <span className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                <span className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-onaccent text-xs font-bold flex items-center justify-center shadow-sm">
                   {initials || '?'}
                 </span>
                 <ChevronDown
@@ -233,7 +235,7 @@ export function Navbar() {
           ) : (
             <Link
               to="/login"
-              className="inline-flex items-center gap-1.5 rounded-full bg-gray-900 hover:bg-blue-600 text-white text-sm font-semibold px-5 py-2 shadow-sm transition-colors duration-300"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gray-900 hover:bg-blue-600 text-onaccent text-sm font-semibold px-5 py-2 shadow-sm transition-colors duration-300"
             >
               <LogIn size={15} />
               Login

@@ -59,7 +59,7 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
 
         <Link
           to={`/vehicles/${vehicle.id}`}
-          className="mt-auto w-full inline-flex items-center justify-center gap-2 rounded-xl border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white text-sm font-bold py-2.5 transition-colors duration-300"
+          className="mt-auto w-full inline-flex items-center justify-center gap-2 rounded-xl border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-onaccent text-sm font-bold py-2.5 transition-colors duration-300"
         >
           <Eye size={16} />
           View car

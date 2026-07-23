@@ -14,10 +14,10 @@ const inputClasses =
   'w-full rounded-lg bg-gray-100 border border-transparent px-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition'
 
 const solidPill =
-  'rounded-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold uppercase tracking-wider px-10 py-2.5 shadow-md transition'
+  'rounded-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-onaccent text-sm font-semibold uppercase tracking-wider px-10 py-2.5 shadow-md transition'
 
 const outlinePill =
-  'rounded-full border-2 border-white/90 text-white text-sm font-semibold uppercase tracking-wider px-10 py-2.5 hover:bg-white hover:text-blue-600 transition'
+  'rounded-full border-2 border-white/90 text-onaccent text-sm font-semibold uppercase tracking-wider px-10 py-2.5 hover:bg-white hover:text-blue-600 transition'
 
 function ErrorBanner({ message }: { message: string }) {
   return (
@@ -68,7 +68,7 @@ function LoginForm() {
       onSubmit={handleSubmit}
       className="w-full max-w-xs mx-auto text-center space-y-4"
     >
-      <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 text-white">
+      <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 text-onaccent">
         <Car size={22} />
       </span>
       <h1 className="text-3xl font-bold text-gray-900">Sign in</h1>
@@ -177,7 +177,7 @@ function RegisterForm() {
       onSubmit={handleSubmit}
       className="w-full max-w-xs mx-auto text-center space-y-4"
     >
-      <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 text-white">
+      <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 text-onaccent">
         <Car size={22} />
       </span>
       <h1 className="text-3xl font-bold text-gray-900">Sign up</h1>
@@ -258,7 +258,7 @@ export function AuthPage() {
 
         {/* Blue overlay: right in login mode, slides left in register mode. */}
         <div
-          className={`bg-gradient-to-br from-blue-500 to-blue-700 text-white flex flex-col items-center justify-center text-center gap-4 p-8 sm:p-10 md:absolute md:inset-y-0 md:left-1/2 md:w-1/2 transition-transform duration-700 ease-in-out ${
+          className={`bg-gradient-to-br from-blue-500 to-blue-700 text-onaccent flex flex-col items-center justify-center text-center gap-4 p-8 sm:p-10 md:absolute md:inset-y-0 md:left-1/2 md:w-1/2 transition-transform duration-700 ease-in-out ${
             isRegister ? 'md:-translate-x-full' : 'md:translate-x-0'
           }`}
         >

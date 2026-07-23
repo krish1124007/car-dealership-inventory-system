@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { SplashScreen } from './components/SplashScreen'
+import { ThemeProvider } from './theme/ThemeContext'
 import { AuthProvider } from './auth/AuthContext'
 import { ToastProvider } from './components/Toast'
 import { ProtectedRoute } from './auth/ProtectedRoute'
@@ -14,6 +15,7 @@ import { AdminPage } from './pages/AdminPage'
 
 function App() {
   return (
+    <ThemeProvider>
     <SplashScreen>
       <AuthProvider>
       <ToastProvider>
@@ -50,6 +52,7 @@ function App() {
       </ToastProvider>
       </AuthProvider>
     </SplashScreen>
+    </ThemeProvider>
   )
 }
 

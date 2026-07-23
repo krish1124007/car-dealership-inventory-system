@@ -1,16 +1,20 @@
 # 🚗 Car Dealership Inventory System
 
-A full-stack **Car Dealership Inventory System** built for the Incubyte TDD Kata — Node.js/TypeScript + Express + MongoDB on the backend, React + Tailwind on the frontend, built **test-first** end to end (200 tests, red → green visible throughout the commit history).
+**[🌐 Live site](https://car-dealership-inventory-system-delta.vercel.app)** · **[🧪 Test report](https://claude.ai/code/artifact/16f81e13-550c-4251-bf54-92354162d31e)** · [test.md](test.md)
+
+A full-stack **Car Dealership Inventory System** built for the Incubyte TDD Kata — Node.js/TypeScript + Express + MongoDB on the backend, React + Tailwind on the frontend, built **test-first** end to end (278 tests, red → green visible throughout the commit history).
+
+Sign in with one click — the sign-in page has **Demo user login** and **Demo admin login** buttons, no credentials to type. The whole site supports **light and dark mode**, following your system preference by default and switchable from the navbar.
 
 ---
 
 ## 1. About the project
 
-Visitors land on a showroom-style home page — a full-screen hero with drive-mode photo tabs (Fast / Furious / Flawless) and auto-scrolling brand logos, a Hyundai Creta feature spotlight with callout markers, and curated **Luxury** / **Most affordable** collections. The **Cars** page lists the full inventory with a filter sidebar (name search, category, a 0-to-max price slider) where **filters apply automatically**. Every card opens a **detail page**; purchasing happens there and is disabled at zero stock. Logged-in users get **My purchases** (photo, price paid, date — the record survives even if the car is later deleted). Admins manage inventory from a dedicated panel: add/edit with **photo upload** (stored in the backend's `public/uploads`), per-row restock and delete. Prices render in **Indian rupees** with lakh/crore grouping.
+Visitors land on a showroom-style home page — a full-screen hero with drive-mode photo tabs (Fast / Furious / Flawless) and auto-scrolling brand logos, a Hyundai Creta feature spotlight with callout markers, and curated **Luxury** / **Most affordable** collections. The **Cars** page lists the full inventory with a filter sidebar (name search, category, a 0-to-max price slider) where **filters apply automatically**. Every card opens a **detail page**; purchasing happens there and is disabled at zero stock. Logged-in users get **My purchases** (photo, price paid, date — the record survives even if the car is later deleted). Admins manage inventory from a panel with sidebar sections — inventory, registered users (with last-login times) and the contact-form inbox. Listings take **multiple photos** (first is the main image, the rest become the detail-page gallery), stored on disk in development and on **Cloudinary** in production. Prices render in **Indian rupees** with lakh/crore grouping.
 
 **Key behaviours (all pinned by tests):**
 
-- JWT auth with roles — public registration can never create an admin; admins register via a shared secret (`x-admin-secret`).
+- JWT auth with roles — public registration can never create an admin, and there is **no admin-registration endpoint at all**: admin accounts exist only because the server creates them on start.
 - Login answers 401 identically for unknown email and wrong password (no user enumeration).
 - Purchases decrement stock **atomically** (`quantity > 0` guard) — stock can never go negative, even under concurrent purchases — and store an immutable price snapshot.
 - Search supports `q` (partial, case-insensitive, make *or* model) plus make/model/category/price-range filters.
@@ -78,7 +82,9 @@ Every response uses the envelope `{ statusCode, message, data }`.
 | Method | Endpoint | Access |
 |---|---|---|
 | POST | `/api/auth/register` · `/api/auth/login` | Public |
-| POST | `/api/admin/register` | `x-admin-secret` header |
+| GET | `/api/admin/users` | **Admin** |
+| POST | `/api/contact` | Public |
+| GET | `/api/contact` | **Admin** |
 | GET | `/api/vehicles` · `/api/vehicles/search` · `/api/vehicles/:id` | Public browsing |
 | POST | `/api/vehicles` | **Admin** |
 | PUT / DELETE | `/api/vehicles/:id` | **Admin** |
@@ -196,14 +202,3 @@ test(image-upload): add failing tests for image upload ... (red)
 feat(image-upload): local image uploads, Home page rename and filter sidebar (green)
 ```
 
----
-
-## Deliverables checklist
-
-- [x] Public Git repository with a red → green TDD history
-- [x] Comprehensive README (this file) in the required format
-- [x] **My AI Usage** section
-- [x] Test report — 200 tests, ~97% backend coverage
-- [x] [PROMPTS.md](PROMPTS.md) — full AI prompt history incl. edge-case prompts
-- [ ] Screenshots in `docs/screenshots/` (capture from the running app)
-- [ ] (Optional) Live deployment — step-by-step guide in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) (Vercel + Render + Atlas, free tier)
