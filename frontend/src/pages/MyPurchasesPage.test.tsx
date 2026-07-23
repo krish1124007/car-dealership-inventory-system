@@ -59,6 +59,53 @@ describe('MyPurchasesPage', () => {
     expect(screen.getByText('$45,000')).toBeInTheDocument()
   })
 
+  it('shows the vehicle photo on the purchase entry', async () => {
+    vi.mocked(usersApi.getMyPurchases).mockResolvedValue([
+      {
+        id: 'p1',
+        quantity: 1,
+        purchasePrice: 45000,
+        purchasedAt: '2026-07-20T10:00:00.000Z',
+        vehicle: {
+          id: 'v1',
+          make: 'Toyota',
+          model: 'Fortuner',
+          category: 'SUV',
+          price: 47000,
+          quantity: 2,
+          imageUrl: 'https://example.com/fortuner.jpg',
+        },
+      },
+    ])
+    renderPage()
+
+    const img = await screen.findByRole('img', { name: /toyota fortuner/i })
+    expect(img).toHaveAttribute('src', 'https://example.com/fortuner.jpg')
+  })
+
+  it('shows a placeholder tile when the vehicle has no photo', async () => {
+    vi.mocked(usersApi.getMyPurchases).mockResolvedValue([
+      {
+        id: 'p1',
+        quantity: 1,
+        purchasePrice: 45000,
+        purchasedAt: '2026-07-20T10:00:00.000Z',
+        vehicle: {
+          id: 'v1',
+          make: 'Toyota',
+          model: 'Fortuner',
+          category: 'SUV',
+          price: 47000,
+          quantity: 2,
+        },
+      },
+    ])
+    renderPage()
+
+    await screen.findByText(/fortuner/i)
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
   it('falls back gracefully when the vehicle was deleted', async () => {
     vi.mocked(usersApi.getMyPurchases).mockResolvedValue([
       {
