@@ -78,7 +78,7 @@ export function HeroShowcase() {
               key={m.name}
               src={m.photo}
               alt={`${m.name} mode`}
-              className={`absolute inset-0 w-full h-full object-contain object-bottom transition-opacity duration-500 ${
+              className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ${
                 index === active ? 'opacity-100' : 'opacity-0'
               }`}
             />
