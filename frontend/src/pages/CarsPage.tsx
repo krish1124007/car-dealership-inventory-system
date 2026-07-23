@@ -6,6 +6,7 @@ import { AppLayout } from '../components/AppLayout'
 import { Loading } from '../components/Loading'
 import { VehicleCard } from '../components/VehicleCard'
 import { useToast } from '../components/Toast'
+import { formatPrice } from '../components/VehicleCard'
 import { listVehicles, searchVehicles } from '../api/vehicles.api'
 import type { SearchFilters } from '../api/vehicles.api'
 import type { Vehicle } from '../api/schemas'
@@ -31,8 +32,10 @@ export function CarsPage() {
   const [categories, setCategories] = useState<string[]>([])
   const [query, setQuery] = useState(urlQuery)
   const [category, setCategory] = useState('')
-  const [minPrice, setMinPrice] = useState('')
-  const [maxPrice, setMaxPrice] = useState('')
+  // Price slider: cap is the highest inventory price; limit is the chosen
+  // upper bound (no filter while it sits at the cap).
+  const [priceCap, setPriceCap] = useState<number | null>(null)
+  const [priceLimit, setPriceLimit] = useState<number | null>(null)
   const toast = useToast()
 
   async function runSearch(filters: SearchFilters) {
@@ -50,9 +53,14 @@ export function CarsPage() {
   useEffect(() => {
     // Categories always come from the full inventory.
     listVehicles()
-      .then((list) =>
-        setCategories([...new Set(list.map((v) => v.category))]),
-      )
+      .then((list) => {
+        setCategories([...new Set(list.map((v) => v.category))])
+        if (list.length > 0) {
+          const cap = Math.max(...list.map((v) => v.price))
+          setPriceCap(cap)
+          setPriceLimit((prev) => prev ?? cap)
+        }
+      })
       .catch(() => {})
 
     setQuery(urlQuery)
@@ -64,8 +72,13 @@ export function CarsPage() {
     const filters: SearchFilters = {}
     if (query.trim()) filters.q = query.trim()
     if (category) filters.category = category
-    if (minPrice.trim()) filters.minPrice = Number(minPrice)
-    if (maxPrice.trim()) filters.maxPrice = Number(maxPrice)
+    if (
+      priceCap !== null &&
+      priceLimit !== null &&
+      priceLimit < priceCap
+    ) {
+      filters.maxPrice = priceLimit
+    }
     return filters
   }
 
@@ -77,8 +90,7 @@ export function CarsPage() {
   function handleReset() {
     setQuery('')
     setCategory('')
-    setMinPrice('')
-    setMaxPrice('')
+    setPriceLimit(priceCap)
     void runSearch({})
   }
 
@@ -159,42 +171,27 @@ export function CarsPage() {
 
           <div>
             <SectionTitle>Price range</SectionTitle>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label
-                  htmlFor="cars-min"
-                  className="block text-[11px] text-gray-400 mb-1"
-                >
-                  Min price
-                </label>
-                <input
-                  id="cars-min"
-                  type="number"
-                  min="0"
-                  placeholder="From"
-                  className={fieldClasses}
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="cars-max"
-                  className="block text-[11px] text-gray-400 mb-1"
-                >
-                  Max price
-                </label>
-                <input
-                  id="cars-max"
-                  type="number"
-                  min="0"
-                  placeholder="To"
-                  className={fieldClasses}
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                />
-              </div>
+            <label htmlFor="cars-price" className="sr-only">
+              Price range
+            </label>
+            <input
+              id="cars-price"
+              type="range"
+              min={0}
+              max={priceCap ?? 0}
+              step={1000}
+              disabled={priceCap === null}
+              value={priceLimit ?? 0}
+              onChange={(e) => setPriceLimit(Number(e.target.value))}
+              className="w-full accent-blue-600 cursor-pointer"
+            />
+            <div className="flex justify-between text-[11px] text-gray-400 mt-1">
+              <span>₹0</span>
+              <span>{priceCap !== null ? formatPrice(priceCap) : '—'}</span>
             </div>
+            <p className="text-sm font-semibold text-gray-900 mt-2">
+              Up to {priceLimit !== null ? formatPrice(priceLimit) : '…'}
+            </p>
           </div>
 
           <button
