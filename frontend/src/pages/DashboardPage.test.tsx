@@ -48,10 +48,12 @@ beforeEach(() => {
 })
 
 describe('DashboardPage (home)', () => {
-  it('shows the hero with the three drive-mode tabs', () => {
+  it('shows the connected brands section with the three drive-mode tabs', () => {
     renderHome()
 
-    expect(screen.getByRole('region', { name: /hero/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('region', { name: /connected brands/i }),
+    ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^fast$/i })).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /^furious$/i }),
@@ -61,7 +63,34 @@ describe('DashboardPage (home)', () => {
     ).toBeInTheDocument()
   })
 
-  it('switches the hero photo when a tab is picked', async () => {
+  it('shows the featured car slider with the car name behind', () => {
+    renderHome()
+
+    const slider = screen.getByRole('region', { name: /featured cars/i })
+    expect(within(slider).getByText('Creta')).toBeInTheDocument()
+    expect(
+      within(slider).getByRole('img', { name: /hyundai creta/i }),
+    ).toHaveAttribute('src', '/landing-photo/p1-show.png')
+    expect(
+      within(slider).getByRole('button', { name: /go to car 3/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('slides to the next featured car with the arrow', async () => {
+    renderHome()
+
+    const slider = screen.getByRole('region', { name: /featured cars/i })
+    await userEvent.click(
+      within(slider).getByRole('button', { name: /next car/i }),
+    )
+
+    expect(within(slider).getByText('Mustang')).toBeInTheDocument()
+    expect(
+      within(slider).getByRole('img', { name: /ford mustang/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('switches the brands photo when a tab is picked', async () => {
     renderHome()
 
     await userEvent.click(screen.getByRole('button', { name: /^furious$/i }))
