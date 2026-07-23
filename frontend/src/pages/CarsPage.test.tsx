@@ -57,34 +57,48 @@ describe('CarsPage', () => {
     expect(screen.getByText(/2 vehicles available/i)).toBeInTheDocument()
   })
 
-  it('applies the name search from the sidebar', async () => {
+  it('has no apply button — filters apply on change', async () => {
     renderCars()
 
     await screen.findByText(/wrangler/i)
-    await userEvent.type(screen.getByRole('searchbox', { name: /search by name/i }), 'Toyota')
-    await userEvent.click(screen.getByRole('button', { name: /apply/i }))
+    expect(
+      screen.queryByRole('button', { name: /apply/i }),
+    ).not.toBeInTheDocument()
+  })
 
-    expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
-      expect.objectContaining({ q: 'Toyota' }),
+  it('applies the name search automatically while typing', async () => {
+    renderCars()
+
+    await screen.findByText(/wrangler/i)
+    await userEvent.type(
+      screen.getByRole('searchbox', { name: /search by name/i }),
+      'Toyota',
+    )
+
+    await waitFor(() =>
+      expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
+        expect.objectContaining({ q: 'Toyota' }),
+      ),
     )
     await waitFor(() =>
       expect(screen.queryByText(/wrangler/i)).not.toBeInTheDocument(),
     )
   })
 
-  it('filters by category from the sidebar', async () => {
+  it('applies the category filter as soon as it is picked', async () => {
     renderCars()
 
     await screen.findByText(/wrangler/i)
     await userEvent.click(screen.getByRole('radio', { name: /suv/i }))
-    await userEvent.click(screen.getByRole('button', { name: /apply/i }))
 
-    expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
-      expect.objectContaining({ category: 'SUV' }),
+    await waitFor(() =>
+      expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
+        expect.objectContaining({ category: 'SUV' }),
+      ),
     )
   })
 
-  it('filters with a price range slider running from zero to the max price', async () => {
+  it('applies the price slider (0 to max price) as soon as it moves', async () => {
     renderCars()
 
     await screen.findByText(/wrangler/i)
@@ -93,12 +107,12 @@ describe('CarsPage', () => {
     expect(slider).toHaveAttribute('max', '42000')
 
     fireEvent.change(slider, { target: { value: '30000' } })
+
     expect(screen.getByText(/up to ₹30,000/i)).toBeInTheDocument()
-
-    await userEvent.click(screen.getByRole('button', { name: /apply/i }))
-
-    expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
-      expect.objectContaining({ maxPrice: 30000 }),
+    await waitFor(() =>
+      expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
+        expect.objectContaining({ maxPrice: 30000 }),
+      ),
     )
   })
 
@@ -110,9 +124,10 @@ describe('CarsPage', () => {
       screen.getByRole('searchbox', { name: /search by name/i }),
       'Toyota',
     )
-    await userEvent.click(screen.getByRole('button', { name: /apply/i }))
 
-    expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith({ q: 'Toyota' })
+    await waitFor(() =>
+      expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith({ q: 'Toyota' }),
+    )
   })
 
   it('runs the navbar-provided query from the url on load', async () => {
@@ -130,8 +145,10 @@ describe('CarsPage', () => {
     renderCars()
 
     await screen.findByText(/wrangler/i)
-    await userEvent.type(screen.getByRole('searchbox', { name: /search by name/i }), 'Toyota')
-    await userEvent.click(screen.getByRole('button', { name: /apply/i }))
+    await userEvent.type(
+      screen.getByRole('searchbox', { name: /search by name/i }),
+      'Toyota',
+    )
     await waitFor(() =>
       expect(screen.queryByText(/wrangler/i)).not.toBeInTheDocument(),
     )
@@ -146,8 +163,10 @@ describe('CarsPage', () => {
     renderCars()
 
     await screen.findByText(/wrangler/i)
-    await userEvent.type(screen.getByRole('searchbox', { name: /search by name/i }), 'Ferrari')
-    await userEvent.click(screen.getByRole('button', { name: /apply/i }))
+    await userEvent.type(
+      screen.getByRole('searchbox', { name: /search by name/i }),
+      'Ferrari',
+    )
 
     expect(await screen.findByText(/no vehicles found/i)).toBeInTheDocument()
   })
