@@ -3,7 +3,7 @@
 import "dotenv/config";
 import { app } from "./app.js";
 import { connectDB } from "./db/index.js";
-import { ensureDefaultAdmin } from "./utils/ensureAdmin.js";
+import { ensureDemoAccounts } from "./utils/ensureDemoAccounts.js";
 
 const port = process.env.PORT || 3000;
 
@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000;
 // away. Vercel detects the HTTP server from the listen() call during module
 // startup, so it must not be deferred inside a promise chain.
 connectDB()
-    .then(ensureDefaultAdmin)
+    .then(ensureDemoAccounts)
     .catch((err) => {
         console.error("Database startup failed", err);
     });

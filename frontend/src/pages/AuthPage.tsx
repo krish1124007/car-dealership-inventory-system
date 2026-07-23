@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Car, Zap } from 'lucide-react'
+import { Car, Zap, User } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
-import { DEMO_ADMIN, demoLoginEnabled } from '../auth/demoCredentials'
+import {
+  DEMO_ADMIN,
+  DEMO_USER,
+  demoAdminEnabled,
+  demoUserEnabled,
+} from '../auth/demoCredentials'
 
 const inputClasses =
   'w-full rounded-lg bg-gray-100 border border-transparent px-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition'
@@ -51,11 +56,11 @@ function LoginForm() {
     await signIn(email, password)
   }
 
-  /** One click straight into the admin panel — no typing for reviewers. */
-  async function handleDemoAdmin() {
-    setEmail(DEMO_ADMIN.email)
-    setPassword(DEMO_ADMIN.password)
-    await signIn(DEMO_ADMIN.email, DEMO_ADMIN.password)
+  /** One click straight in — no typing for reviewers. */
+  async function handleDemo(account: { email: string; password: string }) {
+    setEmail(account.email)
+    setPassword(account.password)
+    await signIn(account.email, account.password)
   }
 
   return (
@@ -101,26 +106,42 @@ function LoginForm() {
         {submitting ? 'Signing in…' : 'Sign in'}
       </button>
 
-      {demoLoginEnabled && (
+      {(demoUserEnabled || demoAdminEnabled) && (
         <div className="pt-1 space-y-2">
           <div className="flex items-center gap-3">
             <span className="h-px flex-1 bg-gray-200" />
             <span className="text-[10px] uppercase tracking-widest text-gray-400">
-              or
+              or try it instantly
             </span>
             <span className="h-px flex-1 bg-gray-200" />
           </div>
-          <button
-            type="button"
-            onClick={handleDemoAdmin}
-            disabled={submitting}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-emerald-300 bg-emerald-50/70 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold px-6 py-2.5 transition"
-          >
-            <Zap size={15} />
-            Log in as demo admin
-          </button>
+
+          {demoUserEnabled && (
+            <button
+              type="button"
+              onClick={() => handleDemo(DEMO_USER)}
+              disabled={submitting}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-blue-300 bg-blue-50/70 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold px-6 py-2.5 transition"
+            >
+              <User size={15} />
+              Demo user login
+            </button>
+          )}
+
+          {demoAdminEnabled && (
+            <button
+              type="button"
+              onClick={() => handleDemo(DEMO_ADMIN)}
+              disabled={submitting}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-emerald-300 bg-emerald-50/70 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold px-6 py-2.5 transition"
+            >
+              <Zap size={15} />
+              Demo admin login
+            </button>
+          )}
+
           <p className="text-[11px] text-gray-400">
-            Opens the admin panel instantly — no credentials to type.
+            No credentials to type — both accounts are ready to use.
           </p>
         </div>
       )}
@@ -221,14 +242,8 @@ export function AuthPage() {
   const isRegister = location.pathname === '/register'
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center gap-4 px-4 py-10 overflow-hidden">
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-cover bg-center blur-xs scale-105"
-        style={{ backgroundImage: "url('/bgms/login-bgm.png')" }}
-      />
-
-      <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:block md:h-[560px]">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 px-4 py-10">
+      <div className="w-full max-w-3xl bg-white rounded-3xl border border-gray-200 shadow-xl shadow-gray-200/60 overflow-hidden flex flex-col md:block md:h-[600px]">
         {/* Form half: left in login mode, slides right in register mode. */}
         <div
           className={`flex items-center justify-center p-8 sm:p-10 md:absolute md:top-0 md:left-0 md:w-1/2 md:h-full transition-transform duration-700 ease-in-out ${
@@ -268,13 +283,6 @@ export function AuthPage() {
           )}
         </div>
       </div>
-
-      <Link
-        to="/admin/register"
-        className="relative text-xs text-white/80 hover:text-white underline underline-offset-2 drop-shadow"
-      >
-        Admin access
-      </Link>
     </div>
   )
 }

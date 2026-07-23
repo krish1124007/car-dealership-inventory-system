@@ -1,29 +1,45 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { registerAdmin } from './admin.api'
+import * as adminApi from './admin.api'
 import { mockFetchOnce, firstCall } from '../tests/mockFetch'
 
 afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe('registerAdmin', () => {
-  it('POSTs to /admin/register with the x-admin-secret header', async () => {
-    const fetchMock = mockFetchOnce(
-      { id: 'a1', name: 'Admin', email: 'admin@example.com', role: 'ADMIN' },
-      { status: 201 },
-    )
+describe('listUsers', () => {
+  it('GETs /admin/users and returns the parsed list', async () => {
+    const fetchMock = mockFetchOnce({
+      total: 2,
+      users: [
+        {
+          id: 'a1',
+          name: 'Test Admin',
+          email: 'admin@cardealership.com',
+          role: 'ADMIN',
+          createdAt: '2026-07-20T09:00:00.000Z',
+          lastLoginAt: '2026-07-23T11:31:00.000Z',
+        },
+        {
+          id: 'u1',
+          name: 'Demo Customer',
+          email: 'user@cardealership.com',
+          role: 'CUSTOMER',
+          createdAt: '2026-07-21T09:00:00.000Z',
+        },
+      ],
+    })
 
-    const result = await registerAdmin(
-      { name: 'Admin', email: 'admin@example.com', password: 'Secret123!' },
-      'the-admin-secret',
-    )
+    const result = await adminApi.listUsers()
 
-    const [url, init] = firstCall(fetchMock)
-    expect(url).toContain('/admin/register')
-    expect(init.method).toBe('POST')
-    expect((init.headers as Record<string, string>)['x-admin-secret']).toBe(
-      'the-admin-secret',
-    )
-    expect(result.role).toBe('ADMIN')
+    const [url] = firstCall(fetchMock)
+    expect(url).toMatch(/\/admin\/users$/)
+    expect(result.total).toBe(2)
+    expect(result.users[1]?.lastLoginAt).toBeUndefined()
+  })
+
+  it('no longer exposes any way to register an admin', () => {
+    expect(
+      (adminApi as Record<string, unknown>)['registerAdmin'],
+    ).toBeUndefined()
   })
 })

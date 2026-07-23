@@ -1,14 +1,16 @@
+import request from "supertest";
 import bcrypt from "bcryptjs";
+import { app } from "../../src/app.js";
 import { useDb, User } from "../helpers/db.js";
 import { createUser } from "../helpers/auth.js";
 import { Role } from "../../src/models/user.models.js";
-import { ensureDefaultAdmin } from "../../src/utils/ensureAdmin.js";
+import { ensureDemoAccounts } from "../../src/utils/ensureDemoAccounts.js";
 
-describe("ensureDefaultAdmin", () => {
+describe("ensureDemoAccounts", () => {
     useDb();
 
-    it("creates the default test admin when no admin exists", async () => {
-        await ensureDefaultAdmin();
+    it("creates the demo admin so the documented credentials always work", async () => {
+        await ensureDemoAccounts();
 
         const admin = await User.findOne({ role: Role.ADMIN });
         expect(admin).not.toBeNull();
@@ -20,26 +22,80 @@ describe("ensureDefaultAdmin", () => {
         ).resolves.toBe(true);
     });
 
-    it("still creates the default admin when a different admin exists, so the demo credentials always work", async () => {
+    it("creates the demo customer as well", async () => {
+        await ensureDemoAccounts();
+
+        const customer = await User.findOne({
+            email: "user@cardealership.com",
+        });
+        expect(customer).not.toBeNull();
+        expect(customer!.role).toBe(Role.CUSTOMER);
+        await expect(
+            bcrypt.compare("User@123", customer!.passwordHash)
+        ).resolves.toBe(true);
+    });
+
+    it("still creates the demo admin when a different admin exists", async () => {
         await createUser(Role.ADMIN);
 
-        await ensureDefaultAdmin();
+        await ensureDemoAccounts();
 
-        const demo = await User.findOne({
-            email: "admin@cardealership.com",
-        });
+        const demo = await User.findOne({ email: "admin@cardealership.com" });
         expect(demo).not.toBeNull();
-        await expect(
-            User.countDocuments({ role: Role.ADMIN })
-        ).resolves.toBe(2);
+        await expect(User.countDocuments({ role: Role.ADMIN })).resolves.toBe(2);
     });
 
     it("is idempotent across repeated startups", async () => {
-        await ensureDefaultAdmin();
-        await ensureDefaultAdmin();
+        await ensureDemoAccounts();
+        await ensureDemoAccounts();
 
-        await expect(
-            User.countDocuments({ role: Role.ADMIN })
-        ).resolves.toBe(1);
+        await expect(User.countDocuments()).resolves.toBe(2);
+    });
+
+    it("lets both demo accounts sign in through the real login endpoint", async () => {
+        await ensureDemoAccounts();
+
+        const admin = await request(app).post("/api/auth/login").send({
+            email: "admin@cardealership.com",
+            password: "Admin@123",
+        });
+        const customer = await request(app).post("/api/auth/login").send({
+            email: "user@cardealership.com",
+            password: "User@123",
+        });
+
+        expect(admin.status).toBe(200);
+        expect(admin.body.data.user.role).toBe(Role.ADMIN);
+        expect(customer.status).toBe(200);
+        expect(customer.body.data.user.role).toBe(Role.CUSTOMER);
+    });
+});
+
+describe("admin accounts cannot be created through the API", () => {
+    useDb();
+
+    it("has no admin registration endpoint at all", async () => {
+        const res = await request(app).post("/api/admin/register").send({
+            name: "Sneaky Admin",
+            email: "sneaky@example.com",
+            password: "Password123!",
+        });
+
+        expect(res.status).toBe(404);
+        await expect(User.countDocuments()).resolves.toBe(0);
+    });
+
+    it("ignores a client-supplied ADMIN role on public registration", async () => {
+        const res = await request(app).post("/api/auth/register").send({
+            name: "Sneaky",
+            email: "sneaky@example.com",
+            password: "Password123!",
+            role: Role.ADMIN,
+        });
+
+        expect(res.status).toBe(201);
+        const created = await User.findOne({ email: "sneaky@example.com" });
+        expect(created!.role).toBe(Role.CUSTOMER);
+        await expect(User.countDocuments({ role: Role.ADMIN })).resolves.toBe(0);
     });
 });

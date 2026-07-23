@@ -93,12 +93,30 @@ describe('LoginPage', () => {
     renderLogin()
 
     await userEvent.click(
-      screen.getByRole('button', { name: /log in as demo admin/i }),
+      screen.getByRole('button', { name: /demo admin login/i }),
     )
 
     expect(authApi.loginUser).toHaveBeenCalledWith({
       email: 'admin@cardealership.com',
       password: 'Admin@123',
+    })
+    expect(await screen.findByText('DASHBOARD')).toBeInTheDocument()
+  })
+
+  it('logs straight in as the demo customer with one click', async () => {
+    vi.mocked(authApi.loginUser).mockResolvedValue({
+      accessToken: 'jwt',
+      user: { ...customer, email: 'user@cardealership.com' },
+    })
+    renderLogin()
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /demo user login/i }),
+    )
+
+    expect(authApi.loginUser).toHaveBeenCalledWith({
+      email: 'user@cardealership.com',
+      password: 'User@123',
     })
     expect(await screen.findByText('DASHBOARD')).toBeInTheDocument()
   })
@@ -110,12 +128,20 @@ describe('LoginPage', () => {
     renderLogin()
 
     await userEvent.click(
-      screen.getByRole('button', { name: /log in as demo admin/i }),
+      screen.getByRole('button', { name: /demo admin login/i }),
     )
 
     expect(screen.getByLabelText(/email/i)).toHaveValue(
       'admin@cardealership.com',
     )
+  })
+
+  it('offers no way to reach an admin-registration page', () => {
+    renderLogin()
+
+    expect(
+      screen.queryByRole('link', { name: /admin access|admin register/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('links to the register page', () => {

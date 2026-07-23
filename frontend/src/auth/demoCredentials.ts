@@ -1,21 +1,25 @@
 /**
- * The demo admin the backend auto-creates on start (see
- * `backend/src/utils/ensureAdmin.ts`). Kept in one place so the one-click
- * login and the credentials panel can never drift apart.
+ * The demo accounts the backend creates on start (see
+ * `backend/src/utils/ensureDemoAccounts.ts`). Kept in one place so the
+ * one-click sign-in buttons can never drift from what the server made.
  *
- * A deployment that changes DEFAULT_ADMIN_EMAIL / DEFAULT_ADMIN_PASSWORD
- * should set the matching VITE_ variables; setting either to an empty
- * string hides the one-click login entirely.
+ * A deployment that changes DEFAULT_ADMIN_* / DEFAULT_USER_* should set the
+ * matching VITE_ variables; blanking either pair hides that button.
  */
-const email =
-  (import.meta.env.VITE_DEMO_ADMIN_EMAIL as string | undefined) ??
-  'admin@cardealership.com'
+function fromEnv(key: string, fallback: string): string {
+  const value = import.meta.env[key] as string | undefined
+  return value ?? fallback
+}
 
-const password =
-  (import.meta.env.VITE_DEMO_ADMIN_PASSWORD as string | undefined) ??
-  'Admin@123'
+export const DEMO_ADMIN = {
+  email: fromEnv('VITE_DEMO_ADMIN_EMAIL', 'admin@cardealership.com'),
+  password: fromEnv('VITE_DEMO_ADMIN_PASSWORD', 'Admin@123'),
+}
 
-export const DEMO_ADMIN = { email, password }
+export const DEMO_USER = {
+  email: fromEnv('VITE_DEMO_USER_EMAIL', 'user@cardealership.com'),
+  password: fromEnv('VITE_DEMO_USER_PASSWORD', 'User@123'),
+}
 
-/** False when a deployment has deliberately blanked the demo credentials. */
-export const demoLoginEnabled = Boolean(email && password)
+export const demoAdminEnabled = Boolean(DEMO_ADMIN.email && DEMO_ADMIN.password)
+export const demoUserEnabled = Boolean(DEMO_USER.email && DEMO_USER.password)

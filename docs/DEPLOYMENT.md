@@ -58,7 +58,8 @@ Requests to `/api/...` reach Express with the path intact (Vercel does not strip
    |---|---|
    | `MONGODB_URI` | your Atlas connection string |
    | `JWT_SECRET` | a long random string |
-   | `ADMIN_REGISTRATION_SECRET` | a long random string |
+   | `DEFAULT_ADMIN_PASSWORD` | private password for the demo admin |
+   | `DEFAULT_USER_PASSWORD` | private password for the demo customer |
    | `CLOUDINARY_URL` | the value copied above |
    | `VITE_API_URL` | `/api` |
 
@@ -79,7 +80,7 @@ Requests to `/api/...` reach Express with the path intact (Vercel does not strip
 
 ## Step 4 — Deploy and verify
 
-Deploy. On the first request the backend connects to Atlas and auto-creates the demo admin (`admin@cardealership.com` / `Admin@123`).
+Deploy. On the first request the backend connects to Atlas and creates both demo accounts — `admin@cardealership.com` / `Admin@123` and `user@cardealership.com` / `User@123`. This is the only way an admin account ever comes into existence: there is no admin-registration endpoint.
 
 - Open the deployment URL → hero, seeded showroom and collections should render.
 - Log in as the admin → add a car with several photos → they upload to Cloudinary and appear on Home/Cars.

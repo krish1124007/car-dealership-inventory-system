@@ -48,13 +48,14 @@ cp .env.example .env        # VITE_API_URL already points at the local backend
 npm run dev                 # http://localhost:5173
 ```
 
-### Admin access (zero setup)
+### Demo access (zero setup)
 
-The server **auto-creates a test admin on startup** — just log in at `/login` with:
+The server **creates both demo accounts on startup**, and the sign-in page has a one-click button for each — no credentials to type:
 
-> **Email:** `admin@cardealership.com` · **Password:** `Admin@123`
+> **Admin:** `admin@cardealership.com` · `Admin@123`
+> **Customer:** `user@cardealership.com` · `User@123`
 
-These demo credentials are also shown on the **Admin access** page (`/admin/register`), where additional admins can be registered using the `ADMIN_REGISTRATION_SECRET` from `backend/.env`. Customers just use **Register**.
+Admin accounts are **only** created by the server this way. There is no admin-registration endpoint, so no request can ever mint an admin — public registration always produces a customer, even if the body asks for `role: ADMIN`. Override the demo credentials with `DEFAULT_ADMIN_*` / `DEFAULT_USER_*` in `backend/.env`.
 
 ### Environment variables
 
@@ -63,8 +64,9 @@ These demo credentials are also shown on the **Admin access** page (`/admin/regi
 | `backend/.env` | `PORT` | `3000` |
 | | `MONGODB_URI` | `mongodb://127.0.0.1:27017/car_dealership` |
 | | `JWT_SECRET` | any strong string |
-| | `ADMIN_REGISTRATION_SECRET` | any strong string |
 | | `CORS_ORIGIN` | `http://localhost:5173` |
+| | `DEFAULT_ADMIN_PASSWORD` | optional — overrides `Admin@123` |
+| | `DEFAULT_USER_PASSWORD` | optional — overrides `User@123` |
 | `frontend/.env` | `VITE_API_URL` | `http://localhost:3000/api` |
 
 > Tests never touch your dev data — the backend suite runs against a separate `car_dealership_test` database that is wiped between tests.

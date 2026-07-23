@@ -1,24 +1,13 @@
 import { request } from './client'
-import { userSchema, adminUserListSchema } from './schemas'
-import type { User, AdminUserList } from './schemas'
-import type { RegisterPayload } from './auth.api'
+import { adminUserListSchema } from './schemas'
+import type { AdminUserList } from './schemas'
 
 /**
- * POST /api/admin/register — creates an ADMIN account. Requires the shared
- * registration secret, sent as the x-admin-secret header.
+ * GET /api/admin/users (admin) — everyone registered, with sign-in history.
+ *
+ * There is deliberately no admin-registration call: admin accounts exist
+ * only because the server creates them on start.
  */
-export function registerAdmin(
-  payload: RegisterPayload,
-  adminSecret: string,
-): Promise<User> {
-  return request('/admin/register', userSchema, {
-    method: 'POST',
-    body: payload,
-    headers: { 'x-admin-secret': adminSecret },
-  })
-}
-
-/** GET /api/admin/users (admin) — everyone registered, with sign-in history. */
 export function listUsers(): Promise<AdminUserList> {
   return request('/admin/users', adminUserListSchema)
 }

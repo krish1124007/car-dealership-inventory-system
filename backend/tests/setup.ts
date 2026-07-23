@@ -3,7 +3,6 @@ import "dotenv/config";
 
 process.env.JWT_SECRET ??= "test-jwt-secret";
 process.env.CORS_ORIGIN ??= "http://localhost:5173";
-process.env.ADMIN_REGISTRATION_SECRET ??= "test-admin-secret";
 
 // Always run the suite against a dedicated test database so the per-test
 // wipes can never touch development data.
