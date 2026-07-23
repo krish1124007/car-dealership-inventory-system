@@ -48,10 +48,13 @@ describe('Navbar', () => {
     )
   })
 
-  it('has no search bar', () => {
+  it('search sits in the navbar and submits to the cars page', async () => {
     renderNavbar()
 
-    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
+    await userEvent.type(screen.getByRole('searchbox'), 'Corolla{enter}')
+
+    expect(await screen.findByText(/cars page/i)).toBeInTheDocument()
+    expect(screen.getByText(/q=Corolla/)).toBeInTheDocument()
   })
 
   it('links to the electric and petrol collections', () => {

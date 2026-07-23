@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
+import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   CarFront,
+  Search,
+  X,
   ChevronDown,
   ShoppingBag,
   Warehouse,
@@ -32,7 +35,9 @@ export function Navbar() {
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [query, setQuery] = useState('')
   const menuRef = useRef<HTMLDivElement | null>(null)
+  const searchRef = useRef<HTMLInputElement | null>(null)
 
   // Close the account dropdown when clicking anywhere else.
   useEffect(() => {
@@ -54,6 +59,12 @@ export function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  function handleSearch(event: FormEvent) {
+    event.preventDefault()
+    const q = query.trim()
+    navigate(q ? `/cars?q=${encodeURIComponent(q)}` : '/cars')
+  }
 
   function handleLogout() {
     setMenuOpen(false)
@@ -106,7 +117,45 @@ export function Navbar() {
           })}
         </nav>
 
-        <div className="ml-auto shrink-0">
+        {/* Search sits between the nav links and the account area. */}
+        <form
+          onSubmit={handleSearch}
+          className="hidden md:block ml-auto w-44 lg:w-60 shrink-0"
+        >
+          <div className="relative">
+            <Search
+              size={15}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            />
+            <label htmlFor="navbar-search" className="sr-only">
+              Search
+            </label>
+            <input
+              id="navbar-search"
+              ref={searchRef}
+              type="search"
+              placeholder="Search cars…"
+              className="w-full h-10 rounded-full bg-gray-900/5 border border-transparent pl-10 pr-9 text-sm text-gray-900 placeholder-gray-500 hover:bg-gray-900/10 focus:outline-none focus:ring-2 focus:ring-blue-500/70 focus:bg-white focus:shadow-md focus:shadow-blue-100/60 transition-all [&::-webkit-search-cancel-button]:hidden"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            {query && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => {
+                  setQuery('')
+                  searchRef.current?.focus()
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
+        </form>
+
+        <div className="ml-auto md:ml-0 shrink-0">
           {user ? (
             <div className="relative" ref={menuRef}>
               <button
