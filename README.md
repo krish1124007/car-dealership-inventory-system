@@ -48,9 +48,13 @@ cp .env.example .env        # VITE_API_URL already points at the local backend
 npm run dev                 # http://localhost:5173
 ```
 
-### First admin
+### Admin access (zero setup)
 
-Open `http://localhost:5173/login` → click **Admin access** under the card (or go to `/admin/register`) and use the `ADMIN_REGISTRATION_SECRET` value from `backend/.env`. You'll be logged in and land on the inventory panel. Customers just use **Register**.
+The server **auto-creates a test admin on startup** — just log in at `/login` with:
+
+> **Email:** `admin@cardealership.com` · **Password:** `Admin@123`
+
+These demo credentials are also shown on the **Admin access** page (`/admin/register`), where additional admins can be registered using the `ADMIN_REGISTRATION_SECRET` from `backend/.env`. Customers just use **Register**.
 
 ### Environment variables
 
@@ -162,4 +166,4 @@ feat(image-upload): local image uploads, Home page rename and filter sidebar (gr
 - [x] Test report — 200 tests, ~97% backend coverage
 - [x] [PROMPTS.md](PROMPTS.md) — full AI prompt history incl. edge-case prompts
 - [ ] Screenshots in `docs/screenshots/` (capture from the running app)
-- [ ] (Optional) Live deployment link
+- [ ] (Optional) Live deployment — step-by-step guide in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) (Vercel + Render + Atlas, free tier)
