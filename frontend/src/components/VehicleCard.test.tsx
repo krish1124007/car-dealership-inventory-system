@@ -28,7 +28,7 @@ describe('VehicleCard', () => {
     expect(screen.getByText(/toyota/i)).toBeInTheDocument()
     expect(screen.getByText(/corolla/i)).toBeInTheDocument()
     expect(screen.getByText(/sedan/i)).toBeInTheDocument()
-    expect(screen.getByText('$20,000')).toBeInTheDocument()
+    expect(screen.getByText('₹20,000')).toBeInTheDocument()
     expect(screen.getByText(/3 in stock/i)).toBeInTheDocument()
   })
 

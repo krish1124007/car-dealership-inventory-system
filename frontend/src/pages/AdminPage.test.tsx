@@ -199,6 +199,6 @@ describe('AdminPage', () => {
       'v1',
       expect.objectContaining({ price: 25000 }),
     )
-    expect(await screen.findByText('$25,000')).toBeInTheDocument()
+    expect(await screen.findByText('₹25,000')).toBeInTheDocument()
   })
 })

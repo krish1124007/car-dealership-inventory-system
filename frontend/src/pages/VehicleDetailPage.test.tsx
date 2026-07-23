@@ -60,7 +60,7 @@ describe('VehicleDetailPage', () => {
     expect(await screen.findByRole('heading', { name: /toyota fortuner/i })).toBeInTheDocument()
     expect(vehiclesApi.getVehicle).toHaveBeenCalledWith('v1')
     expect(screen.getByText(/suv/i)).toBeInTheDocument()
-    expect(screen.getByText('$45,000')).toBeInTheDocument()
+    expect(screen.getByText('₹45,000')).toBeInTheDocument()
     expect(screen.getAllByText(/3 in stock/i).length).toBeGreaterThan(0)
     expect(
       screen.getByRole('img', { name: /toyota fortuner/i }),

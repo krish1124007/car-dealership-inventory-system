@@ -56,7 +56,7 @@ describe('MyPurchasesPage', () => {
     renderPage()
 
     expect(await screen.findByText(/fortuner/i)).toBeInTheDocument()
-    expect(screen.getByText('$45,000')).toBeInTheDocument()
+    expect(screen.getByText('₹45,000')).toBeInTheDocument()
   })
 
   it('shows the vehicle photo on the purchase entry', async () => {
@@ -121,7 +121,7 @@ describe('MyPurchasesPage', () => {
     expect(
       await screen.findByText(/no longer available/i),
     ).toBeInTheDocument()
-    expect(screen.getByText('$45,000')).toBeInTheDocument()
+    expect(screen.getByText('₹45,000')).toBeInTheDocument()
   })
 
   it('shows an empty state when nothing was bought yet', async () => {
