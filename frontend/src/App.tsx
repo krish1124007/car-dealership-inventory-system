@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { SplashScreen } from './components/SplashScreen'
 import { AuthProvider } from './auth/AuthContext'
 import { ToastProvider } from './components/Toast'
 import { ProtectedRoute } from './auth/ProtectedRoute'
@@ -13,7 +14,8 @@ import { AdminPage } from './pages/AdminPage'
 
 function App() {
   return (
-    <AuthProvider>
+    <SplashScreen>
+      <AuthProvider>
       <ToastProvider>
         <BrowserRouter>
           <Routes>
@@ -46,7 +48,8 @@ function App() {
           </Routes>
         </BrowserRouter>
       </ToastProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </SplashScreen>
   )
 }
 
