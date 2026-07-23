@@ -1,258 +1,165 @@
 # 🚗 Car Dealership Inventory System
 
-A full-stack **Car Dealership Inventory System** built for the Incubyte TDD Kata. Customers can browse a showroom, search and filter cars, open a detail page for any listing and purchase it; admins manage the entire inventory (add with photo upload, edit, restock, delete) from a dedicated panel. The whole system was built **test-first** — every feature started with a failing test, visible as a red → green pattern throughout the commit history.
+A full-stack **Car Dealership Inventory System** built for the Incubyte TDD Kata — Node.js/TypeScript + Express + MongoDB on the backend, React + Tailwind on the frontend, built **test-first** end to end (200 tests, red → green visible throughout the commit history).
 
 ---
 
-## Table of Contents
+## 1. About the project
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [API Reference](#api-reference)
-- [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
-- [Running the Tests / Test Report](#running-the-tests--test-report)
-- [TDD Process](#tdd-process)
-- [Screenshots](#screenshots)
-- [My AI Usage](#my-ai-usage)
+Visitors land on a showroom-style home page — a full-screen hero with drive-mode photo tabs (Fast / Furious / Flawless) and auto-scrolling brand logos, a Hyundai Creta feature spotlight with callout markers, and curated **Luxury** / **Most affordable** collections. The **Cars** page lists the full inventory with a filter sidebar (name search, category, a 0-to-max price slider) where **filters apply automatically**. Every card opens a **detail page**; purchasing happens there and is disabled at zero stock. Logged-in users get **My purchases** (photo, price paid, date — the record survives even if the car is later deleted). Admins manage inventory from a dedicated panel: add/edit with **photo upload** (stored in the backend's `public/uploads`), per-row restock and delete. Prices render in **Indian rupees** with lakh/crore grouping.
 
----
+**Key behaviours (all pinned by tests):**
 
-## Features
+- JWT auth with roles — public registration can never create an admin; admins register via a shared secret (`x-admin-secret`).
+- Login answers 401 identically for unknown email and wrong password (no user enumeration).
+- Purchases decrement stock **atomically** (`quantity > 0` guard) — stock can never go negative, even under concurrent purchases — and store an immutable price snapshot.
+- Search supports `q` (partial, case-insensitive, make *or* model) plus make/model/category/price-range filters.
+- Broken/missing vehicle photos fall back to a placeholder; deleted vehicles degrade gracefully in purchase history.
 
-### For every user
-- **Register / Login** — JWT-based authentication; the token carries the user's role and every protected route verifies it.
-- **Home showroom** — all available cars as photo cards with price, category and live stock badges.
-- **Search & filter** — a top search bar that finds cars by name (matches make *or* model, partial and case-insensitive) plus a filter bar with a category dropdown (derived from the actual inventory), min/max price range and one-click reset.
-- **Vehicle detail page** — click **View car** on any card to see the large photo, price and spec tiles. The **Purchase** button lives here and is **disabled when stock is zero**.
-- **Purchase** — an atomic stock decrement on the backend guarantees stock can never go negative, even under concurrent purchases. Every purchase is stored as an immutable record with a price snapshot.
-- **My purchases** — personal purchase history, newest first, with a graceful fallback when a purchased car was later removed from the catalogue.
-- **Toast notifications** — every success and error surfaces as an accessible toast (auto-dismiss + manual close).
+> **Design decision:** browsing (list/search/detail) is intentionally **public** so visitors can window-shop before signing up — the navbar shows *Login* until then. Purchasing, purchase history, uploads and all admin operations remain JWT-protected, with admin-only rules enforced on both the API (403) and the UI (route guards). This is a deliberate storefront-UX deviation from the kata's "all vehicle endpoints protected" reading; flipping the three GET routes back behind `requireAuth` is a one-line-per-route change in `backend/src/routers/vehicle.routes.ts`.
 
-### For admins
-- **Admin registration** — gated by a shared secret (`x-admin-secret` header); public registration can never create an admin.
-- **Inventory panel** — a structured form to add or edit vehicles **with photo upload** (files are stored in the backend's `public/uploads` folder and served statically), plus per-row restock and delete actions in a thumbnail table.
-- **Role enforcement everywhere** — admin-only routes are protected in the UI (route guards + hidden nav) *and* on the API (403 for non-admins), so the frontend can never be bypassed.
+**Tech stack:** Express 5 · Mongoose 9 · JWT + bcrypt · Zod · Multer | React 19 · Vite · Tailwind v4 · React Router 7 · lucide-react | Jest + Supertest | Vitest + React Testing Library
 
 ---
 
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Backend | Node.js, TypeScript, Express 5 |
-| Database | MongoDB with Mongoose 9 |
-| Auth | JWT (`jsonwebtoken`), `bcrypt` password hashing |
-| Validation | Zod (request bodies, query params and API responses) |
-| File uploads | Multer → `backend/public/uploads`, served by `express.static` |
-| Backend tests | Jest + Supertest (integration against a dedicated test database) |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS v4, React Router 7 |
-| UI | lucide-react icons, custom toast system, responsive sidebar layout |
-| Frontend tests | Vitest + React Testing Library (user-event, jsdom) |
-
----
-
-## Project Structure
-
-```
-project/
-├── backend/
-│   ├── src/
-│   │   ├── app.ts               # Express app: routers + central error handler
-│   │   ├── index.ts             # Entry point (loads .env first, connects DB)
-│   │   ├── controllers/         # auth, vehicles, uploads, admin, user
-│   │   ├── middlewares/         # requireAuth (JWT) + requireAdmin (role)
-│   │   ├── models/              # Mongoose schemas: User, Vehicle, Purchase
-│   │   ├── routers/             # Route definitions per resource
-│   │   └── utils/               # asyncHandler, response envelope, login
-│   ├── tests/
-│   │   ├── unit/                # Pure utility tests
-│   │   ├── integration/         # Supertest suites per endpoint group
-│   │   └── helpers/             # Test DB lifecycle, auth + data factories
-│   ├── scripts/seed.ts          # npm run seed → 10 example cars
-│   └── public/uploads/          # Uploaded vehicle photos (gitignored)
-└── frontend/
-    └── src/
-        ├── api/                 # Typed API layer — every response zod-validated
-        ├── auth/                # AuthContext (session persistence) + ProtectedRoute
-        ├── components/          # Sidebar, VehicleCard, Toast, Loading, layout
-        ├── pages/               # Auth slider, Home, Detail, Purchases, Admin
-        └── tests/               # Vitest setup + fetch mock helper
-```
-
----
-
-## API Reference
-
-Every response uses a consistent envelope: `{ statusCode, message, data }`.
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | `/api/auth/register` | Public | Register (always as CUSTOMER) |
-| POST | `/api/auth/login` | Public | Login → JWT + user profile |
-| POST | `/api/admin/register` | `x-admin-secret` header | Create an ADMIN account |
-| GET | `/api/vehicles` | Authenticated | List all vehicles |
-| GET | `/api/vehicles/search` | Authenticated | Search: `q`, `make`, `model`, `category`, `minPrice`, `maxPrice` |
-| GET | `/api/vehicles/:id` | Authenticated | Single vehicle details |
-| POST | `/api/vehicles` | **Admin** | Add a vehicle |
-| PUT | `/api/vehicles/:id` | **Admin** | Update a vehicle |
-| DELETE | `/api/vehicles/:id` | **Admin** | Delete a vehicle |
-| POST | `/api/vehicles/:id/purchase` | Authenticated | Purchase (atomic stock decrement) |
-| POST | `/api/vehicles/:id/restock` | **Admin** | Restock by a positive quantity |
-| POST | `/api/uploads/vehicle-image` | **Admin** | Upload a vehicle photo (multipart) |
-| GET | `/api/users/me` | Authenticated | Own profile |
-| GET | `/api/users/me/purchases` | Authenticated | Own purchase history |
-
----
-
-## Getting Started
+## 2. Setup — run it locally
 
 ### Prerequisites
 
 - **Node.js 20+**
-- **MongoDB** running locally on `mongodb://127.0.0.1:27017` (Community Server or Docker: `docker run -d -p 27017:27017 mongo`)
+- **MongoDB** on `mongodb://127.0.0.1:27017` (Community Server, or `docker run -d -p 27017:27017 mongo`)
 
-### 1. Backend
+### Backend
 
 ```bash
 cd backend
 npm install
-cp .env.example .env        # then edit values (see table below)
-npm run seed                # optional: loads 10 example cars with photos
+cp .env.example .env        # then fill the values (table below)
+npm run seed                # optional: 10 example cars with photos
 npm run dev                 # http://localhost:3000
 ```
 
-### 2. Frontend
+### Frontend
 
 ```bash
 cd frontend
 npm install
-cp .env.example .env        # VITE_API_URL defaults to the local backend
+cp .env.example .env        # VITE_API_URL already points at the local backend
 npm run dev                 # http://localhost:5173
 ```
 
-### 3. Create your first admin
+### First admin
 
-Open `http://localhost:5173/login` → click **Admin access** below the card (or visit `/admin/register`) and fill the form using the value of `ADMIN_REGISTRATION_SECRET` from `backend/.env`. You'll be logged in and land straight on the inventory panel.
+Open `http://localhost:5173/login` → click **Admin access** under the card (or go to `/admin/register`) and use the `ADMIN_REGISTRATION_SECRET` value from `backend/.env`. You'll be logged in and land on the inventory panel. Customers just use **Register**.
 
-Regular customers just use **Register** on the login card.
+### Environment variables
 
----
-
-## Environment Variables
-
-### `backend/.env`
-
-| Variable | Description | Example |
+| File | Variable | Example |
 |---|---|---|
-| `PORT` | API port | `3000` |
-| `MONGODB_URI` | Mongo connection string | `mongodb://127.0.0.1:27017/car_dealership` |
-| `JWT_SECRET` | Secret for signing access tokens | any strong string |
-| `ADMIN_REGISTRATION_SECRET` | Shared secret required to register admins | any strong string |
-| `CORS_ORIGIN` | Frontend origin | `http://localhost:5173` |
+| `backend/.env` | `PORT` | `3000` |
+| | `MONGODB_URI` | `mongodb://127.0.0.1:27017/car_dealership` |
+| | `JWT_SECRET` | any strong string |
+| | `ADMIN_REGISTRATION_SECRET` | any strong string |
+| | `CORS_ORIGIN` | `http://localhost:5173` |
+| `frontend/.env` | `VITE_API_URL` | `http://localhost:3000/api` |
 
-### `frontend/.env`
+> Tests never touch your dev data — the backend suite runs against a separate `car_dealership_test` database that is wiped between tests.
 
-| Variable | Description | Example |
+### API reference
+
+Every response uses the envelope `{ statusCode, message, data }`.
+
+| Method | Endpoint | Access |
 |---|---|---|
-| `VITE_API_URL` | Backend API base URL | `http://localhost:3000/api` |
-
-> The test suites never touch your development data — backend tests run against a separate `car_dealership_test` database that is wiped between tests.
-
----
-
-## Running the Tests / Test Report
-
-```bash
-# Backend (Jest + Supertest)
-cd backend
-npm test                # run all suites
-npm run test:coverage   # with coverage report
-
-# Frontend (Vitest + React Testing Library)
-cd frontend
-npm test
-```
-
-### Latest results
-
-| Suite | Test files | Tests | Result |
-|---|---|---|---|
-| Backend (unit + integration) | 11 | **97** | ✅ all passing |
-| Frontend (components + pages + api) | 18 | **89** | ✅ all passing |
-| **Total** | **29** | **186** | ✅ |
-
-Backend coverage (Jest `--coverage`):
-
-| Metric | Coverage |
-|---|---|
-| Statements | **97.76%** |
-| Branches | **97.18%** |
-| Functions | **97.77%** |
-| Lines | **97.69%** |
-
-Backend integration tests exercise the real Express app against a real MongoDB instance (no mocked database), covering authentication, role rules, validation errors, out-of-stock protection, image uploads to disk and the purchase audit trail. Frontend tests render real components with Testing Library and mock only the API module boundary.
+| POST | `/api/auth/register` · `/api/auth/login` | Public |
+| POST | `/api/admin/register` | `x-admin-secret` header |
+| GET | `/api/vehicles` · `/api/vehicles/search` · `/api/vehicles/:id` | Public browsing |
+| POST | `/api/vehicles` | **Admin** |
+| PUT / DELETE | `/api/vehicles/:id` | **Admin** |
+| POST | `/api/vehicles/:id/purchase` | Authenticated |
+| POST | `/api/vehicles/:id/restock` | **Admin** |
+| POST | `/api/uploads/vehicle-image` | **Admin** (multipart) |
+| GET | `/api/users/me` · `/api/users/me/purchases` | Authenticated |
 
 ---
 
-## TDD Process
-
-Every feature followed **red → green**: a commit that adds failing tests describing the contract, followed by a commit with the minimum implementation that makes them pass. You can trace pairs like these through `git log`:
-
-```
-test(frontend-api): add failing tests for api client ... (red)
-feat(frontend-api): implement api client with zod validation ... (green)
-test(vehicle-detail): add failing tests for the vehicle detail page (red)
-feat(vehicle-detail): vehicle detail page with purchase moved off the cards (green)
-```
-
-Notable behaviours pinned by tests before implementation: registration can never self-assign the admin role, login answers 401 identically for unknown email and wrong password (no user enumeration), purchases decrement atomically and refuse at zero stock, purchase history survives vehicle deletion, and uploaded files must actually exist on disk.
-
----
-
-## Screenshots
-
-> Screenshots of the running application:
+## 3. Screenshots
 
 | Screen | Preview |
 |---|---|
-| Login / Register (sliding card) | ![Login](docs/screenshots/login.png) |
-| Home showroom with search & filters | ![Home](docs/screenshots/home.png) |
+| Home — hero with drive-mode tabs & logo rails | ![Home](docs/screenshots/home.png) |
+| Creta feature spotlight & collections | ![Spotlight](docs/screenshots/spotlight.png) |
+| Cars page — filter sidebar with price slider | ![Cars](docs/screenshots/cars.png) |
 | Vehicle detail with purchase | ![Detail](docs/screenshots/detail.png) |
-| Admin inventory panel | ![Admin](docs/screenshots/admin.png) |
+| Login / Register (sliding card) | ![Login](docs/screenshots/login.png) |
+| Admin inventory panel with photo upload | ![Admin](docs/screenshots/admin.png) |
 | My purchases | ![Purchases](docs/screenshots/purchases.png) |
 
 ---
 
-## My AI Usage
+## 4. My AI Usage
 
-### Which tools I used
+### Which AI tools I used
 
-- **Claude Code** (Anthropic's CLI agent, running the Claude Fable 5 model) — used throughout the project as a pair programmer.
+- **Claude Code** (Anthropic's CLI agent running the Claude Fable 5 model) — my pair programmer for the entire project.
 
 ### How I used it
 
-- **TDD workflow**: for every module I had Claude write the failing test suite first (backend Supertest suites, frontend Testing Library specs), reviewed the contract it encoded, and then had it implement the minimum code to go green. The red/green commit pairs in the history come from this loop.
-- **Boilerplate & scaffolding**: Vite + Tailwind + Vitest setup, the Express app skeleton, Mongoose schemas and the typed frontend API layer with zod validation.
-- **Debugging**: Claude diagnosed several real issues — an ESM import-hoisting bug where `CORS_ORIGIN` was read before `.env` loaded (so the CORS header silently never appeared), Jest × ESM incompatibilities with the generated client, and Mongoose 9 deprecation warnings.
-- **Design research**: I asked it to research professional car-dealership UI patterns on the web, then directed the design myself over several iterations (light theme, sliding auth card, sidebar layout, photo-first listing cards, detail page).
-- **Verification**: after each feature Claude ran the full test suites and also drove the real app in a browser against the live backend (registering, purchasing, uploading an image) before I accepted the change.
+- **TDD loop:** for every module I had Claude write the failing test suite first, reviewed the contract it encoded, then had it implement the minimum code to go green. The `test(...) (red)` / `feat(...) (green)` commit pairs in the history come straight from this loop.
+- **Edge cases:** I pushed edge-case prompts before implementation — concurrent purchase of the last car, admin-role injection on register, user enumeration via login errors, deleted-vehicle purchase history, broken image URLs, nonsense restock quantities — and each became a red test first (the full list is in [PROMPTS.md](PROMPTS.md)).
+- **Boilerplate & scaffolding:** Vite/Tailwind/Vitest setup, Express skeleton, Mongoose schemas, the zod-validated typed API layer, multer upload pipeline.
+- **Debugging:** Claude diagnosed real bugs — an ESM import-hoisting issue where `CORS_ORIGIN` was read before `.env` loaded (CORS header silently missing), Jest × ESM `import.meta` failures, Mongoose 9 deprecations.
+- **Design iterations:** I drove the look through many rounds — light theme, sliding split auth card, top-navbar storefront, full-screen drive-mode hero using my own photo/logo assets, the Creta spotlight — Claude researched professional dealer sites on the web and implemented each direction; I rejected and redirected several versions.
+- **Verification:** after every feature Claude ran both test suites and drove the real app in a browser against the live backend (registering, uploading a photo, purchasing, filtering) before I accepted it.
 
 ### My reflection
 
-AI made the TDD loop dramatically faster — writing an exhaustive failing test suite by hand is usually the part I'd be tempted to shortcut, and having the tests generated first (then reviewed by me) kept the discipline honest. The biggest lesson was that the value stays high only when I stay in the driver's seat: I rejected and redirected designs several times, asked for changes in plain language, and treated every generated test as a contract to read before implementing. AI also caught bugs I would have lost time on (the CORS/env-loading one was subtle), but it equally produced things I had to push back on — which is exactly why every commit was reviewed and test-verified before it went in. Overall it felt like pairing with a very fast junior engineer who never gets tired but always needs a code reviewer.
+AI made the TDD discipline *cheaper to keep*: writing an exhaustive failing suite is the step I'd normally shortcut, and generating it first (then reading it as a contract) kept me honest. The value stayed high only because I stayed in the driver's seat — I redirected designs repeatedly, questioned defaults, and treated every generated test as something to review rather than trust. It caught bugs I'd have burned hours on (the CORS/env-loading one was genuinely subtle), and it also produced things I pushed back on — which is exactly why nothing merged without tests passing and a review. Net effect: it felt like pairing with a tireless, very fast engineer who still needs a decision-maker.
 
-Per the kata's policy, every AI-assisted commit carries a `Co-Authored-By` trailer, and the complete prompt history is in [PROMPTS.md](PROMPTS.md).
+Per the kata policy, every AI-assisted commit carries a `Co-Authored-By` trailer, and my complete prompt history is in [PROMPTS.md](PROMPTS.md).
+
+---
+
+## 5. Test report
+
+```bash
+cd backend  && npm test          # or npm run test:coverage
+cd frontend && npm test
+```
+
+| Suite | Test files | Tests | Result |
+|---|---|---|---|
+| Backend — Jest + Supertest (real MongoDB, no mocks) | 11 | **96** | ✅ all passing |
+| Frontend — Vitest + React Testing Library | 19 | **104** | ✅ all passing |
+| **Total** | **30** | **200** | ✅ |
+
+Backend coverage (`npm run test:coverage`):
+
+| Statements | Branches | Functions | Lines |
+|---|---|---|---|
+| **97.38%** | **97.18%** | **97.77%** | **97.29%** |
+
+Coverage spans auth and role rules, validation failures, out-of-stock and concurrency protection, upload-to-disk verification, search semantics and the purchase audit trail. Frontend tests render real components and mock only at the API-module boundary.
+
+### TDD process
+
+Every feature landed as a red commit (failing tests defining the contract) followed by a green commit (minimum implementation). Trace pairs like:
+
+```
+test(vehicle-detail): add failing tests for the vehicle detail page (red)
+feat(vehicle-detail): vehicle detail page with purchase moved off the cards (green)
+test(image-upload): add failing tests for image upload ... (red)
+feat(image-upload): local image uploads, Home page rename and filter sidebar (green)
+```
 
 ---
 
 ## Deliverables checklist
 
-- [x] Public Git repository with a red → green TDD commit history
-- [x] Comprehensive README (this file)
-- [x] Test report — 186 tests passing, backend coverage ~98% (see above)
-- [x] Mandatory **My AI Usage** section
-- [x] [PROMPTS.md](PROMPTS.md) with the AI chat history
-- [ ] Screenshots in `docs/screenshots/` (see section above)
-- [ ] (Optional) Live deployment
+- [x] Public Git repository with a red → green TDD history
+- [x] Comprehensive README (this file) in the required format
+- [x] **My AI Usage** section
+- [x] Test report — 200 tests, ~97% backend coverage
+- [x] [PROMPTS.md](PROMPTS.md) — full AI prompt history incl. edge-case prompts
+- [ ] Screenshots in `docs/screenshots/` (capture from the running app)
+- [ ] (Optional) Live deployment link
