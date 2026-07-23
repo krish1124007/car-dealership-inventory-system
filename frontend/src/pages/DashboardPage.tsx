@@ -84,9 +84,8 @@ export function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-12">
-        <BannerCarousel />
-
+      <BannerCarousel />
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-12 space-y-12">
         {vehicles === null ? (
           <Loading label="Loading collections…" />
         ) : (

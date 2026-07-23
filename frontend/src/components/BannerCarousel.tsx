@@ -56,7 +56,7 @@ export function BannerCarousel() {
   return (
     <section
       aria-label="Promotions"
-      className="relative rounded-3xl overflow-hidden shadow-lg shadow-gray-200/80 h-72 sm:h-96"
+      className="relative w-full overflow-hidden h-[70vh] min-h-[420px] sm:h-[calc(100vh-4rem)]"
     >
       {banners.map((banner, index) => (
         <div
@@ -75,12 +75,14 @@ export function BannerCarousel() {
           <div
             className={`absolute inset-0 bg-gradient-to-r ${banner.accent} to-transparent`}
           />
-          <div className="absolute inset-0 flex flex-col justify-center px-8 sm:px-14 max-w-2xl">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full max-w-6xl mx-auto px-4 sm:px-6">
+              <div className="max-w-2xl flex flex-col items-start">
             <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
               <Sparkles size={12} />
               {banner.eyebrow}
             </p>
-            <h2 className="font-display mt-3 text-3xl sm:text-5xl font-bold text-white leading-[1.1] tracking-tight">
+            <h2 className="font-display mt-3 text-4xl sm:text-6xl font-bold text-white leading-[1.08] tracking-tight">
               {banner.title}
             </h2>
             <p className="mt-4 text-sm sm:text-base text-white/80 max-w-md leading-relaxed">
@@ -93,11 +95,13 @@ export function BannerCarousel() {
               Browse cars
               <ArrowRight size={15} />
             </Link>
+              </div>
+            </div>
           </div>
         </div>
       ))}
 
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
         {banners.map((banner, index) => (
           <button
             key={banner.title}
