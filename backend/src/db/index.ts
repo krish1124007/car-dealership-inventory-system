@@ -7,6 +7,10 @@ async function connectDB(): Promise<void> {
         console.log("MongoDB connected");
     } catch (error) {
         console.error("MongoDB connection failed:", error);
+        // Exiting is the clearest signal locally, but on Vercel it would kill
+        // the whole instance over a transient Atlas hiccup — rethrow there and
+        // let the caller log it so the next request can retry.
+        if (process.env["VERCEL"]) throw error;
         process.exit(1);
     }
 }

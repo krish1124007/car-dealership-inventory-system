@@ -7,12 +7,16 @@ import { ensureDefaultAdmin } from "./utils/ensureAdmin.js";
 
 const port = process.env.PORT || 3000;
 
-connectDB().then(async () => {
-    await ensureDefaultAdmin();
-    app.listen(port, () => {
-        console.log(`Server is running on port ${port}`);
-    });
-})
+// Connect in the background rather than awaiting: Mongoose buffers queries
+// until the connection is ready, so the server can start listening straight
+// away. Vercel detects the HTTP server from the listen() call during module
+// startup, so it must not be deferred inside a promise chain.
+connectDB()
+    .then(ensureDefaultAdmin)
     .catch((err) => {
-        console.log("Error connecting to database", err);
-    })
+        console.error("Database startup failed", err);
+    });
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});

@@ -1,90 +1,110 @@
-# Deployment Guide — everything on Vercel
+# Deployment Guide — one Vercel project, two services
 
-Both halves of the app deploy to **Vercel from this one repo**, as two Vercel projects with different root directories. The database lives on **MongoDB Atlas** (free tier) and uploaded car photos go to **Vercel Blob**, because Vercel functions have a read-only, ephemeral filesystem.
+The whole app deploys as a **single Vercel project** using [Vercel Services](https://vercel.com/docs/services): the Vite frontend and the Express backend are built separately but served from one domain through one routing table. The database lives on **MongoDB Atlas** and uploaded car photos go to **Vercel Blob**.
 
-| Piece | Where | How |
-|---|---|---|
-| Frontend (Vite/React) | Vercel project #1 | Static build served from the CDN |
-| Backend (Express) | Vercel project #2 | One serverless function ([`backend/api/index.ts`](../backend/api/index.ts)) |
-| Database | MongoDB Atlas (free M0) | Managed MongoDB, connection string |
-| Uploaded photos | Vercel Blob | Attached to the backend project |
+Because both halves share an origin, the frontend calls the API at the relative path `/api` — so **there is no CORS to configure** and no second project to keep in sync.
 
-Total cost: ₹0.
+| Piece | Where |
+|---|---|
+| Frontend (Vite/React) | `frontend` service, serves `/` |
+| Backend (Express) | `backend` service, serves `/api/*` |
+| Database | MongoDB Atlas (free M0) |
+| Uploaded photos | Vercel Blob |
+
+The routing table is [`vercel.json`](../vercel.json) at the repo root:
+
+```json
+{
+  "services": {
+    "frontend": { "root": "frontend", "framework": "vite", "rewrites": [...] },
+    "backend":  { "root": "backend",  "framework": "express", "entrypoint": "src/index.ts" }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "backend" } },
+    { "source": "/(.*)",     "destination": { "service": "frontend" } }
+  ]
+}
+```
+
+Requests to `/api/...` reach Express with the path intact (Vercel does not strip the prefix, which is why the Express routes still mount at `/api`). Everything else goes to the SPA, whose service-level rewrite serves `index.html` so React Router deep links survive a refresh.
 
 ---
 
-## Step 1 — MongoDB Atlas (database)
+## Step 1 — MongoDB Atlas
 
-1. Create a free account at [mongodb.com/atlas](https://www.mongodb.com/atlas) → **Build a Database** → **M0 Free** tier.
-2. Create a database user (username + password) under **Database Access**.
-3. Under **Network Access** → **Add IP Address** → *Allow access from anywhere* (`0.0.0.0/0`) — Vercel's function IPs vary.
-4. **Connect → Drivers** → copy the connection string, e.g.
-   `mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/car_dealership`
-   (add the `/car_dealership` database name before any `?`).
-5. Seed the showroom once from your machine against Atlas:
+1. Create a free account at [mongodb.com/atlas](https://www.mongodb.com/atlas) → **Build a Database** → **M0 Free**.
+2. Create a database user under **Database Access**.
+3. Under **Network Access** → **Add IP Address** → allow `0.0.0.0/0` (Vercel's IPs vary).
+4. **Connect → Drivers** → copy the connection string and add the database name before any `?`, so it ends `/car_dealership`.
+5. Seed the showroom once from your machine:
    ```bash
-   cd backend
-   MONGODB_URI="<atlas-uri>" npm run seed
+   cd backend && MONGODB_URI="<atlas-uri>" npm run seed
    ```
 
-## Step 2 — Backend project on Vercel
+## Step 2 — Create the Vercel project
 
-1. Push this repo to GitHub, then at [vercel.com](https://vercel.com) → **Add New → Project** → import the repo.
-2. Settings:
-   - **Root Directory:** `backend`
-   - **Framework Preset:** Other
-3. **Storage → Create Database → Blob** → attach the new Blob store to this project. This injects `BLOB_READ_WRITE_TOKEN`, which flips the upload controller from local disk to Blob automatically.
-4. **Environment variables:**
+1. Push the repo to GitHub, then [vercel.com](https://vercel.com) → **Add New → Project** → import it.
+2. Leave the **Root Directory** as the repo root — the services in `vercel.json` point at `frontend/` and `backend/` themselves.
+3. In **Settings → Build and Deployment**, set the **Framework Preset to `Services`**. A project only builds as services when this is selected *and* a `services` key exists in `vercel.json`.
+
+> Services requires the **Services** permission on your Vercel account. If the `Services` framework preset isn't offered, your plan doesn't have it — use the two-project fallback at the bottom of this page.
+
+## Step 3 — Storage and environment variables
+
+1. **Storage → Create Database → Blob** → attach it to the project. This injects `BLOB_READ_WRITE_TOKEN`, which switches uploads from local disk to Blob. This is not optional on Vercel: `express.static()` does not serve files there and the filesystem is read-only, so disk uploads cannot work.
+2. Add these environment variables:
 
    | Key | Value |
    |---|---|
    | `MONGODB_URI` | your Atlas connection string |
    | `JWT_SECRET` | a long random string |
    | `ADMIN_REGISTRATION_SECRET` | a long random string |
-   | `CORS_ORIGIN` | your frontend URL (add after Step 3, e.g. `https://your-app.vercel.app`) |
+   | `VITE_API_URL` | `/api` |
 
-5. Deploy. Note the backend URL, e.g. `https://car-dealership-api.vercel.app`.
-   - [`backend/vercel.json`](../backend/vercel.json) routes every request into the function; Express handles the `/api/...` paths exactly as it does locally.
-   - On the first (cold) request the function connects to Atlas and **auto-creates the demo admin** (`admin@cardealership.com` / `Admin@123` — override via `DEFAULT_ADMIN_EMAIL` / `DEFAULT_ADMIN_PASSWORD` for a public deployment).
+   Generate each secret with:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+   ```
 
-## Step 3 — Frontend project on Vercel
+   `CORS_ORIGIN` is not needed — frontend and backend share an origin.
 
-1. **Add New → Project** → import the **same repo** again.
-2. Settings:
-   - **Root Directory:** `frontend`
-   - **Framework Preset:** Vite (auto-detected; build `npm run build`, output `dist`)
-3. **Environment variable:**
+## Step 4 — Deploy and verify
 
-   | Key | Value |
-   |---|---|
-   | `VITE_API_URL` | `https://<your-backend>.vercel.app/api` |
+Deploy. On the first request the backend connects to Atlas and auto-creates the demo admin (`admin@cardealership.com` / `Admin@123`).
 
-4. Deploy. The included [`frontend/vercel.json`](../frontend/vercel.json) rewrites every route to `index.html` so React Router deep links (`/cars`, `/vehicles/:id`, …) work on refresh.
-5. Copy the frontend URL → back in the **backend** project set `CORS_ORIGIN` to it → redeploy the backend.
-
-From now on every push to `main` redeploys both projects together.
-
-## Step 4 — Verify
-
-- Open the frontend URL → the car-loader splash, hero and seeded showroom should appear.
-- Log in with the demo admin → add a car with photos → they upload to Blob and appear on Home/Cars.
+- Open the deployment URL → hero, seeded showroom and collections should render.
+- Log in as the admin → add a car with several photos → they upload to Blob and appear on Home/Cars.
 - Register a customer → purchase from a detail page → check **My purchases**.
 
-## How the backend runs on Vercel
+> **Before sharing this publicly**, set `DEFAULT_ADMIN_EMAIL` and `DEFAULT_ADMIN_PASSWORD` to private values — otherwise anyone who reads this repo can log in as an administrator.
 
-Locally `src/index.ts` starts a long-lived server with `app.listen()`. On Vercel that file is never used — [`backend/api/index.ts`](../backend/api/index.ts) is the entry instead: it connects to Mongo once per cold start (cached across warm invocations), runs the default-admin bootstrap, and hands each request to the same Express `app`. No code changes are needed between the two environments; uploads pick Blob vs disk based on `BLOB_READ_WRITE_TOKEN`.
+## How the backend runs
+
+Vercel's Express support detects the HTTP server from the `app.listen()` call in [`backend/src/index.ts`](../backend/src/index.ts) during module startup, then routes requests to it internally (the port only matters locally). The Express app becomes a single Vercel Function on Fluid compute.
+
+That detection is why `index.ts` starts listening immediately instead of waiting on the database: `connectDB()` runs in the background and Mongoose buffers queries until the connection is ready. Locally a failed connection still exits with a clear error; on Vercel it is logged and rethrown instead, so one bad connection doesn't kill the instance.
+
+Nothing differs between local and deployed code — uploads pick Blob or disk based on whether `BLOB_READ_WRITE_TOKEN` exists.
+
+## Local development
+
+Unchanged: `npm run dev` in `backend/` and `frontend/` as before. To exercise the real service routing locally instead, use the Vercel CLI from the repo root:
+
+```bash
+vercel dev
+```
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---|---|
-| Browser console shows CORS errors | `CORS_ORIGIN` on the backend project must exactly match the frontend origin (scheme + host, no trailing slash) |
-| `/cars` 404s on refresh | `frontend/vercel.json` missing — the SPA rewrite handles client routes |
-| API 500s with a Mongo connection error | Check `MONGODB_URI` and that Atlas Network Access allows `0.0.0.0/0` |
-| Image upload returns 500 | The Blob store isn't attached — `BLOB_READ_WRITE_TOKEN` must exist on the backend project |
+| Build ignores `services` | Framework Preset isn't set to `Services` (Step 2.3) |
+| `/api/...` returns the SPA | Rewrite order matters — the `/api/(.*)` rule must come before the catch-all |
+| `/cars` 404s on refresh | The frontend service's `rewrites` entry to `/index.html` is missing |
+| Image upload 500s | Blob store not attached, so `BLOB_READ_WRITE_TOKEN` is absent |
+| API 500s with a Mongo error | Check `MONGODB_URI` and that Atlas allows `0.0.0.0/0` |
 | Empty showroom | Run the seed against the Atlas URI (Step 1.5) |
-| First request after a while is slow | Serverless cold start + fresh Mongo connection; subsequent requests are fast |
 
-## Alternative: backend on Render
+## Fallback: two separate projects
 
-If you'd rather run the backend as a classic long-lived server (no Blob needed, disk uploads work as in dev), deploy `backend/` to a Render free web service instead: build `npm install && npm run build`, start `npm start`, same env vars minus the Blob token. Everything else in this guide stays the same.
+If your account lacks Services, deploy the halves as two Vercel projects from the same repo — one with Root Directory `frontend`, one with `backend` (the frontend keeps its own [`frontend/vercel.json`](../frontend/vercel.json) SPA rewrite). In that setup the origins differ, so you must set `VITE_API_URL` to the full backend URL and `CORS_ORIGIN` on the backend to the frontend URL. Everything else in this guide is identical.
