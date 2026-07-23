@@ -24,6 +24,12 @@ Visitors land on a showroom-style home page — a full-screen hero with drive-mo
 
 **Tech stack:** Express 5 · Mongoose 9 · JWT + bcrypt · Zod · Multer | React 19 · Vite · Tailwind v4 · React Router 7 · lucide-react | Jest + Supertest | Vitest + React Testing Library
 
+> **Backend scaffolded with my own npm package.** The Express + TypeScript + MongoDB skeleton comes from [`create-nodets-app-nish`](https://www.npmjs.com/package/create-nodets-app-nish) — a CLI I wrote and published to npm myself — so the project started from my own conventions rather than a copied boilerplate.
+>
+> ```bash
+> npx create-nodets-app-nish backend
+> ```
+
 ---
 
 ## 2. Setup — run it locally
@@ -34,6 +40,8 @@ Visitors land on a showroom-style home page — a full-screen hero with drive-mo
 - **MongoDB** on `mongodb://127.0.0.1:27017` (Community Server, or `docker run -d -p 27017:27017 mongo`)
 
 ### Backend
+
+The folder was generated with my own scaffolding CLI, [`create-nodets-app-nish`](https://www.npmjs.com/package/create-nodets-app-nish) (`npx create-nodets-app-nish backend`); to run the project you only need the steps below.
 
 ```bash
 cd backend
