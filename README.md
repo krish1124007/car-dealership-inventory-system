@@ -91,15 +91,47 @@ Every response uses the envelope `{ statusCode, message, data }`.
 
 ## 3. Screenshots
 
-| Screen | Preview |
-|---|---|
-| Home — hero with drive-mode tabs & logo rails | ![Home](docs/screenshots/home.png) |
-| Creta feature spotlight & collections | ![Spotlight](docs/screenshots/spotlight.png) |
-| Cars page — filter sidebar with price slider | ![Cars](docs/screenshots/cars.png) |
-| Vehicle detail with purchase | ![Detail](docs/screenshots/detail.png) |
-| Login / Register (sliding card) | ![Login](docs/screenshots/login.png) |
-| Admin inventory panel with photo upload | ![Admin](docs/screenshots/admin.png) |
-| My purchases | ![Purchases](docs/screenshots/purchases.png) |
+### Landing page
+
+The featured-car hero: one car centred with its name set huge behind it, sliding to the next every few seconds.
+
+![Landing page](docs/screenshots/landing.png)
+
+### Feature spotlight
+
+Numbered callouts pinned to the actual features of the car, with colour swatches that swap the photo.
+
+![Feature spotlight](docs/screenshots/features.png)
+
+### Curated collections
+
+Luxury and most-affordable collections, each card showing live stock and opening the full listing.
+
+![Curated collections](docs/screenshots/card-collection.png)
+
+### Connected brands
+
+The brands band, with the logo rails scrolling in opposite directions.
+
+![Connected brands](docs/screenshots/branding.png)
+
+### Closing invite & footer
+
+The closing showroom invite that ends the landing page.
+
+![Closing invite and footer](docs/screenshots/contact.png)
+
+### Vehicle details
+
+Photo gallery — click a thumbnail to bring it up top — alongside the specs and the purchase action.
+
+![Vehicle details](docs/screenshots/detail-card.png)
+
+### Admin panel
+
+Sidebar sections for inventory, users and messages; the inventory form handles multi-photo upload, fuel type and the pre-launch flag.
+
+![Admin panel](docs/screenshots/admin.png)
 
 ---
 
