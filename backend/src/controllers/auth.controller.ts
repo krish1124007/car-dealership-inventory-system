@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { User } from "../models/user.models.js";
 import { asyncHandler } from "../utils/asyncHandler.js";

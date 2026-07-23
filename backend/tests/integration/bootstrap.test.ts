@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { useDb, User } from "../helpers/db.js";
 import { createUser } from "../helpers/auth.js";
 import { Role } from "../../src/models/user.models.js";

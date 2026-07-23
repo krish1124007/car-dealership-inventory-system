@@ -1,5 +1,5 @@
 import request from "supertest";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { app } from "../../src/app.js";
 import { useDb, User } from "../helpers/db.js";
 
