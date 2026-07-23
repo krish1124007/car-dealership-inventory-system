@@ -28,9 +28,11 @@ const fortuner: Vehicle = {
   imageUrl: 'https://example.com/fortuner.jpg',
 }
 
-function renderDetail() {
-  setToken('jwt')
-  localStorage.setItem('authUser', JSON.stringify(customer))
+function renderDetail(loggedIn = true) {
+  if (loggedIn) {
+    setToken('jwt')
+    localStorage.setItem('authUser', JSON.stringify(customer))
+  }
   return render(
     <AuthProvider>
       <ToastProvider>
@@ -108,6 +110,16 @@ describe('VehicleDetailPage', () => {
     renderDetail()
 
     expect(await screen.findByText(/vehicle not found/i)).toBeInTheDocument()
+  })
+
+  it('sends logged-out visitors to login when they try to purchase', async () => {
+    renderDetail(false)
+
+    await screen.findByRole('heading', { name: /toyota fortuner/i })
+    await userEvent.click(screen.getByRole('button', { name: /purchase/i }))
+
+    expect(await screen.findByText('LOGIN PAGE')).toBeInTheDocument()
+    expect(vehiclesApi.purchaseVehicle).not.toHaveBeenCalled()
   })
 
   it('links back to the home page', async () => {

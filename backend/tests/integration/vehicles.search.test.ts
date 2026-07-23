@@ -17,10 +17,13 @@ describe(`GET ${ENDPOINT}`, () => {
         await createVehicle({ make: "Tesla", model: "Model Y", category: "SUV", price: 60000 });
     }
 
-    it("rejects unauthenticated requests with 401", async () => {
+    it("allows searching without a token", async () => {
+        await seedInventory();
+
         const res = await request(app).get(ENDPOINT).query({ make: "Toyota" });
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(200);
+        expect(res.body.data).toHaveLength(2);
     });
 
     it("filters by make", async () => {

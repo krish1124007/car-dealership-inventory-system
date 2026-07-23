@@ -13,18 +13,13 @@ describe("Vehicle CRUD", () => {
     useDb();
 
     describe("GET /api/vehicles", () => {
-        it("rejects unauthenticated requests with 401", async () => {
+        it("allows browsing the list without a token", async () => {
+            await createVehicle({ make: "Toyota", model: "Corolla" });
+
             const res = await request(app).get("/api/vehicles");
 
-            expect(res.status).toBe(401);
-        });
-
-        it("rejects an invalid token with 401", async () => {
-            const res = await request(app)
-                .get("/api/vehicles")
-                .set("Authorization", "Bearer not-a-real-token");
-
-            expect(res.status).toBe(401);
+            expect(res.status).toBe(200);
+            expect(res.body.data).toHaveLength(1);
         });
 
         it("returns all vehicles for an authenticated customer", async () => {
@@ -153,12 +148,13 @@ describe("Vehicle CRUD", () => {
     });
 
     describe("GET /api/vehicles/:id", () => {
-        it("rejects unauthenticated requests with 401", async () => {
+        it("allows viewing a vehicle without a token", async () => {
             const vehicle = await createVehicle();
 
             const res = await request(app).get(`/api/vehicles/${vehicle.id}`);
 
-            expect(res.status).toBe(401);
+            expect(res.status).toBe(200);
+            expect(res.body.data.id).toBe(vehicle.id);
         });
 
         it("returns the vehicle details for any authenticated user", async () => {
