@@ -13,17 +13,17 @@ import {
 
 const vehicleRouter = Router();
 
-// Every vehicle endpoint requires authentication.
-vehicleRouter.use(requireAuth);
-
+// Browsing is public — anyone can window-shop the inventory.
 // /search must be registered before the /:id routes.
 vehicleRouter.get("/search", searchVehicles);
 vehicleRouter.get("/", listVehicles);
 vehicleRouter.get("/:id", getVehicle);
-vehicleRouter.post("/", requireAdmin, createVehicle);
-vehicleRouter.put("/:id", requireAdmin, updateVehicle);
-vehicleRouter.delete("/:id", requireAdmin, deleteVehicle);
-vehicleRouter.post("/:id/purchase", purchaseVehicle);
-vehicleRouter.post("/:id/restock", requireAdmin, restockVehicle);
+
+// Purchasing requires a logged-in user; management requires an admin.
+vehicleRouter.post("/", requireAuth, requireAdmin, createVehicle);
+vehicleRouter.put("/:id", requireAuth, requireAdmin, updateVehicle);
+vehicleRouter.delete("/:id", requireAuth, requireAdmin, deleteVehicle);
+vehicleRouter.post("/:id/purchase", requireAuth, purchaseVehicle);
+vehicleRouter.post("/:id/restock", requireAuth, requireAdmin, restockVehicle);
 
 export { vehicleRouter };

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   CarFront,
@@ -13,11 +13,14 @@ import { Loading } from '../components/Loading'
 import { useToast } from '../components/Toast'
 import { formatPrice } from '../components/VehicleCard'
 import { getVehicle, purchaseVehicle } from '../api/vehicles.api'
+import { useAuth } from '../auth/AuthContext'
 import type { Vehicle } from '../api/schemas'
 
-/** Full listing view: everyone can look; purchasing happens here. */
+/** Full listing view: everyone can look; purchasing needs a login. */
 export function VehicleDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [vehicle, setVehicle] = useState<Vehicle | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [purchasing, setPurchasing] = useState(false)
@@ -37,6 +40,10 @@ export function VehicleDetailPage() {
 
   async function handlePurchase() {
     if (!vehicle) return
+    if (!user) {
+      navigate('/login')
+      return
+    }
     setPurchasing(true)
     try {
       const result = await purchaseVehicle(vehicle.id)

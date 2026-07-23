@@ -61,7 +61,7 @@ describe('CarsPage', () => {
     renderCars()
 
     await screen.findByText(/wrangler/i)
-    await userEvent.type(screen.getByRole('searchbox'), 'Toyota')
+    await userEvent.type(screen.getByRole('searchbox', { name: /search by name/i }), 'Toyota')
     await userEvent.click(screen.getByRole('button', { name: /apply/i }))
 
     expect(vehiclesApi.searchVehicles).toHaveBeenCalledWith(
@@ -112,7 +112,7 @@ describe('CarsPage', () => {
     renderCars()
 
     await screen.findByText(/wrangler/i)
-    await userEvent.type(screen.getByRole('searchbox'), 'Toyota')
+    await userEvent.type(screen.getByRole('searchbox', { name: /search by name/i }), 'Toyota')
     await userEvent.click(screen.getByRole('button', { name: /apply/i }))
     await waitFor(() =>
       expect(screen.queryByText(/wrangler/i)).not.toBeInTheDocument(),
@@ -128,7 +128,7 @@ describe('CarsPage', () => {
     renderCars()
 
     await screen.findByText(/wrangler/i)
-    await userEvent.type(screen.getByRole('searchbox'), 'Ferrari')
+    await userEvent.type(screen.getByRole('searchbox', { name: /search by name/i }), 'Ferrari')
     await userEvent.click(screen.getByRole('button', { name: /apply/i }))
 
     expect(await screen.findByText(/no vehicles found/i)).toBeInTheDocument()
