@@ -99,10 +99,7 @@ export function CarsPage() {
   }
 
   return (
-    <AppLayout
-      title="All cars"
-      subtitle="Filter the inventory and find the one made for you."
-    >
+    <AppLayout>
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         <form
           onSubmit={(e) => e.preventDefault()}
