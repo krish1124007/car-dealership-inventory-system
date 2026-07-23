@@ -20,14 +20,18 @@ describe("ensureDefaultAdmin", () => {
         ).resolves.toBe(true);
     });
 
-    it("does nothing when an admin already exists", async () => {
+    it("still creates the default admin when a different admin exists, so the demo credentials always work", async () => {
         await createUser(Role.ADMIN);
 
         await ensureDefaultAdmin();
 
+        const demo = await User.findOne({
+            email: "admin@cardealership.com",
+        });
+        expect(demo).not.toBeNull();
         await expect(
             User.countDocuments({ role: Role.ADMIN })
-        ).resolves.toBe(1);
+        ).resolves.toBe(2);
     });
 
     it("is idempotent across repeated startups", async () => {

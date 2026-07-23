@@ -138,7 +138,23 @@ export function AdminRegisterPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        {/* Demo credentials so evaluators can explore without setup. */}
+        <div className="mt-6 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/60 p-4 text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
+            Test admin — auto-created on server start
+          </p>
+          <p className="mt-2 text-sm text-gray-700">
+            Email: <span className="font-mono font-semibold">admin@cardealership.com</span>
+          </p>
+          <p className="text-sm text-gray-700">
+            Password: <span className="font-mono font-semibold">Admin@123</span>
+          </p>
+          <p className="mt-2 text-xs text-gray-500">
+            Use these on the sign-in page to explore the admin panel.
+          </p>
+        </div>
+
+        <p className="mt-5 text-center text-sm text-gray-500">
           Not an admin?{' '}
           <Link
             to="/login"
