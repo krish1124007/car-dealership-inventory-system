@@ -57,16 +57,12 @@ describe('Navbar', () => {
     expect(screen.getByText(/q=Corolla/)).toBeInTheDocument()
   })
 
-  it('links to the electric and petrol collections', () => {
+  it('links to the electric collection', () => {
     renderNavbar()
 
     expect(
       screen.getByRole('link', { name: /electric cars/i }),
     ).toHaveAttribute('href', '/cars?category=EV')
-    expect(screen.getByRole('link', { name: /petrol cars/i })).toHaveAttribute(
-      'href',
-      '/cars?fuel=petrol',
-    )
   })
 
   it('links to the pre-launch collection', () => {
@@ -75,6 +71,29 @@ describe('Navbar', () => {
     expect(
       screen.getByRole('link', { name: /pre-launch cars/i }),
     ).toHaveAttribute('href', '/cars?type=pre-launch')
+  })
+
+  it('links to the contact page after the collections', () => {
+    renderNavbar()
+
+    const links = screen.getAllByRole('link')
+    const labels = links.map((link) => link.textContent?.trim())
+
+    expect(screen.getByRole('link', { name: /^contact$/i })).toHaveAttribute(
+      'href',
+      '/contact',
+    )
+    expect(labels.indexOf('Contact')).toBeGreaterThan(
+      labels.indexOf('Pre-launch cars'),
+    )
+  })
+
+  it('no longer offers a petrol collection', () => {
+    renderNavbar()
+
+    expect(
+      screen.queryByRole('link', { name: /petrol/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('is transparent at the top and turns solid after scrolling', () => {

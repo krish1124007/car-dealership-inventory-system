@@ -13,22 +13,31 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 
+/** Each link decides for itself when it is the current page, because they
+ *  are not all collections of `/cars`. */
 const navLinks = [
-  { label: 'Cars', to: '/cars', match: (search: string) => search === '' },
+  {
+    label: 'Cars',
+    to: '/cars',
+    isActive: (path: string, search: string) =>
+      path === '/cars' && search === '',
+  },
   {
     label: 'Electric cars',
     to: '/cars?category=EV',
-    match: (search: string) => search.includes('category=EV'),
-  },
-  {
-    label: 'Petrol cars',
-    to: '/cars?fuel=petrol',
-    match: (search: string) => search.includes('fuel=petrol'),
+    isActive: (path: string, search: string) =>
+      path === '/cars' && search.includes('category=EV'),
   },
   {
     label: 'Pre-launch cars',
     to: '/cars?type=pre-launch',
-    match: (search: string) => search.includes('type=pre-launch'),
+    isActive: (path: string, search: string) =>
+      path === '/cars' && search.includes('type=pre-launch'),
+  },
+  {
+    label: 'Contact',
+    to: '/contact',
+    isActive: (path: string) => path === '/contact',
   },
 ]
 
@@ -104,8 +113,7 @@ export function Navbar() {
 
         <nav className="mx-auto flex items-center gap-1">
           {navLinks.map((link) => {
-            const active =
-              location.pathname === '/cars' && link.match(location.search)
+            const active = link.isActive(location.pathname, location.search)
             return (
               <Link
                 key={link.label}

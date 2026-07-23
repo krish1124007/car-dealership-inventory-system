@@ -243,10 +243,13 @@ export function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 px-4 py-10">
-      <div className="w-full max-w-3xl bg-white rounded-3xl border border-gray-200 shadow-xl shadow-gray-200/60 overflow-hidden flex flex-col md:block md:h-[600px]">
+      {/* `relative` is load-bearing: the halves below position against this
+          card. The form half stays in normal flow so the card grows with its
+          content instead of clipping a taller form. */}
+      <div className="relative w-full max-w-3xl bg-white rounded-3xl border border-gray-200 shadow-xl shadow-gray-200/60 overflow-hidden flex flex-col md:block">
         {/* Form half: left in login mode, slides right in register mode. */}
         <div
-          className={`flex items-center justify-center p-8 sm:p-10 md:absolute md:top-0 md:left-0 md:w-1/2 md:h-full transition-transform duration-700 ease-in-out ${
+          className={`flex items-center justify-center p-8 sm:p-10 md:w-1/2 md:min-h-[560px] transition-transform duration-700 ease-in-out ${
             isRegister ? 'md:translate-x-full' : 'md:translate-x-0'
           }`}
         >
@@ -255,7 +258,7 @@ export function AuthPage() {
 
         {/* Blue overlay: right in login mode, slides left in register mode. */}
         <div
-          className={`bg-gradient-to-br from-blue-500 to-blue-700 text-white flex flex-col items-center justify-center text-center gap-4 p-8 sm:p-10 md:absolute md:top-0 md:left-1/2 md:w-1/2 md:h-full transition-transform duration-700 ease-in-out ${
+          className={`bg-gradient-to-br from-blue-500 to-blue-700 text-white flex flex-col items-center justify-center text-center gap-4 p-8 sm:p-10 md:absolute md:inset-y-0 md:left-1/2 md:w-1/2 transition-transform duration-700 ease-in-out ${
             isRegister ? 'md:-translate-x-full' : 'md:translate-x-0'
           }`}
         >
