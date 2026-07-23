@@ -11,7 +11,7 @@ export function Footer() {
             alt=""
             className="w-8 h-8 rounded-lg object-cover"
           />
-          <span className="font-display font-bold text-gray-900">
+          <span className="font-hero text-xl text-gray-900 tracking-wide leading-none pt-0.5">
             Car Dealership
           </span>
         </div>

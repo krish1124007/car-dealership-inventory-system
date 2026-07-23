@@ -56,10 +56,10 @@ export function FeaturedCarHero() {
                   : 'translate-y-16 opacity-0'
             }`}
           >
-            <p className="text-lg sm:text-3xl font-bold uppercase tracking-[0.4em] text-gray-800">
+            <p className="font-hero text-2xl sm:text-4xl uppercase tracking-[0.45em] text-gray-800">
               {car.brand}
             </p>
-            <p className="font-display text-[21vw] sm:text-[16vw] leading-[0.9] font-extrabold uppercase text-gray-900/10 -mt-1">
+            <p className="font-hero text-[24vw] sm:text-[19vw] leading-[0.85] uppercase text-gray-900/10 -mt-1">
               {car.model}
             </p>
           </div>
@@ -85,7 +85,7 @@ export function FeaturedCarHero() {
             <img
               src={car.photo}
               alt={`${car.brand} ${car.model}`}
-              className="w-[min(96%,66rem)] max-h-[64%] object-contain drop-shadow-2xl"
+              className="w-[min(100%,76rem)] max-h-[72%] object-contain drop-shadow-2xl"
             />
           </div>
         )

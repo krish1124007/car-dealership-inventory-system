@@ -78,7 +78,7 @@ export function Navbar() {
             alt=""
             className="w-9 h-9 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform"
           />
-          <span className="font-display hidden sm:block font-bold text-gray-900 tracking-tight">
+          <span className="font-hero hidden sm:block text-2xl text-gray-900 tracking-wide leading-none pt-0.5">
             Car Dealership
           </span>
         </Link>
