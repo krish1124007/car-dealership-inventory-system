@@ -7,11 +7,16 @@ import { put } from "@vercel/blob";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { returnResponse } from "../utils/apiResponse.js";
 
-// On Vercel the filesystem is read-only and wiped between invocations, so
-// uploads go to Vercel Blob (the token is injected by the Blob store
-// integration). Local dev keeps writing to public/uploads on disk, which
-// express.static("public") serves at /uploads/<filename>.
-const useBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+// Where uploads go depends on the environment:
+//   - Vercel Blob when its token is present (the Blob store injects it)
+//   - local disk otherwise, served by express.static("public") at /uploads/…
+// Serverless filesystems are read-only, so disk is never an option there —
+// falling back to it would crash the whole app at import time and take down
+// every unrelated route with it.
+const blobToken = process.env["BLOB_READ_WRITE_TOKEN"];
+const onServerless = Boolean(process.env["VERCEL"]);
+const useBlob = Boolean(blobToken);
+const useDisk = !useBlob && !onServerless;
 
 const uploadDir = path.join(process.cwd(), "public", "uploads");
 
@@ -20,16 +25,21 @@ function uniqueName(originalname: string): string {
 }
 
 function diskStorage() {
-    fs.mkdirSync(uploadDir, { recursive: true });
     return multer.diskStorage({
-        destination: (_req, _file, cb) => cb(null, uploadDir),
+        // Created lazily, per upload, so an unwritable filesystem can never
+        // break module loading.
+        destination: (_req, _file, cb) => {
+            fs.mkdir(uploadDir, { recursive: true }, (err) => {
+                cb(err, uploadDir);
+            });
+        },
         filename: (_req, file, cb) => cb(null, uniqueName(file.originalname)),
     });
 }
 
 /** Multer middleware: single "image" field, images only, max 5 MB. */
 const uploadImage = multer({
-    storage: useBlob ? multer.memoryStorage() : diskStorage(),
+    storage: useDisk ? diskStorage() : multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith("image/")),
 }).single("image");
@@ -37,6 +47,16 @@ const uploadImage = multer({
 /** POST /api/uploads/vehicle-image (admin) — returns the public url. */
 const handleVehicleImageUpload = asyncHandler(
     async (req: Request, res: Response) => {
+        if (!useBlob && !useDisk) {
+            returnResponse(
+                res,
+                503,
+                "Image uploads are not configured — attach a Vercel Blob store to this project",
+                null
+            );
+            return;
+        }
+
         const file = (req as Request & { file?: Express.Multer.File }).file;
         if (!file) {
             returnResponse(res, 400, "An image file is required", null);
