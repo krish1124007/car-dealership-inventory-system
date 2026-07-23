@@ -89,6 +89,26 @@ describe('DashboardPage (home)', () => {
     ).toBeInTheDocument()
   })
 
+  it('switches the spotlight car colour from the swatches', async () => {
+    renderHome()
+
+    const spotlight = screen.getByRole('region', { name: /car spotlight/i })
+    expect(
+      within(spotlight).getByRole('button', { name: /white/i }),
+    ).toBeInTheDocument()
+    expect(
+      within(spotlight).getByRole('button', { name: /black/i }),
+    ).toBeInTheDocument()
+
+    await userEvent.click(
+      within(spotlight).getByRole('button', { name: /brown/i }),
+    )
+
+    expect(
+      within(spotlight).getByRole('img', { name: /hyundai creta/i }),
+    ).toHaveAttribute('src', '/cars/creata-brown.png')
+  })
+
   it('shows the priciest cars in the luxury collection', async () => {
     renderHome()
 
