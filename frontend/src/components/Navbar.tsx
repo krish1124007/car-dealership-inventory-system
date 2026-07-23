@@ -104,7 +104,7 @@ export function Navbar() {
     >
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-          <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-600 text-onaccent flex items-center justify-center shadow-md group-hover:scale-105 group-hover:from-blue-600 group-hover:to-blue-500 transition-all duration-300">
+          <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-600 text-gray-50 flex items-center justify-center shadow-md group-hover:scale-105 group-hover:from-blue-600 group-hover:to-blue-500 transition-all duration-300">
             <CarFront size={18} />
           </span>
           <span className="font-hero hidden sm:block text-2xl text-gray-900 tracking-wide leading-none pt-0.5">
@@ -121,7 +121,7 @@ export function Navbar() {
                 to={link.to}
                 className={`px-3 sm:px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
                   active
-                    ? 'bg-gray-900 text-onaccent shadow-sm'
+                    ? 'bg-gray-900 text-gray-50 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-900/5'
                 } ${link.label === 'Cars' ? '' : 'hidden sm:inline-flex'}`}
               >
@@ -235,7 +235,7 @@ export function Navbar() {
           ) : (
             <Link
               to="/login"
-              className="inline-flex items-center gap-1.5 rounded-full bg-gray-900 hover:bg-blue-600 text-onaccent text-sm font-semibold px-5 py-2 shadow-sm transition-colors duration-300"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gray-900 hover:bg-blue-600 text-gray-50 text-sm font-semibold px-5 py-2 shadow-sm transition-colors duration-300"
             >
               <LogIn size={15} />
               Login

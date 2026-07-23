@@ -143,7 +143,7 @@ export function DashboardPage() {
               </p>
               <Link
                 to="/cars"
-                className="mt-7 inline-flex items-center gap-2 rounded-full bg-gray-900 text-onaccent hover:bg-blue-600 text-sm font-semibold px-8 py-3 shadow-lg transition-colors duration-300"
+                className="mt-7 inline-flex items-center gap-2 rounded-full bg-gray-900 text-gray-50 hover:bg-blue-600 text-sm font-semibold px-8 py-3 shadow-lg transition-colors duration-300"
               >
                 Visit our collections
                 <ArrowRight size={15} />

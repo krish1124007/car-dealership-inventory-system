@@ -111,7 +111,7 @@ export function FeaturedCarHero() {
       <div className="absolute inset-x-0 bottom-16 sm:bottom-20 z-10 flex justify-center">
         <Link
           to="/cars"
-          className="inline-flex items-center gap-2 rounded-full bg-gray-900 text-onaccent hover:bg-blue-600 text-sm font-semibold px-8 py-3 shadow-lg transition-colors duration-300"
+          className="inline-flex items-center gap-2 rounded-full bg-gray-900 text-gray-50 hover:bg-blue-600 text-sm font-semibold px-8 py-3 shadow-lg transition-colors duration-300"
         >
           Browse cars
           <ArrowRight size={15} />

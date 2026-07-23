@@ -108,7 +108,7 @@ function PhotoOrder({ vehicle }: { vehicle: Vehicle }) {
               index === 0 ? 'border-blue-400' : 'border-gray-200'
             }`}
           />
-          <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-gray-900 text-onaccent text-[9px] font-bold flex items-center justify-center leading-none">
+          <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-gray-900 text-gray-50 text-[9px] font-bold flex items-center justify-center leading-none">
             {index + 1}
           </span>
         </span>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CarFront, Eye } from 'lucide-react'
+import { CarFront, Eye, LogIn } from 'lucide-react'
+import { useAuth } from '../auth/AuthContext'
 import type { Vehicle } from '../api/schemas'
 
 export function formatPrice(price: number): string {
@@ -10,6 +11,7 @@ export function formatPrice(price: number): string {
 /** Listing card in the classifieds style: white pill badges over the
  * photo, name and price beneath, and an outlined View car action. */
 export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+  const { user } = useAuth()
   const outOfStock = vehicle.quantity === 0
   // Broken image urls fall back to the placeholder instead of a broken icon.
   const [imgFailed, setImgFailed] = useState(false)
@@ -57,12 +59,23 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
           </span>
         </p>
 
+        {/* Signed-out visitors are sent to log in rather than to a page the
+            card implies they can already open. */}
         <Link
-          to={`/vehicles/${vehicle.id}`}
+          to={user ? `/vehicles/${vehicle.id}` : '/login'}
           className="mt-auto w-full inline-flex items-center justify-center gap-2 rounded-xl border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-onaccent text-sm font-bold py-2.5 transition-colors duration-300"
         >
-          <Eye size={16} />
-          View car
+          {user ? (
+            <>
+              <Eye size={16} />
+              View car
+            </>
+          ) : (
+            <>
+              <LogIn size={16} />
+              Login to view
+            </>
+          )}
         </Link>
       </div>
     </div>

@@ -60,18 +60,7 @@ describe('ThemeToggle', () => {
     expect(localStorage.getItem('theme')).toBe('dark')
   })
 
-  it('follows the system preference when nothing was chosen before', () => {
-    vi.stubGlobal(
-      'matchMedia',
-      vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn() }),
-    )
-    renderToggle()
-
-    expect(document.documentElement).toHaveClass('dark')
-  })
-
-  it('a saved choice wins over the system preference', () => {
-    localStorage.setItem('theme', 'light')
+  it('starts light even when the system prefers dark — dark is opt-in', () => {
     vi.stubGlobal(
       'matchMedia',
       vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn() }),
@@ -79,5 +68,12 @@ describe('ThemeToggle', () => {
     renderToggle()
 
     expect(document.documentElement).not.toHaveClass('dark')
+  })
+
+  it('restores a previously chosen dark theme', () => {
+    localStorage.setItem('theme', 'dark')
+    renderToggle()
+
+    expect(document.documentElement).toHaveClass('dark')
   })
 })

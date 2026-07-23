@@ -1,8 +1,10 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { AuthProvider } from '../auth/AuthContext'
 import { VehicleCard } from './VehicleCard'
-import type { Vehicle } from '../api/schemas'
+import { setToken } from '../api/client'
+import type { User, Vehicle } from '../api/schemas'
 
 const vehicle: Vehicle = {
   id: 'v1',
@@ -13,13 +15,31 @@ const vehicle: Vehicle = {
   quantity: 3,
 }
 
-function renderCard(v: Vehicle = vehicle) {
+const customer: User = {
+  id: 'u1',
+  name: 'Krish',
+  email: 'krish@example.com',
+  role: 'CUSTOMER',
+}
+
+function renderCard(v: Vehicle = vehicle, { signedIn = true } = {}) {
+  if (signedIn) {
+    setToken('jwt')
+    localStorage.setItem('authUser', JSON.stringify(customer))
+  }
   return render(
-    <MemoryRouter>
-      <VehicleCard vehicle={v} />
-    </MemoryRouter>,
+    <AuthProvider>
+      <MemoryRouter>
+        <VehicleCard vehicle={v} />
+      </MemoryRouter>
+    </AuthProvider>,
   )
 }
+
+beforeEach(() => {
+  localStorage.clear()
+  setToken(null)
+})
 
 describe('VehicleCard', () => {
   it('shows the vehicle details', () => {
@@ -32,11 +52,21 @@ describe('VehicleCard', () => {
     expect(screen.getByText(/3 in stock/i)).toBeInTheDocument()
   })
 
-  it('links to the vehicle detail page', () => {
+  it('links a signed-in visitor straight to the vehicle detail page', () => {
     renderCard()
 
     const link = screen.getByRole('link', { name: /view car/i })
     expect(link).toHaveAttribute('href', '/vehicles/v1')
+  })
+
+  it('asks a signed-out visitor to log in first', () => {
+    renderCard(vehicle, { signedIn: false })
+
+    const link = screen.getByRole('link', { name: /login to view/i })
+    expect(link).toHaveAttribute('href', '/login')
+    expect(
+      screen.queryByRole('link', { name: /view car/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('shows the out-of-stock badge when the quantity is zero', () => {

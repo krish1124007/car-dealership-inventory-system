@@ -20,13 +20,14 @@ const ThemeContext = createContext<ThemeValue>({
   toggleTheme: () => {},
 })
 
-/** Saved choice first; otherwise follow whatever the operating system says. */
+/**
+ * Everyone starts in light mode. Dark is opt-in — the system preference is
+ * deliberately ignored so a first-time visitor always sees the site the way
+ * it was designed, and only their own choice is remembered.
+ */
 function initialTheme(): Theme {
   const saved = localStorage.getItem(STORAGE_KEY)
-  if (saved === 'light' || saved === 'dark') return saved
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
+  return saved === 'dark' ? 'dark' : 'light'
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
