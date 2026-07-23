@@ -1,6 +1,6 @@
 # 🚗 Car Dealership Inventory System
 
-**[🌐 Live site](https://car-dealership-inventory-system-delta.vercel.app)** · **[🧪 Test report](https://claude.ai/code/artifact/16f81e13-550c-4251-bf54-92354162d31e)** · [test.md](test.md)
+**[🌐 Live site](https://car-dealership-inventory-system-delta.vercel.app)** · [test.md](test.md)
 
 A full-stack **Car Dealership Inventory System** built for the Incubyte TDD Kata — Node.js/TypeScript + Express + MongoDB on the backend, React + Tailwind on the frontend, built **test-first** end to end (278 tests, red → green visible throughout the commit history).
 
