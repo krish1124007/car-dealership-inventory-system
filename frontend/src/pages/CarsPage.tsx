@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import type { FormEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Search, SearchX, RotateCcw, SlidersHorizontal } from 'lucide-react'
+import { SearchX, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { AppLayout } from '../components/AppLayout'
 import { Loading } from '../components/Loading'
 import { VehicleCard } from '../components/VehicleCard'
@@ -50,8 +49,8 @@ export function CarsPage() {
     }
   }
 
+  // Categories and the price cap always come from the full inventory.
   useEffect(() => {
-    // Categories always come from the full inventory.
     listVehicles()
       .then((list) => {
         setCategories([...new Set(list.map((v) => v.category))])
@@ -62,11 +61,22 @@ export function CarsPage() {
         }
       })
       .catch(() => {})
+  }, [])
 
+  // Keep the local search box in sync with the navbar-provided ?q=.
+  useEffect(() => {
     setQuery(urlQuery)
-    void runSearch(urlQuery ? { q: urlQuery } : {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlQuery])
+
+  // Auto-apply: any filter change re-runs the search after a short debounce
+  // (no Apply button needed).
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void runSearch(buildFilters())
+    }, 300)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, category, priceLimit, priceCap])
 
   function buildFilters(): SearchFilters {
     const filters: SearchFilters = {}
@@ -82,16 +92,10 @@ export function CarsPage() {
     return filters
   }
 
-  function handleApply(event: FormEvent) {
-    event.preventDefault()
-    void runSearch(buildFilters())
-  }
-
   function handleReset() {
     setQuery('')
     setCategory('')
     setPriceLimit(priceCap)
-    void runSearch({})
   }
 
   return (
@@ -101,7 +105,7 @@ export function CarsPage() {
     >
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         <form
-          onSubmit={handleApply}
+          onSubmit={(e) => e.preventDefault()}
           className="w-full lg:w-64 shrink-0 bg-white border border-gray-200 rounded-2xl shadow-sm p-5 space-y-6 lg:sticky lg:top-24"
         >
           <div className="flex items-center justify-between">
@@ -194,13 +198,9 @@ export function CarsPage() {
             </p>
           </div>
 
-          <button
-            type="submit"
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold py-2.5 shadow-sm transition"
-          >
-            <Search size={15} />
-            Apply
-          </button>
+          <p className="text-[11px] text-gray-400 text-center">
+            Filters apply automatically.
+          </p>
         </form>
 
         <div className="flex-1 w-full space-y-4">
