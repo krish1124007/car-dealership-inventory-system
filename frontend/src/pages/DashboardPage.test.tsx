@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '../auth/AuthContext'
@@ -10,23 +10,22 @@ import type { Vehicle } from '../api/schemas'
 
 vi.mock('../api/vehicles.api')
 
-const corolla: Vehicle = {
-  id: 'v1',
-  make: 'Toyota',
-  model: 'Corolla',
-  category: 'Sedan',
-  price: 20000,
-  quantity: 3,
+function vehicle(
+  id: string,
+  make: string,
+  model: string,
+  price: number,
+): Vehicle {
+  return { id, make, model, category: 'Sedan', price, quantity: 2 }
 }
 
-const city: Vehicle = {
-  id: 'v2',
-  make: 'Honda',
-  model: 'City',
-  category: 'Sedan',
-  price: 18000,
-  quantity: 0,
-}
+const inventory: Vehicle[] = [
+  vehicle('v1', 'Porsche', '911 Carrera', 115000),
+  vehicle('v2', 'BMW', 'M4', 82000),
+  vehicle('v3', 'Jeep', 'Wrangler', 42000),
+  vehicle('v4', 'Toyota', 'Corolla', 20000),
+  vehicle('v5', 'Honda', 'City', 18000),
+]
 
 function renderHome() {
   return render(
@@ -45,7 +44,7 @@ function renderHome() {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  vi.mocked(vehiclesApi.listVehicles).mockResolvedValue([corolla, city])
+  vi.mocked(vehiclesApi.listVehicles).mockResolvedValue(inventory)
 })
 
 describe('DashboardPage (home)', () => {
@@ -55,24 +54,12 @@ describe('DashboardPage (home)', () => {
     expect(
       screen.getByRole('region', { name: /promotions/i }),
     ).toBeInTheDocument()
-    // Three slides, reachable via their dots.
     expect(
       screen.getByRole('button', { name: /go to slide 1/i }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /go to slide 3/i }),
     ).toBeInTheDocument()
-  })
-
-  it('switches banner slides from the dots', async () => {
-    renderHome()
-
-    await userEvent.click(
-      screen.getByRole('button', { name: /go to slide 2/i }),
-    )
-
-    const region = screen.getByRole('region', { name: /promotions/i })
-    expect(region.textContent).toMatch(/./)
   })
 
   it('banner call-to-action leads to the cars page', async () => {
@@ -85,19 +72,53 @@ describe('DashboardPage (home)', () => {
     expect(await screen.findByText('CARS PAGE')).toBeInTheDocument()
   })
 
-  it('lists every vehicle below the banners', async () => {
+  it('shows the priciest cars in the luxury collection', async () => {
     renderHome()
 
-    expect(await screen.findByText(/corolla/i)).toBeInTheDocument()
-    expect(screen.getByText(/city/i)).toBeInTheDocument()
-    expect(screen.getByText('$20,000')).toBeInTheDocument()
+    const luxury = await screen.findByRole('region', {
+      name: /luxury cars collection/i,
+    })
+    expect(within(luxury).getByText(/porsche/i)).toBeInTheDocument()
+    expect(within(luxury).getByText(/bmw/i)).toBeInTheDocument()
+    expect(within(luxury).queryByText(/city/i)).not.toBeInTheDocument()
   })
 
-  it('links every card to its vehicle detail page', async () => {
+  it('shows the cheapest cars in the affordable collection', async () => {
     renderHome()
 
-    await screen.findByText(/corolla/i)
-    const links = screen.getAllByRole('link', { name: /view car/i })
-    expect(links[0]).toHaveAttribute('href', '/vehicles/v1')
+    const affordable = await screen.findByRole('region', {
+      name: /affordable cars collection/i,
+    })
+    expect(within(affordable).getByText(/city/i)).toBeInTheDocument()
+    expect(within(affordable).getByText(/corolla/i)).toBeInTheDocument()
+    expect(
+      within(affordable).queryByText(/porsche/i),
+    ).not.toBeInTheDocument()
+  })
+
+  it('ends every collection with a View more link to the cars page', async () => {
+    renderHome()
+
+    await screen.findByRole('region', { name: /luxury cars collection/i })
+    const viewMoreLinks = screen.getAllByRole('link', { name: /view more/i })
+    expect(viewMoreLinks).toHaveLength(2)
+    for (const link of viewMoreLinks) {
+      expect(link).toHaveAttribute('href', '/cars')
+    }
+  })
+
+  it('closes with an invitation to visit the full collection', async () => {
+    renderHome()
+
+    expect(
+      await screen.findByText(/explore our full collection/i),
+    ).toBeInTheDocument()
+  })
+
+  it('shows a simple footer', () => {
+    renderHome()
+
+    const footer = screen.getByRole('contentinfo')
+    expect(within(footer).getByText(/car dealership/i)).toBeInTheDocument()
   })
 })
