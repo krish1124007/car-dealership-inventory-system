@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import { CarFront } from 'lucide-react'
 
 /** Images the site needs before the first paint feels complete. */
 const CRITICAL_ASSETS = [
@@ -46,11 +47,18 @@ export function SplashScreen({
   timeoutMs?: number
 }) {
   const [ready, setReady] = useState(false)
+  const [loaded, setLoaded] = useState(0)
 
   useEffect(() => {
     let cancelled = false
 
-    const assets = Promise.all(CRITICAL_ASSETS.map(preloadImage))
+    const assets = Promise.all(
+      CRITICAL_ASSETS.map((src) =>
+        preloadImage(src).then(() => {
+          if (!cancelled) setLoaded((n) => n + 1)
+        }),
+      ),
+    )
     const safetyCap = new Promise<void>((resolve) =>
       setTimeout(resolve, timeoutMs),
     )
@@ -68,13 +76,38 @@ export function SplashScreen({
   }, [minimumMs, timeoutMs])
 
   if (!ready) {
+    // Real progress, not a decorative spinner — the bar tracks how many
+    // critical images have actually settled.
+    const percent = Math.round((loaded / CRITICAL_ASSETS.length) * 100)
+
     return (
       <div
         role="status"
         aria-label="Loading"
-        className="fixed inset-0 z-50 bg-white flex items-center justify-center"
+        className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center gap-8 px-6"
       >
-        <img src="/loaders/loader1.gif" alt="" className="w-72 max-w-[75vw]" />
+        <p className="font-hero text-5xl sm:text-6xl uppercase tracking-[0.18em] text-gray-900 leading-none">
+          Car Dealership
+        </p>
+
+        <div className="relative w-64 max-w-[70vw]">
+          <CarFront
+            size={20}
+            aria-hidden
+            className="absolute bottom-full mb-2 -translate-x-1/2 text-gray-900 transition-[left] duration-500 ease-out"
+            style={{ left: `${percent}%` }}
+          />
+          <span className="block h-[3px] w-full rounded-full bg-gray-200 overflow-hidden">
+            <span
+              className="block h-full rounded-full bg-blue-600 transition-[width] duration-500 ease-out"
+              style={{ width: `${percent}%` }}
+            />
+          </span>
+        </div>
+
+        <p className="text-xs text-gray-400 tabular-nums tracking-wide">
+          Warming up the showroom · {percent}%
+        </p>
       </div>
     )
   }

@@ -3,20 +3,43 @@ import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
 import crypto from "node:crypto";
-import { put } from "@vercel/blob";
+import { v2 as cloudinary } from "cloudinary";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { returnResponse } from "../utils/apiResponse.js";
 
 // Where uploads go depends on the environment:
-//   - Vercel Blob when its token is present (the Blob store injects it)
+//   - Cloudinary when it is configured (CLOUDINARY_URL, or the three
+//     CLOUDINARY_* variables)
 //   - local disk otherwise, served by express.static("public") at /uploads/…
 // Serverless filesystems are read-only, so disk is never an option there —
 // falling back to it would crash the whole app at import time and take down
 // every unrelated route with it.
-const blobToken = process.env["BLOB_READ_WRITE_TOKEN"];
 const onServerless = Boolean(process.env["VERCEL"]);
-const useBlob = Boolean(blobToken);
-const useDisk = !useBlob && !onServerless;
+
+const cloudName = process.env["CLOUDINARY_CLOUD_NAME"];
+const apiKey = process.env["CLOUDINARY_API_KEY"];
+const apiSecret = process.env["CLOUDINARY_API_SECRET"];
+
+const useCloudinary =
+    Boolean(process.env["CLOUDINARY_URL"]) ||
+    Boolean(cloudName && apiKey && apiSecret);
+
+// The SDK self-configures from CLOUDINARY_URL; the split variables need an
+// explicit call. Either way secure: true keeps the returned urls on https.
+if (useCloudinary) {
+    if (cloudName && apiKey && apiSecret) {
+        cloudinary.config({
+            cloud_name: cloudName,
+            api_key: apiKey,
+            api_secret: apiSecret,
+            secure: true,
+        });
+    } else {
+        cloudinary.config({ secure: true });
+    }
+}
+
+const useDisk = !useCloudinary && !onServerless;
 
 const uploadDir = path.join(process.cwd(), "public", "uploads");
 
@@ -44,14 +67,35 @@ const uploadImage = multer({
     fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith("image/")),
 }).single("image");
 
+/** Streams an in-memory buffer to Cloudinary and resolves its https url. */
+function uploadToCloudinary(file: Express.Multer.File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                folder: "car-dealership/vehicles",
+                public_id: path.parse(uniqueName(file.originalname)).name,
+                resource_type: "image",
+            },
+            (error, result) => {
+                if (error || !result) {
+                    reject(error ?? new Error("Cloudinary upload failed"));
+                    return;
+                }
+                resolve(result.secure_url);
+            }
+        );
+        stream.end(file.buffer);
+    });
+}
+
 /** POST /api/uploads/vehicle-image (admin) — returns the public url. */
 const handleVehicleImageUpload = asyncHandler(
     async (req: Request, res: Response) => {
-        if (!useBlob && !useDisk) {
+        if (!useCloudinary && !useDisk) {
             returnResponse(
                 res,
                 503,
-                "Image uploads are not configured — attach a Vercel Blob store to this project",
+                "Image uploads are not configured — set CLOUDINARY_URL on this deployment",
                 null
             );
             return;
@@ -63,13 +107,16 @@ const handleVehicleImageUpload = asyncHandler(
             return;
         }
 
-        if (useBlob) {
-            const blob = await put(
-                `vehicles/${uniqueName(file.originalname)}`,
-                file.buffer,
-                { access: "public", contentType: file.mimetype }
-            );
-            returnResponse(res, 201, "Image uploaded", { url: blob.url });
+        if (useCloudinary) {
+            try {
+                const url = await uploadToCloudinary(file);
+                returnResponse(res, 201, "Image uploaded", { url });
+            } catch (err) {
+                // Surface the provider's reason (bad credentials, quota) rather
+                // than a bare 500 from the central error handler.
+                console.error("Cloudinary upload failed", err);
+                returnResponse(res, 502, "Image upload failed at Cloudinary", null);
+            }
             return;
         }
 

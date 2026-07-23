@@ -50,6 +50,17 @@ describe('SplashScreen', () => {
     ).not.toBeInTheDocument()
   })
 
+  it('reports real preload progress instead of a decorative spinner', async () => {
+    render(
+      <SplashScreen minimumMs={5000}>
+        <div>THE APP</div>
+      </SplashScreen>,
+    )
+
+    expect(screen.getByText(/0%/)).toBeInTheDocument()
+    expect(await screen.findByText(/100%/)).toBeInTheDocument()
+  })
+
   it('still reveals the app when images fail to load', async () => {
     stubImage('error')
     render(

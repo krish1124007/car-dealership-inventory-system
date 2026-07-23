@@ -1,6 +1,6 @@
 # Deployment Guide — one Vercel project, two services
 
-The whole app deploys as a **single Vercel project** using [Vercel Services](https://vercel.com/docs/services): the Vite frontend and the Express backend are built separately but served from one domain through one routing table. The database lives on **MongoDB Atlas** and uploaded car photos go to **Vercel Blob**.
+The whole app deploys as a **single Vercel project** using [Vercel Services](https://vercel.com/docs/services): the Vite frontend and the Express backend are built separately but served from one domain through one routing table. The database lives on **MongoDB Atlas** and uploaded car photos go to **Cloudinary**.
 
 Because both halves share an origin, the frontend calls the API at the relative path `/api` — so **there is no CORS to configure** and no second project to keep in sync.
 
@@ -9,7 +9,7 @@ Because both halves share an origin, the frontend calls the API at the relative 
 | Frontend (Vite/React) | `frontend` service, serves `/` |
 | Backend (Express) | `backend` service, serves `/api/*` |
 | Database | MongoDB Atlas (free M0) |
-| Uploaded photos | Vercel Blob |
+| Uploaded photos | Cloudinary |
 
 The routing table is [`vercel.json`](../vercel.json) at the repo root:
 
@@ -51,7 +51,7 @@ Requests to `/api/...` reach Express with the path intact (Vercel does not strip
 
 ## Step 3 — Storage and environment variables
 
-1. **Storage → Create Database → Blob** → attach it to the project. This injects `BLOB_READ_WRITE_TOKEN`, which switches uploads from local disk to Blob. This is not optional on Vercel: `express.static()` does not serve files there and the filesystem is read-only, so disk uploads cannot work.
+1. Create a free account at [cloudinary.com](https://cloudinary.com). On the dashboard open **API Keys** and copy the **API environment variable** — it looks like `cloudinary://<api_key>:<api_secret>@<cloud_name>`. This is not optional on Vercel: `express.static()` does not serve files there and the filesystem is read-only, so disk uploads cannot work.
 2. Add these environment variables:
 
    | Key | Value |
@@ -59,6 +59,7 @@ Requests to `/api/...` reach Express with the path intact (Vercel does not strip
    | `MONGODB_URI` | your Atlas connection string |
    | `JWT_SECRET` | a long random string |
    | `ADMIN_REGISTRATION_SECRET` | a long random string |
+   | `CLOUDINARY_URL` | the value copied above |
    | `VITE_API_URL` | `/api` |
 
    Generate each secret with:
@@ -73,7 +74,7 @@ Requests to `/api/...` reach Express with the path intact (Vercel does not strip
 Deploy. On the first request the backend connects to Atlas and auto-creates the demo admin (`admin@cardealership.com` / `Admin@123`).
 
 - Open the deployment URL → hero, seeded showroom and collections should render.
-- Log in as the admin → add a car with several photos → they upload to Blob and appear on Home/Cars.
+- Log in as the admin → add a car with several photos → they upload to Cloudinary and appear on Home/Cars.
 - Register a customer → purchase from a detail page → check **My purchases**.
 
 > **Before sharing this publicly**, set `DEFAULT_ADMIN_EMAIL` and `DEFAULT_ADMIN_PASSWORD` to private values — otherwise anyone who reads this repo can log in as an administrator.
@@ -84,7 +85,7 @@ Vercel's Express support detects the HTTP server from the `app.listen()` call in
 
 That detection is why `index.ts` starts listening immediately instead of waiting on the database: `connectDB()` runs in the background and Mongoose buffers queries until the connection is ready. Locally a failed connection still exits with a clear error; on Vercel it is logged and rethrown instead, so one bad connection doesn't kill the instance.
 
-Nothing differs between local and deployed code — uploads pick Blob or disk based on whether `BLOB_READ_WRITE_TOKEN` exists.
+Nothing differs between local and deployed code — uploads pick Cloudinary or local disk based on whether `CLOUDINARY_URL` exists.
 
 ## Local development
 
@@ -101,7 +102,8 @@ vercel dev
 | Build ignores `services` | Framework Preset isn't set to `Services` (Step 2.3) |
 | `/api/...` returns the SPA | Rewrite order matters — the `/api/(.*)` rule must come before the catch-all |
 | `/cars` 404s on refresh | The frontend service's `rewrites` entry to `/index.html` is missing |
-| Image upload 500s | Blob store not attached, so `BLOB_READ_WRITE_TOKEN` is absent |
+| Image upload returns 503 | `CLOUDINARY_URL` is not set on the deployment |
+| Image upload returns 502 | `CLOUDINARY_URL` is set but wrong — check the credentials in the Cloudinary dashboard |
 | API 500s with a Mongo error | Check `MONGODB_URI` and that Atlas allows `0.0.0.0/0` |
 | Empty showroom | Run the seed against the Atlas URI (Step 1.5) |
 

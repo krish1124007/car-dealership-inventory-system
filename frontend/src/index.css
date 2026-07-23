@@ -26,12 +26,41 @@
   }
 }
 
+/* Road markings streaming past — the loading motif, shared by the inline
+   loader and the splash screen. One period is 30px, so shifting the
+   background by exactly 30px loops seamlessly. */
+@keyframes lane-run {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 30px 0;
+  }
+}
+
 @layer utilities {
   .animate-logo-scroll {
     animation: logo-scroll 9s linear infinite;
   }
   .animate-logo-scroll-reverse {
     animation: logo-scroll 12s linear infinite reverse;
+  }
+  .lane-track {
+    background-image: repeating-linear-gradient(
+      90deg,
+      currentColor 0 14px,
+      transparent 14px 30px
+    );
+    background-size: 30px 100%;
+    animation: lane-run 0.7s linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lane-track,
+  .animate-logo-scroll,
+  .animate-logo-scroll-reverse {
+    animation: none;
   }
 }
 
