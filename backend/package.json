@@ -13,6 +13,7 @@
     "start": "node dist/index.js",
     "seed": "tsx scripts/seed.ts",
     "seed:accounts": "tsx scripts/seed-accounts.ts",
+    "admin:reset": "tsx scripts/reset-admin.ts",
     "backfill:fuel-type": "tsx scripts/backfill-fuel-type.ts",
     "check:cloudinary": "tsx scripts/check-cloudinary.ts",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",

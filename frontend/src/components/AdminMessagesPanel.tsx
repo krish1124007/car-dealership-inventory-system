@@ -32,15 +32,7 @@ export function AdminMessagesPanel() {
       className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
     >
       <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/60 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="inline-flex items-center gap-2 font-semibold text-gray-900">
-            <Inbox size={17} className="text-emerald-600" />
-            Messages from visitors
-          </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Sent through the contact form, newest first.
-          </p>
-        </div>
+        <Inbox size={18} className="text-emerald-600" />
         <p className="text-right">
           <span className="block font-hero text-2xl text-gray-900 leading-none">
             {total}

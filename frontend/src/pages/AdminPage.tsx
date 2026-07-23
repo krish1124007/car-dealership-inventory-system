@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { CarFront, Pencil, Trash2, PackagePlus } from 'lucide-react'
+import {
+  CarFront,
+  Pencil,
+  Trash2,
+  PackagePlus,
+  Warehouse,
+  Users,
+  Inbox,
+} from 'lucide-react'
 import { AppLayout } from '../components/AppLayout'
 import { AdminUsersPanel } from '../components/AdminUsersPanel'
 import { AdminMessagesPanel } from '../components/AdminMessagesPanel'
@@ -35,7 +43,35 @@ const emptyForm = {
   quantity: '',
 }
 
+/** Sidebar sections — one is open at a time, so nothing needs scrolling past. */
+const sections = [
+  {
+    key: 'inventory' as const,
+    label: 'Inventory',
+    icon: <Warehouse size={16} />,
+    title: 'Inventory management',
+    subtitle: 'Add, edit, restock or remove vehicles from the showroom.',
+  },
+  {
+    key: 'users' as const,
+    label: 'Users',
+    icon: <Users size={16} />,
+    title: 'Registered users',
+    subtitle: 'Everyone with an account, and when they last signed in.',
+  },
+  {
+    key: 'messages' as const,
+    label: 'Messages',
+    icon: <Inbox size={16} />,
+    title: 'Messages from visitors',
+    subtitle: 'Enquiries sent through the public contact form.',
+  },
+]
+
+type SectionKey = (typeof sections)[number]['key']
+
 export function AdminPage() {
+  const [section, setSection] = useState<SectionKey>('inventory')
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
   const [form, setForm] = useState(emptyForm)
   const [preLaunch, setPreLaunch] = useState(false)
@@ -141,11 +177,41 @@ export function AdminPage() {
     }
   }
 
+  const openSection = sections.find((s) => s.key === section)!
+
   return (
-    <AppLayout
-      title="Inventory management"
-      subtitle="Add, edit, restock or remove vehicles from the showroom."
-    >
+    <AppLayout title={openSection.title} subtitle={openSection.subtitle}>
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        <nav
+          aria-label="Admin sections"
+          className="w-full lg:w-56 shrink-0 bg-white border border-gray-200 rounded-2xl shadow-sm p-2 flex lg:flex-col gap-1 overflow-x-auto lg:sticky lg:top-24"
+        >
+          {sections.map((item) => {
+            const active = item.key === section
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setSection(item.key)}
+                aria-current={active ? 'page' : undefined}
+                className={`flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium whitespace-nowrap transition ${
+                  active
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            )
+          })}
+        </nav>
+
+        <div className="flex-1 w-full min-w-0 space-y-6">
+          {section === 'users' && <AdminUsersPanel />}
+          {section === 'messages' && <AdminMessagesPanel />}
+          {section === 'inventory' && (
+            <>
       <form
         onSubmit={handleSubmit}
         className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
@@ -433,9 +499,10 @@ export function AdminPage() {
           </table>
         </div>
       )}
-
-      <AdminUsersPanel />
-      <AdminMessagesPanel />
+            </>
+          )}
+        </div>
+      </div>
     </AppLayout>
   )
 }

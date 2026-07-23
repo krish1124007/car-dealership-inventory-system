@@ -45,16 +45,10 @@ export function AdminUsersPanel() {
       aria-label="Registered users"
       className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
     >
+      {/* The page header already names this section, so the strip carries
+          only the numbers. */}
       <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/60 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="inline-flex items-center gap-2 font-semibold text-gray-900">
-            <Users size={17} className="text-blue-600" />
-            Registered users
-          </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Everyone with an account, and when they last signed in.
-          </p>
-        </div>
+        <Users size={18} className="text-blue-600" />
         <div className="flex items-center gap-5">
           <p className="text-right">
             <span className="block font-hero text-2xl text-gray-900 leading-none">

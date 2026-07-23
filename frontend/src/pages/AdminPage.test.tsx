@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '../auth/AuthContext'
@@ -7,11 +7,15 @@ import { ToastProvider } from '../components/Toast'
 import { AdminPage } from './AdminPage'
 import * as vehiclesApi from '../api/vehicles.api'
 import * as uploadsApi from '../api/uploads.api'
+import * as adminApi from '../api/admin.api'
+import * as contactApi from '../api/contact.api'
 import { setToken } from '../api/client'
 import type { User, Vehicle } from '../api/schemas'
 
 vi.mock('../api/vehicles.api')
 vi.mock('../api/uploads.api')
+vi.mock('../api/admin.api')
+vi.mock('../api/contact.api')
 
 const admin: User = {
   id: 'a1',
@@ -49,6 +53,31 @@ function renderAdmin() {
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(vehiclesApi.listVehicles).mockResolvedValue([corolla])
+  vi.mocked(adminApi.listUsers).mockResolvedValue({
+    total: 1,
+    users: [
+      {
+        id: 'a1',
+        name: 'Site Admin',
+        email: 'admin@cardealership.com',
+        role: 'ADMIN',
+        createdAt: '2026-07-20T09:00:00.000Z',
+        lastLoginAt: '2026-07-23T11:31:00.000Z',
+      },
+    ],
+  })
+  vi.mocked(contactApi.listContactMessages).mockResolvedValue({
+    total: 1,
+    messages: [
+      {
+        id: 'm1',
+        name: 'Riya Sharma',
+        email: 'riya@example.com',
+        message: 'Can I book a test drive?',
+        createdAt: '2026-07-23T10:00:00.000Z',
+      },
+    ],
+  })
 })
 
 describe('AdminPage', () => {
@@ -290,5 +319,69 @@ describe('AdminPage', () => {
       expect.objectContaining({ price: 25000 }),
     )
     expect(await screen.findByText('₹25,000')).toBeInTheDocument()
+  })
+})
+
+describe('AdminPage sidebar', () => {
+  it('offers a section for inventory, users and messages', async () => {
+    renderAdmin()
+    const nav = await screen.findByRole('navigation', {
+      name: /admin sections/i,
+    })
+
+    expect(
+      within(nav).getByRole('button', { name: /inventory/i }),
+    ).toBeInTheDocument()
+    expect(
+      within(nav).getByRole('button', { name: /users/i }),
+    ).toBeInTheDocument()
+    expect(
+      within(nav).getByRole('button', { name: /messages/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('opens on the inventory section', async () => {
+    renderAdmin()
+
+    expect(await screen.findByLabelText(/make/i)).toBeInTheDocument()
+    expect(
+      screen.queryByRole('region', { name: /registered users/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('swaps to users without scrolling past the inventory', async () => {
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    await userEvent.click(screen.getByRole('button', { name: /users/i }))
+
+    expect(
+      await screen.findByRole('region', { name: /registered users/i }),
+    ).toBeInTheDocument()
+    expect(screen.queryByLabelText(/make/i)).not.toBeInTheDocument()
+  })
+
+  it('swaps to the message inbox', async () => {
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    await userEvent.click(screen.getByRole('button', { name: /messages/i }))
+
+    expect(
+      await screen.findByRole('region', { name: /contact messages/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('marks the open section as current', async () => {
+    renderAdmin()
+    await screen.findByText(/corolla/i)
+
+    const users = screen.getByRole('button', { name: /users/i })
+    await userEvent.click(users)
+
+    expect(users).toHaveAttribute('aria-current', 'page')
+    expect(
+      screen.getByRole('button', { name: /inventory/i }),
+    ).not.toHaveAttribute('aria-current', 'page')
   })
 })
