@@ -1,84 +1,88 @@
 # PROMPTS.md — AI Tooling Prompt History
 
-**Tool used:** Claude Code (Anthropic CLI agent, Claude Fable 5 model), used as a TDD pair programmer across the whole project.
+**Tool used:** Claude Code (Anthropic's CLI agent, Claude Fable 5 model), used as a TDD pair programmer for the whole project.
 
-This is the complete log of the prompts I wrote, in chronological order, lightly condensed and translated for readability (I often prompt in Hinglish). Every AI-assisted commit in the history carries a `Co-Authored-By` trailer.
+**How to read this file:** I usually prompt in Hinglish and in shorthand; below is the complete, chronological log of my prompts with the technical intent written out cleanly. My role throughout was direction and review — I set the requirements, supplied the design references and assets, rejected what I didn't like, and approved every test contract before implementation. Every AI-assisted commit carries a `Co-Authored-By` trailer.
 
 ---
 
 ## Phase 1 — Design & database
 
-- "Here is the kata problem statement *(pasted the full TDD Kata: Car Dealership Inventory System)*. Create the database model code for this project. Create perfect code — we want to use Postgres, almost all dependencies are installed."
-- "I have the following database design model — create a professional ERD-style illustration for the docs, with PK/FK markers, cardinality labels, a legend and a clean white background." *(full version of this prompt kept in the appendix below)*
-- "Why not create vehicle and purchase models in the models folder too?"
-- "Change the database from Postgres to MongoDB." *(Prisma 7 has no MongoDB support — Claude migrated the models, tests and client to Mongoose and flagged the trade-off)*
+- "Here is the kata problem statement *(pasted the full TDD Kata: Car Dealership Inventory System)*. I've prepared the database design docs — create the database model code for it. We're using Postgres; dependencies are mostly installed."
+- "Take my database design model and produce a professional ERD-style illustration for the docs — PK/FK markers, cardinality labels, a legend, clean white background." *(my full illustration prompt is in the appendix)*
+- "Why are vehicle and purchase models not in the models folder? Keep one file per entity."
+- "Switch the database from Postgres to MongoDB." *(Prisma 7 has no MongoDB support, so this meant migrating models, tests and the client to Mongoose — I accepted that trade-off knowingly)*
 
 ## Phase 2 — Backend, test-first
 
-- "Now write the tests into a tests folder. Make the folder structure perfect — right now we just want to write tests, nothing else." *(red phase: 71 failing integration tests defined the whole API contract before a single endpoint existed)*
-- "Now write the minimum code to convert red to green in testing."
-- "Now implement the admin functionality." *(secret-gated admin registration — public register must never create an admin)*
-- "Complete the user side." *(login returns the user + role, profile endpoint, purchase history)*
-- "Is the backend complete?" *(requirement-by-requirement audit before moving on)*
+- "Now write the tests into a tests folder — structure it properly. Only tests for now, nothing else." *(red phase: 71 failing integration tests defined the entire API contract before a single endpoint existed; I reviewed the contract before green-lighting implementation)*
+- "Now write the minimum code to convert red to green."
+- "Now implement the admin functionality." *(I wanted admin creation gated by a shared secret — public registration must never be able to create an admin)*
+- "Complete the user side." *(login must return the user object and role along with the token, plus a profile endpoint and purchase history)*
+- "Is the backend complete? Audit it against the kata requirement by requirement."
 
 ## Phase 3 — Frontend, test-first
 
-- "Now create the frontend. Use Vite in a frontend folder, keep a separate `api` folder where we add all the endpoints, and use zod for type validation. Work module by module: write tests, commit like `test(...): add test`, then implement and commit — create the first half of the frontend with test cases, then wire it to the backend."
-- "Now complete the dashboard and the rest." *(showroom grid, search, purchase, admin panel — red commit, then green commit)*
-- "How do I access the admin page in the frontend? Also add toaster notifications so every error and success shows properly."
-- "In My Purchases, show the purchases perfectly with the photo."
+- "Create the frontend now. Use Vite in a `frontend` folder, keep a separate `api` folder where all endpoints live, and use zod to validate every response type. Work module by module: write the tests, commit them as `test(...)`, then implement and commit — first half of the frontend with test cases, then wire it to the backend."
+- "Now complete the dashboard and the rest — showroom grid, search, purchase, admin panel — same red/green commit pattern."
+- "How does a user reach the admin page from the UI? And add toaster notifications so every success and error is clearly visible."
+- "In My Purchases, show each purchase properly with the vehicle's photo."
 
-## Phase 4 — Product decisions & UX iterations
+## Phase 4 — Product decisions (my calls, AI implemented)
 
-- "This UI is not good. Research how professional car dealer websites look — use web search — and make everything clean and perfect. The admin add-vehicle form looks weird, it should be a proper form, and vehicles should have images."
-- "I don't want an image URL — I want image upload, with the images saved locally in the backend's public folder. Also rename Showroom to Home."
-- "Don't use a filter sidebar for search — put one search bar on top that searches cars by name, and below it one bar with all the filters."
-- "Add some example cars." *(idempotent seed script, verified photo URLs, one out-of-stock car to demo the disabled purchase state)*
-- "Remove Purchase from the card — keep a View Car button that opens a detail page where everyone can see the car; keep purchase there (add-to-cart maybe later)."
-- "Major frontend change: top navbar (search bar, Cars link, Login when logged out / account icon when logged in), sliding banners below it, then the cars. Clicking Cars opens a page with a filter sidebar (price range, name search, other filters) showing all cars."
-- "After the banner don't show all cars. Show 'our luxury cars collection' then those cars, 'most affordable cars collection' then those cars, a View More button at the end of every collection, closing text inviting people to visit the collections, and a simple footer."
-- "Show prices in Indian rupees."
-- "On the cars page, show the price range as a slider from 0 to the max price."
-- "I don't want an Apply button — any filter I touch should apply automatically."
+- "This UI is not good. **Use web search** to study how professional car-dealer websites design their listing pages, then rebuild ours to that standard. The admin add-vehicle section must look like a real form, and vehicles need images."
+- "No image URLs — I want real **file upload**, with images saved in the backend's `public` folder and served from there."
+- "Rename Showroom to Home."
+- "Drop the filter sidebar — one search bar on top that searches cars by name, and a single filter bar below it."
+- "Seed some example cars so the showroom demos well." *(including one out-of-stock car so the disabled Purchase state is visible)*
+- "Take Purchase off the cards. Cards get a **View Car** button that opens a detail page — everyone can view the car there, and the Purchase action lives on that page (maybe add-to-cart later)."
+- "Major restructure: a top navbar with a search bar, a Cars link, and Login when logged out / an account icon when logged in. Home gets sliding banners, then the cars. The Cars page gets a filter sidebar — price range, name search, other filters — showing the full inventory."
+- "Home should not dump all cars after the banner. Curate it: 'Our luxury cars collection' with those cars, then 'Most affordable cars collection', a View More button closing each collection, an invitation section pointing to the full collection, then a simple footer."
+- "Show all prices in Indian rupees."
+- "The price filter should be a slider from 0 to the maximum inventory price."
+- "Remove the Apply button — every filter must apply automatically the moment it changes."
 
-## Phase 5 — Visual design iterations
+## Phase 5 — Design direction (my references & assets, AI executed)
 
-- "Don't use blackish colours — use a simple white theme with some rounding and green/blue accents."
-- "Login page: use the background image at `public/bgms/login-bgm.png`, no Google/Facebook login — simple login and signup only."
-- "Remove the gradient from the login button and logo — simple colours; and blur the card." → "Actually remove the card blur and blur the background image instead." → "Remove the background blur and move the card right." → "Center the card and keep just a light blur." *(four quick iterations to land the final look)*
-- "Make the login page like this screenshot — clicking Sign Up should rotate the page: the blue panel slides left and the signup form appears on the right." *(double-slider auth card)*
-- "This dashboard is bad — use a sidebar, no emojis, icons only, make it professional." *(later replaced by the public top-navbar layout)*
-- "Take inspiration from this landing page screenshot. Three landing photos are in `public/landing-photo` (p1–p3) and car logos in `public/car-logo/list1` and `list2`. Buttons: Fast, Furious, and a third of your choice." *(drive-mode hero with photo tabs and auto-scrolling logo rails — Claude picked "Flawless")*
-- "Remove the hero text block and its button." / "Remove the watermark name behind the photo." / "The photo leaves space at the top — stretch it to cover perfectly." / "Increase the speed of the moving icons."
-- "After the landing hero, add a section showing one car and point out its features. I stored the Creta photo at `public/cars/creata.png` — study the photo." *(spotlight with numbered pulse dots placed on the actual features)*
-- "Also make it mobile responsive."
+I supplied the visual direction as reference screenshots and prepared all the assets myself, then iterated until it matched what I had in mind:
 
-## Edge-case prompts (the ones that shaped the tests)
+- "Don't use blackish colours — simple white theme, rounded corners, green/blue accents only."
+- "**Here is a login-page design screenshot for reference.** I've put the background image at `public/bgms/login-bgm.png`. No Google/Facebook buttons — plain login and signup only."
+- "Remove the gradient from the button and logo — flat colours; blur the card." → "No — unblur the card, blur the background image instead." → "Remove the background blur, move the card right." → "Center the card, keep only a light blur." *(four iterations until it looked right)*
+- "**Reference screenshot attached**: clicking Sign Up should slide the panels — blue panel moves left and the signup form appears on the right." *(the double-slider auth card)*
+- "The dashboard looks bad — sidebar layout, no emojis, proper icons, professional."
+- "**Take inspiration from this landing page screenshot** *(ControlOne-style hero)*. I've placed three landing photos in `public/landing-photo` (p1–p3) and two car-logo sets in `public/car-logo/list1` and `list2`. Tabs should read Fast, Furious, and a third of your choosing." *(Claude picked "Flawless"; built the photo-tab hero with auto-scrolling logo rails)*
+- "Remove the hero copy block and its button." / "Remove the watermark text behind the photo." / "The photo leaves a gap at the top — stretch it to cover perfectly." / "Speed up the moving logos."
+- "After the hero, spotlight one car and point at its features. **I've stored the Creta photo at `public/cars/creata.png` — study the photo** so the callouts land on the actual features." *(numbered pulse dots on the roof rails, alloys, headlamps and grille)*
+- "Make everything mobile responsive."
+- "Every loader should use my car-loading animation (`public/loaders/loader1.gif`), and the site must keep showing it on first open until our images have actually loaded."
 
-Each of these became a failing (red) test before any code was written:
+## Edge cases I locked in during test review
 
-- "What if someone registers with `role: ADMIN` in the body? Public registration must never create an admin."
-- "Login with an unknown email and with a wrong password should look identical — the API must not leak which emails exist."
-- "What happens when two people buy the last car at the same time? Stock must never go negative." *(atomic `findOneAndUpdate` guarded by `quantity > 0` — later proven live when an automated double-click produced two purchases and stock stopped exactly at zero)*
-- "If an admin deletes a car someone already bought, their purchase history must survive — show 'vehicle no longer available' instead of breaking."
-- "The purchase must snapshot the price — if the admin raises the price later, my old receipt must not change."
-- "What if a vehicle's image URL is broken? Fall back to a placeholder, never a broken-image icon."
-- "Restock with zero, negative or `'many'` as the quantity — all must be 400s and must not touch the stock."
-- "Upload without a file, without a token, or as a customer — 400/401/403; and on success the file must actually exist on disk."
-- "If the price slider stays at the max, don't send a price filter at all."
-- "Search with `q=fort` should find the Fortuner — partial, case-insensitive, matching make or model."
+Before each implementation I reviewed the proposed test contract and insisted these behaviours be pinned as failing tests first:
+
+- Registering with `role: ADMIN` in the body must still create a CUSTOMER — the API must never trust a client-supplied role.
+- Unknown email and wrong password must return identical 401s — no user enumeration through login errors.
+- Two purchases racing for the last unit must never drive stock negative — the decrement has to be atomic. *(later confirmed live: an accidental double-fire produced two purchases and stock stopped exactly at zero)*
+- Purchase history must survive the vehicle being deleted later — degrade to "vehicle no longer available", never break.
+- Each purchase stores a price snapshot — later price changes must not rewrite old receipts.
+- A broken image URL falls back to a placeholder, never a broken-image icon.
+- Restock with `0`, a negative number, or a non-numeric value: all 400, stock untouched.
+- Upload without a file / without a token / as a customer → 400 / 401 / 403; on success the file must verifiably exist on disk.
+- A price slider resting at its maximum sends no price filter at all.
+- `q=fort` finds the Fortuner — search is partial, case-insensitive, and matches make or model.
 
 ## Debugging prompts
 
-- "Register from the browser says 'Failed to fetch' — backend and frontend are both running. Find it." *(root cause: ESM import hoisting read `CORS_ORIGIN` before dotenv loaded, so the CORS header was silently never sent)*
-- "Jest is failing with `Cannot use 'import.meta' outside a module`." *(moved Jest to native ESM mode)*
-- "Mongoose is printing deprecation warnings about `new: true`." *(switched to `returnDocument: 'after'`)*
+- "Register from the browser says 'Failed to fetch' — both servers are running. Find the cause." *(ESM import hoisting read `CORS_ORIGIN` before dotenv loaded, so the CORS header was silently never sent)*
+- "Jest fails with `Cannot use 'import.meta' outside a module` — fix the runner." *(moved Jest to native ESM mode)*
+- "Mongoose keeps warning about `new: true` — clean that up." *(switched to `returnDocument: 'after'`)*
 
 ## Documentation prompts
 
-- "Create the root README properly — here is the problem statement again, follow their required format."
-- "Tell me — do we fulfil all of these requirements?" *(compliance audit that surfaced the remaining gaps)*
-- "Now write the perfect PROMPTS.md — good, short prompts including the edge cases — and update the README in their given format." *(this file)*
+- "Create the root README properly — here's the problem statement again, follow their required format."
+- "Do we fulfil every requirement? Audit it." *(surfaced the remaining gaps before submission)*
+- "Write the final PROMPTS.md — my complete prompt history with the edge cases, concise — and refresh the README in the given format."
 
 ---
 
