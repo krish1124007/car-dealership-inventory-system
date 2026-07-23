@@ -121,6 +121,12 @@ The closing showroom invite that ends the landing page.
 
 ![Closing invite and footer](docs/screenshots/contact.png)
 
+### Full collection
+
+The Cars page the invite leads to: name search, category filter and a price slider that all apply as soon as they change.
+
+![Full collection with filters](docs/screenshots/collection.png)
+
 ### Vehicle details
 
 Photo gallery — click a thumbnail to bring it up top — alongside the specs and the purchase action.
