@@ -4,6 +4,7 @@ import { ArrowRight, Crown, Wallet } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
+import { FeaturedCarHero } from '../components/FeaturedCarHero'
 import { HeroShowcase } from '../components/HeroShowcase'
 import { CarSpotlight } from '../components/CarSpotlight'
 import { Loading } from '../components/Loading'
@@ -85,7 +86,7 @@ export function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <HeroShowcase />
+      <FeaturedCarHero />
       <CarSpotlight />
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-12 space-y-12">
         {vehicles === null ? (
@@ -107,8 +108,16 @@ export function DashboardPage() {
               icon={<Wallet size={20} className="text-emerald-600" />}
               vehicles={affordable}
             />
+          </>
+        )}
+      </main>
 
-            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white text-center px-6 py-14 shadow-lg shadow-blue-200/70">
+      {/* The former landing showcase now lives after the collections as
+          the connected-brands band. */}
+      <HeroShowcase />
+
+      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-12">
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white text-center px-6 py-14 shadow-lg shadow-blue-200/70">
               <div
                 aria-hidden
                 className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-white/10 blur-2xl"
@@ -131,10 +140,8 @@ export function DashboardPage() {
                 Visit our collections
                 <ArrowRight size={15} />
               </Link>
-            </section>
-          </>
-        )}
-      </main>
+        </section>
+      </div>
 
       <Footer />
     </div>

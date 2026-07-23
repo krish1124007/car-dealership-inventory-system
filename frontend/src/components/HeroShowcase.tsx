@@ -48,18 +48,20 @@ function LogoRail({ logos, reverse }: { logos: string[]; reverse?: boolean }) {
 }
 
 /**
- * Full-screen light hero: the landing photo swaps with the drive-mode
- * tabs, a huge ghost watermark echoes the active mode, and brand logos
- * drift down the right rails.
+ * Connected-brands showcase band: the drive-mode photos swap with the
+ * bottom tabs while partner brand logos drift down the right rails.
  */
 export function HeroShowcase() {
   const [active, setActive] = useState(0)
 
   return (
     <section
-      aria-label="Hero"
-      className="relative w-full overflow-hidden bg-white border-b border-gray-200 h-[60vh] min-h-[380px] sm:h-[calc(100vh-4rem)] sm:min-h-[560px]"
+      aria-label="Connected brands"
+      className="relative w-full overflow-hidden bg-white border-y border-gray-200 h-[60vh] min-h-[380px] sm:h-[calc(100vh-4rem)] sm:min-h-[560px]"
     >
+      <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 rounded-full bg-white/90 backdrop-blur border border-gray-200 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.25em] text-gray-700 shadow-sm">
+        Our connected brands
+      </div>
       <div className="relative h-full flex">
         {/* Landing photo, crossfading between modes. */}
         <div className="flex-1 relative h-full">
