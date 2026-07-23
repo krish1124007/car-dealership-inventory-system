@@ -12,6 +12,7 @@
     "start": "node dist/index.js",
     "seed": "tsx scripts/seed.ts",
     "backfill:fuel-type": "tsx scripts/backfill-fuel-type.ts",
+    "check:cloudinary": "tsx scripts/check-cloudinary.ts",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",

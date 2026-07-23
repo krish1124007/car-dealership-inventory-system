@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { FeaturedCarHero } from '../components/FeaturedCarHero'
+import { OfferStrip } from '../components/OfferStrip'
 import { HeroShowcase } from '../components/HeroShowcase'
 import { CarSpotlight } from '../components/CarSpotlight'
 import { Loading } from '../components/Loading'
@@ -87,6 +88,7 @@ export function DashboardPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
       <FeaturedCarHero />
+      <OfferStrip />
       <CarSpotlight />
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-12 space-y-12">
         {vehicles === null ? (

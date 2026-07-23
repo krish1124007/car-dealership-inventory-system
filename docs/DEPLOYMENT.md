@@ -69,6 +69,14 @@ Requests to `/api/...` reach Express with the path intact (Vercel does not strip
 
    `CORS_ORIGIN` is not needed — frontend and backend share an origin.
 
+3. Check the Cloudinary credentials before you rely on them. Put them in `backend/.env` and run:
+
+   ```bash
+   cd backend && npm run check:cloudinary
+   ```
+
+   It pings the account and prints the resolved cloud name, or the exact reason the credentials were rejected. The API secret is never printed.
+
 ## Step 4 — Deploy and verify
 
 Deploy. On the first request the backend connects to Atlas and auto-creates the demo admin (`admin@cardealership.com` / `Admin@123`).
