@@ -16,10 +16,10 @@
 
 @layer utilities {
   .animate-logo-scroll {
-    animation: logo-scroll 22s linear infinite;
+    animation: logo-scroll 9s linear infinite;
   }
   .animate-logo-scroll-reverse {
-    animation: logo-scroll 28s linear infinite reverse;
+    animation: logo-scroll 12s linear infinite reverse;
   }
 }
 
