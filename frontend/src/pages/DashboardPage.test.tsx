@@ -48,21 +48,29 @@ beforeEach(() => {
 })
 
 describe('DashboardPage (home)', () => {
-  it('shows the promotional banner carousel', () => {
+  it('shows the hero with the three drive-mode tabs', () => {
     renderHome()
 
+    expect(screen.getByRole('region', { name: /hero/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^fast$/i })).toBeInTheDocument()
     expect(
-      screen.getByRole('region', { name: /promotions/i }),
+      screen.getByRole('button', { name: /^furious$/i }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: /go to slide 1/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /go to slide 3/i }),
+      screen.getByRole('button', { name: /^flawless$/i }),
     ).toBeInTheDocument()
   })
 
-  it('banner call-to-action leads to the cars page', async () => {
+  it('switches the hero photo when a tab is picked', async () => {
+    renderHome()
+
+    await userEvent.click(screen.getByRole('button', { name: /^furious$/i }))
+
+    const img = screen.getByRole('img', { name: /furious/i })
+    expect(img).toHaveAttribute('src', '/landing-photo/p2.png')
+  })
+
+  it('hero call-to-action leads to the cars page', async () => {
     renderHome()
 
     await userEvent.click(
