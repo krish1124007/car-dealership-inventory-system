@@ -70,6 +70,61 @@ const sections = [
 
 type SectionKey = (typeof sections)[number]['key']
 
+/**
+ * The vehicle's photos in the order they are stored and shown on the detail
+ * page: the main image first, then the gallery. The number under each is its
+ * position, so a wrong order is obvious at a glance.
+ */
+function PhotoOrder({ vehicle }: { vehicle: Vehicle }) {
+  const photos = [vehicle.imageUrl, ...(vehicle.images ?? [])].filter(
+    (src): src is string => Boolean(src),
+  )
+
+  if (photos.length === 0) {
+    return (
+      <span className="inline-flex items-center justify-center w-9 h-7 rounded-md bg-gray-100 text-gray-300">
+        <CarFront size={14} />
+      </span>
+    )
+  }
+
+  // Four thumbnails is what the column fits; beyond that, show three and
+  // count the rest so the row can never overflow.
+  const shown = photos.length > 4 ? photos.slice(0, 3) : photos
+  const hidden = photos.length - shown.length
+
+  return (
+    <div className="flex items-center gap-1">
+      {shown.map((src, index) => (
+        <span
+          key={`${src}-${index}`}
+          className="relative shrink-0"
+          title={index === 0 ? 'Main photo' : `Gallery photo ${index}`}
+        >
+          <img
+            src={src}
+            alt=""
+            className={`w-9 h-7 rounded-md object-cover border ${
+              index === 0 ? 'border-blue-400' : 'border-gray-200'
+            }`}
+          />
+          <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-gray-900 text-white text-[9px] font-bold flex items-center justify-center leading-none">
+            {index + 1}
+          </span>
+        </span>
+      ))}
+      {hidden > 0 && (
+        <span
+          title={`${hidden} more photo${hidden === 1 ? '' : 's'}`}
+          className="shrink-0 text-[11px] font-semibold text-gray-500 bg-gray-100 rounded-md px-1.5 py-1"
+        >
+          +{hidden}
+        </span>
+      )}
+    </div>
+  )
+}
+
 export function AdminPage() {
   const [section, setSection] = useState<SectionKey>('inventory')
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
@@ -395,16 +450,17 @@ export function AdminPage() {
         <Loading />
       ) : (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-[13px]">
             <thead>
               <tr className="text-left text-gray-500 border-b border-gray-100 bg-gray-50/60">
-                <th className="px-5 py-3 font-medium">Vehicle</th>
-                <th className="px-5 py-3 font-medium">Category</th>
-                <th className="px-5 py-3 font-medium">Fuel</th>
-                <th className="px-5 py-3 font-medium">Price</th>
-                <th className="px-5 py-3 font-medium">Stock</th>
-                <th className="px-5 py-3 font-medium">Restock</th>
-                <th className="px-5 py-3 font-medium">Actions</th>
+                <th className="px-3 py-2.5 font-medium">Vehicle</th>
+                <th className="px-3 py-2.5 font-medium">Photos</th>
+                <th className="px-3 py-2.5 font-medium">Category</th>
+                <th className="px-3 py-2.5 font-medium">Fuel</th>
+                <th className="px-3 py-2.5 font-medium text-right">Price</th>
+                <th className="px-3 py-2.5 font-medium text-right">Stock</th>
+                <th className="px-3 py-2.5 font-medium">Restock</th>
+                <th className="px-3 py-2.5 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -413,51 +469,41 @@ export function AdminPage() {
                   key={vehicle.id}
                   className="border-b border-gray-50 last:border-0 hover:bg-gray-50/40 transition"
                 >
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-3">
-                      {vehicle.imageUrl ? (
-                        <img
-                          src={vehicle.imageUrl}
-                          alt=""
-                          className="w-12 h-9 rounded-lg object-cover border border-gray-100"
-                        />
-                      ) : (
-                        <span className="w-12 h-9 rounded-lg bg-gray-100 text-gray-300 flex items-center justify-center">
-                          <CarFront size={18} />
-                        </span>
-                      )}
-                      <span className="font-medium text-gray-900">
-                        {vehicle.make} {vehicle.model}
-                      </span>
-                    </div>
+                  <td className="px-3 py-2.5">
+                    <span className="font-medium text-gray-900">
+                      {vehicle.make} {vehicle.model}
+                    </span>
                   </td>
-                  <td className="px-5 py-3 text-gray-500">
+                  <td className="px-3 py-2.5">
+                    <PhotoOrder vehicle={vehicle} />
+                  </td>
+                  <td className="px-3 py-2.5 text-gray-500">
                     {vehicle.category}
                   </td>
-                  <td className="px-5 py-3 text-gray-500">
-                    <span className="inline-flex items-center gap-1.5">
+                  <td className="px-3 py-2.5 text-gray-500">
+                    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
                       {fuelLabels[vehicle.fuelType ?? 'PETROL']}
                       {vehicle.preLaunch && (
-                        <span className="rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold px-2 py-0.5">
+                        <span className="rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold px-1.5 py-0.5">
                           Pre-launch
                         </span>
                       )}
                     </span>
                   </td>
-                  <td className="px-5 py-3 font-semibold text-gray-900">
+                  <td className="px-3 py-2.5 font-semibold text-gray-900 text-right whitespace-nowrap tabular-nums">
                     {formatPrice(vehicle.price)}
                   </td>
-                  <td className="px-5 py-3 text-gray-700">
+                  <td className="px-3 py-2.5 text-gray-700 text-right tabular-nums">
                     {vehicle.quantity}
                   </td>
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-2">
+                  <td className="px-3 py-2.5">
+                    <div className="flex items-center gap-1.5">
                       <input
                         type="number"
                         min="1"
                         aria-label="Restock quantity"
                         placeholder="Qty"
-                        className="w-20 rounded-lg bg-white border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="w-14 rounded-lg bg-white border border-gray-200 px-2 py-1.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-400"
                         value={restockAmounts[vehicle.id] ?? ''}
                         onChange={(e) =>
                           setRestockAmounts((prev) => ({
@@ -468,28 +514,32 @@ export function AdminPage() {
                       />
                       <button
                         onClick={() => handleRestock(vehicle.id)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 transition"
+                        aria-label={`Restock ${vehicle.make} ${vehicle.model}`}
+                        title="Restock"
+                        className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition"
                       >
                         <PackagePlus size={14} />
-                        Restock
                       </button>
                     </div>
                   </td>
-                  <td className="px-5 py-3">
-                    <div className="flex gap-2">
+                  <td className="px-3 py-2.5">
+                    {/* Icon-only, but each keeps an accessible name. */}
+                    <div className="flex gap-1.5 justify-end">
                       <button
                         onClick={() => startEdit(vehicle)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 text-xs font-medium px-3 py-1.5 transition"
+                        aria-label={`Edit ${vehicle.make} ${vehicle.model}`}
+                        title="Edit"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600 transition"
                       >
                         <Pencil size={14} />
-                        Edit
                       </button>
                       <button
                         onClick={() => handleDelete(vehicle.id)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 text-xs font-medium px-3 py-1.5 transition"
+                        aria-label={`Delete ${vehicle.make} ${vehicle.model}`}
+                        title="Delete"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition"
                       >
                         <Trash2 size={14} />
-                        Delete
                       </button>
                     </div>
                   </td>
