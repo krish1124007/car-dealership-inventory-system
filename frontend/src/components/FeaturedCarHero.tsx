@@ -74,7 +74,7 @@ export function FeaturedCarHero() {
         return (
           <div
             key={car.model}
-            className={`absolute inset-0 flex items-center justify-center pt-[14vh] sm:pt-[16vh] pb-24 transition-transform duration-700 ease-in-out ${
+            className={`absolute inset-0 flex items-center justify-center pt-[8vh] sm:pt-[10vh] pb-16 transition-transform duration-700 ease-in-out ${
               position === 'active'
                 ? 'translate-x-0'
                 : position === 'prev'
@@ -85,7 +85,7 @@ export function FeaturedCarHero() {
             <img
               src={car.photo}
               alt={`${car.brand} ${car.model}`}
-              className="w-[min(100%,76rem)] max-h-[72%] object-contain drop-shadow-2xl"
+              className="h-[42vh] sm:h-[60vh] w-auto max-w-[98%] object-contain drop-shadow-2xl"
             />
           </div>
         )
