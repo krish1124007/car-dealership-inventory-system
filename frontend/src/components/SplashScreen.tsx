@@ -8,6 +8,8 @@ const CRITICAL_ASSETS = [
   '/landing-photo/p2.png',
   '/landing-photo/p3.png',
   '/cars/creata.png',
+  '/cars/creata-brown.png',
+  '/cars/creata-black.png',
   '/car-logo/list1/l1.png',
   '/car-logo/list1/l2.png',
   '/car-logo/list1/l3.png',
